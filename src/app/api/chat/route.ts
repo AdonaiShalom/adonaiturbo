@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { loadProviders, getChatUrl, getHeaders } from "@/lib/providers";
+import { loadAdonaiKnowledge } from "@/lib/knowledge";
 
 function supabaseConfig() {
   return {
@@ -45,6 +46,7 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     const providers = loadProviders();
+    const conhecimento = await loadAdonaiKnowledge();
 
     if (!providers.length) {
       return NextResponse.json(
@@ -69,6 +71,16 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+
+    const mensagensComConhecimento = [
+      {
+        role: "system",
+        content:
+          "Voce e o assistente do ecossistema Adonai. Use o manual oficial abaixo como sua base de conhecimento. Responda de acordo com ele. Nao invente informacoes. Se algo nao estiver no manual, diga que nao sabe e proponha verificar.\n\n" +
+          conhecimento
+      },
+      ...messages
+    ];
 
     const ultimaMensagem = messages[messages.length - 1];
     const textoNovo =
@@ -136,7 +148,7 @@ export async function POST(req: Request) {
             body: JSON.stringify({
               ...body,
               model: providerModel.id,
-              messages
+              messages: mensagensComConhecimento
             })
           });
 
