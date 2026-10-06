@@ -11,7 +11,7 @@ export async function POST(req: Request) {
     }
 
     const model = body.model || "auto";
-    const messages = body.messages || [];
+    const messages = Array.isArray(body.mensagens) ? body.mensagens : (Array.isArray(body.messages) ? body.messages : (body.mensagem ? [{ role: "user", content: body.mensagem }] : []));
 
     for (const provider of providers) {
       for (const providerModel of provider.models) {
@@ -48,7 +48,7 @@ export async function POST(req: Request) {
     );
   } catch {
     return NextResponse.json(
-      { error: "Requisi‡Æo inv lida." },
+      { error: "Requisição inválida." },
       { status: 400 }
     );
   }
