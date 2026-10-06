@@ -251,13 +251,16 @@ export function getHeaders(provider: ProviderConfig): Record<string, string> {
 }
 
 /**
- * Check if an error is retryable (429, 503, timeout, etc.)
+ * Check if an error is retryable (429, 503, timeout, billing, etc.)
  */
 export function isRetryableError(err: any): boolean {
   const msg = (err.message ?? '').toLowerCase();
+
   return msg.includes('429') || msg.includes('rate limit') || msg.includes('too many requests')
     || msg.includes('quota') || msg.includes('resource_exhausted')
     || msg.includes('timeout') || msg.includes('503') || msg.includes('unavailable')
     || msg.includes('500') || msg.includes('internal server error')
-    || msg.includes('404') || msg.includes('not found');
+    || msg.includes('404') || msg.includes('not found')
+    || msg.includes('402') || msg.includes('payment_method_required')
+    || msg.includes('payment method is required') || msg.includes('balance_units');
 }
