@@ -1602,14 +1602,14 @@
     } catch (e) { micMsg("Não consegui: " + e.message); }
     MIC.estado = "parado"; micBotao();
   }
-  const vozPT = () => { const l = (window.speechSynthesis && speechSynthesis.getVoices()) || []; return l.find((v) => /pt[-_]BR/i.test(v.lang) && /(francisca|maria|antonio|thalita|natural)/i.test(v.name)) || l.find((v) => /pt[-_]BR/i.test(v.lang)) || l.find((v) => /^pt/i.test(v.lang)) || null; };
+  const vozPT = () => { const l = (window.speechSynthesis && speechSynthesis.getVoices()) || []; const pt = l.filter((v) => /pt[-_]BR/i.test(v.lang)); const masculino = /(antonio|antônio|daniel|joao|joão|ricardo|felipe|bruno|carlos|male|homem)/i; const natural = /(natural|online|neural)/i; return pt.find((v) => masculino.test(v.name) && natural.test(v.name)) || pt.find((v) => masculino.test(v.name)) || pt.find((v) => natural.test(v.name)) || pt[0] || l.find((v) => /^pt/i.test(v.lang)) || null; };
   function pararVoz() { try { if (window.speechSynthesis) speechSynthesis.cancel(); } catch (e) {} }
   function textoFalado(md) { return String(md).replace(/```[\s\S]*?```/g, " (trecho de código omitido) ").replace(/`([^`]+)`/g, "$1").replace(/\[([^\]]*)\]\([^)]*\)/g, "$1").replace(/https?:\/\/\S+/g, " link ").replace(/[*_#>|]+/g, " ").replace(/\s+/g, " ").trim(); }
   function falar(md) {
     if (!window.speechSynthesis) return; pararVoz();
     let txt = textoFalado(md); if (txt.length > 1400) txt = txt.slice(0, 1400) + ". Resposta longa: leia o resto na tela.";
     const partes = []; (txt.match(/[^.!?\n]+[.!?]?/g) || [txt]).forEach((s) => { s = s.trim(); if (!s) return; const u = partes[partes.length - 1]; if (u && (u + " " + s).length < 200) partes[partes.length - 1] = u + " " + s; else partes.push(s); });
-    const v = vozPT(); partes.forEach((p) => { const u = new SpeechSynthesisUtterance(p); u.lang = "pt-BR"; if (v) u.voice = v; u.rate = 1.05; speechSynthesis.speak(u); });
+    const v = vozPT(); partes.forEach((p) => { const u = new SpeechSynthesisUtterance(p); u.lang = "pt-BR"; if (v) u.voice = v; u.rate = 0.92; u.pitch = 0.78; u.volume = 1; speechSynthesis.speak(u); });
   }
   try { if (window.speechSynthesis) speechSynthesis.onvoiceschanged = () => {}; } catch (e) {}
 
@@ -1703,3 +1703,4 @@
 </script>
 </body>
 </html>
+
