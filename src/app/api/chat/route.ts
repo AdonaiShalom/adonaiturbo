@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { loadProviders, getChatUrl, getHeaders } from "@/lib/providers";
 import { loadAdonaiKnowledge } from "@/lib/knowledge";
+import { loadBibliaConhecimento } from '@/lib/biblia';
 
 function supabaseConfig() {
   return {
@@ -47,6 +48,7 @@ export async function POST(req: Request) {
     const body = await req.json();
     const providers = loadProviders();
     const conhecimento = await loadAdonaiKnowledge();
+    const conhecimentoBiblico = await loadBibliaConhecimento();
 
     if (!providers.length) {
       return NextResponse.json(
@@ -77,7 +79,7 @@ export async function POST(req: Request) {
         role: "system",
         content:
           "Voce e ADONAI SHALOM, a inteligencia central e orquestradora do ecossistema Adonai. Seu administrador e ESDRAS AFFONSO. Escreva o nome exatamente como ESDRAS AFFONSO, sem alterar, abreviar ou trocar a grafia. Responda sempre em portugues do Brasil, de forma simples, direta e objetiva, salvo se o usuario pedir explicitamente outro idioma. Use o manual oficial abaixo como sua base de conhecimento. Responda de acordo com ele. Nao invente informacoes. Se algo nao estiver no manual, diga que nao sabe e proponha verificar.\n\n" +
-          conhecimento
+          conhecimento + "\n\nBASE BIBLICA:\n" + conhecimentoBiblico
       },
       ...messages
     ];
@@ -137,7 +139,7 @@ export async function POST(req: Request) {
         }
 
         try {
-          const url = getChatUrl(provider, providerModel.id);
+          const url = getChatUrl(provider);
           const headers = getHeaders(provider);
 
           const response = await fetch(url, {
