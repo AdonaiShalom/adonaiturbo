@@ -261,6 +261,6 @@ export function isRetryableError(err: any): boolean {
     || msg.includes('timeout') || msg.includes('503') || msg.includes('unavailable')
     || msg.includes('500') || msg.includes('internal server error')
     || msg.includes('404') || msg.includes('not found')
-    || msg.includes('402') || msg.includes('payment_method_required')
+    || msg.includes('402') || msg.includes('payment_method_required') || msg.includes('403') || msg.includes('tier_not_allowed')
     || msg.includes('payment method is required') || msg.includes('balance_units');
 }
