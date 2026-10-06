@@ -920,7 +920,7 @@
      e ao Supabase. Nada aqui é simulado: se o servidor estiver desligado,
      as telas ficam vazias e o aviso do topo explica o motivo.
      ===================================================================== */
-  const API = "http://localhost:3000";
+  const API = "";
   const PK = ["turbo", "market", "financas"];
   const norm = (x) => String(x || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]/g, "");
   const RL = { mem: [], logs: [], exec: [], apTodas: [], sel: {}, rev: {}, ok: false, primeira: true, projetos: [], agentes: [], map: {}, pid: {}, ligados: { turbo: 0, market: 0, financas: 0 }, ollama: null, modelos: [], nuvem: null, erro: "" };
