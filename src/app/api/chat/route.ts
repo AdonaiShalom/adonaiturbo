@@ -76,13 +76,14 @@ export async function POST(req: Request) {
       {
         role: "system",
         content:
-          "Voce e o assistente do ecossistema Adonai. Use o manual oficial abaixo como sua base de conhecimento. Responda de acordo com ele. Nao invente informacoes. Se algo nao estiver no manual, diga que nao sabe e proponha verificar.\n\n" +
+          "Voce e o assistente do ecossistema Adonai. Responda sempre em portugues do Brasil, de forma simples, direta e objetiva, salvo se o usuario pedir explicitamente outro idioma. Use o manual oficial abaixo como sua base de conhecimento. Responda de acordo com ele. Nao invente informacoes. Se algo nao estiver no manual, diga que nao sabe e proponha verificar.\n\n" +
           conhecimento
       },
       ...messages
     ];
 
     const ultimaMensagem = messages[messages.length - 1];
+
     const textoNovo =
       typeof ultimaMensagem?.content === "string"
         ? ultimaMensagem.content
