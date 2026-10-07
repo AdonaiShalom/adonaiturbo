@@ -5,9 +5,10 @@ import { loadProviders, routeRequest, getChatUrl, getHeaders, isRetryableError, 
 function validateAuth(request: NextRequest): boolean {
   const token = request.headers.get('authorization')?.replace(/^Bearer\s+/i, '');
   const apiKey = process.env.API_KEY;
-  if (!apiKey) return true; // No auth required if API_KEY not set
+  const openJarvisApiKey = process.env.OPENJARVIS_API_KEY;
+  if (!apiKey && !openJarvisApiKey) return true; // No auth required if no keys are configured
   if (!token) return false;
-  return token === apiKey;
+  return token === apiKey || token === openJarvisApiKey;
 }
 
 // ── Request schema ──
