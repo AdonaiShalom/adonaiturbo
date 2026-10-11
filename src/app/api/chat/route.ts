@@ -1,12 +1,16 @@
 import { NextResponse } from "next/server";
-import { loadProviders, getChatUrl, getHeaders } from "@/lib/providers";
+import {
+  loadProviders,
+  getChatUrl,
+  getHeaders,
+} from "@/lib/providers";
 import { loadAdonaiKnowledge } from "@/lib/knowledge";
-import { loadBibliaConhecimento } from '@/lib/biblia';
+import { loadBibliaConhecimento } from "@/lib/biblia";
 
 function supabaseConfig() {
   return {
     url: process.env.SUPABASE_URL || "",
-    key: process.env.SUPABASE_SECRET_KEY || ""
+    key: process.env.SUPABASE_SECRET_KEY || "",
   };
 }
 
@@ -31,7 +35,7 @@ async function supabase(
   const r = await fetch(`${url}/rest/v1/${caminho}`, {
     ...options,
     headers,
-    cache: "no-store"
+    cache: "no-store",
   });
 
   if (!r.ok) {
@@ -47,8 +51,6 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     const providers = loadProviders();
-    const conhecimento = await loadAdonaiKnowledge();
-    const conhecimentoBiblico = await loadBibliaConhecimento();
 
     if (!providers.length) {
       return NextResponse.json(
@@ -74,22 +76,35 @@ export async function POST(req: Request) {
       );
     }
 
-    const mensagensComConhecimento = [
-      {
-        role: "system",
-        content:
-          "Voce e ADONAI SHALOM, a inteligencia central e orquestradora do ecossistema Adonai. Seu administrador e ESDRAS AFFONSO. Escreva o nome exatamente como ESDRAS AFFONSO, sem alterar, abreviar ou trocar a grafia. Responda sempre em portugues do Brasil, de forma simples, direta e objetiva, salvo se o usuario pedir explicitamente outro idioma. Use o manual oficial abaixo como sua base de conhecimento. Responda de acordo com ele. Nao invente informacoes. Se algo nao estiver no manual, diga que nao sabe e proponha verificar.\n\n" +
-          conhecimento + "\n\nBASE BIBLICA:\n" + conhecimentoBiblico
-      },
-      ...messages
-    ];
-
     const ultimaMensagem = messages[messages.length - 1];
 
     const textoNovo =
       typeof ultimaMensagem?.content === "string"
         ? ultimaMensagem.content
         : "";
+
+    const conhecimento = await loadAdonaiKnowledge();
+    const conhecimentoBiblico =
+      await loadBibliaConhecimento(textoNovo);
+
+    const mensagensComConhecimento = [
+      {
+        role: "system",
+        content:
+          "Voce e ADONAI SHALOM, a inteligencia central e orquestradora do ecossistema Adonai. " +
+          "Seu administrador e ESDRAS AFFONSO. Escreva o nome exatamente como ESDRAS AFFONSO, " +
+          "sem alterar, abreviar ou trocar a grafia. Responda sempre em portugues do Brasil, " +
+          "de forma simples, direta e objetiva, salvo se o usuario pedir explicitamente outro idioma. " +
+          "Use o manual oficial abaixo como sua base de conhecimento. Nao invente informacoes. " +
+          "Se algo nao estiver no manual, diga que nao sabe e proponha verificar. " +
+          "Quando houver um trecho da Biblia Livre na base biblica, responda de acordo com o texto " +
+          "fornecido e identifique-o como Biblia Livre, sem atribui-lo a outra traducao.\n\n" +
+          conhecimento +
+          "\n\nBASE BIBLICA:\n" +
+          conhecimentoBiblico,
+      },
+      ...messages,
+    ];
 
     let conversaId =
       typeof body.conversaId === "string" && body.conversaId.trim()
@@ -104,11 +119,11 @@ export async function POST(req: Request) {
           const criada = await supabase("conversas", {
             method: "POST",
             headers: {
-              Prefer: "return=representation"
+              Prefer: "return=representation",
             },
             body: JSON.stringify({
-              titulo: textoNovo.slice(0, 80)
-            })
+              titulo: textoNovo.slice(0, 80),
+            }),
           });
 
           conversaId = criada?.[0]?.id || null;
@@ -120,14 +135,17 @@ export async function POST(req: Request) {
             body: JSON.stringify({
               conversa_id: conversaId,
               papel: "user",
-              conteudo: textoNovo
-            })
+              conteudo: textoNovo,
+            }),
           });
 
           salvando = true;
         }
       } catch (erro) {
-        console.error("Nao consegui salvar a pergunta:", erro);
+        console.error(
+          "Nao consegui salvar a pergunta:",
+          erro
+        );
         conversaId = null;
       }
     }
@@ -146,13 +164,13 @@ export async function POST(req: Request) {
             method: "POST",
             headers: {
               ...headers,
-              "Content-Type": "application/json"
+              "Content-Type": "application/json",
             },
             body: JSON.stringify({
               ...body,
               model: providerModel.id,
-              messages: mensagensComConhecimento
-            })
+              messages: mensagensComConhecimento,
+            }),
           });
 
           if (!response.ok) {
@@ -173,16 +191,19 @@ export async function POST(req: Request) {
                 body: JSON.stringify({
                   conversa_id: conversaId,
                   papel: "assistant",
-                  conteudo: textoResposta
-                })
+                  conteudo: textoResposta,
+                }),
               });
 
-              await supabase(`conversas?id=eq.${conversaId}`, {
-                method: "PATCH",
-                body: JSON.stringify({
-                  atualizada_em: new Date().toISOString()
-                })
-              });
+              await supabase(
+                `conversas?id=eq.${conversaId}`,
+                {
+                  method: "PATCH",
+                  body: JSON.stringify({
+                    atualizada_em: new Date().toISOString(),
+                  }),
+                }
+              );
 
               salvo = true;
             } catch (erro) {
@@ -197,7 +218,7 @@ export async function POST(req: Request) {
             resposta: textoResposta,
             conversaId,
             salvo,
-            data
+            data,
           });
         } catch (erro) {
           console.error(
@@ -211,7 +232,7 @@ export async function POST(req: Request) {
     return NextResponse.json(
       {
         error: "Nenhum provedor respondeu.",
-        conversaId
+        conversaId,
       },
       { status: 502 }
     );
