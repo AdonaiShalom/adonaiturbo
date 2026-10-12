@@ -6,6 +6,7 @@
 - Keep provider credentials in hosting-provider encrypted environment settings and ignored local environment files.
 - If a credential was committed to a public repository, revoke/rotate it at the provider. Removing it in a later commit does not erase Git history or invalidate the credential.
 - The OpenAI-compatible `/v1/chat/completions` endpoint now fails closed when neither `API_KEY` nor `OPENJARVIS_API_KEY` is configured.
+- The Next.js app adds baseline response headers and no longer suppresses TypeScript build errors; a production build must now surface type failures rather than silently ignoring them.
 
 ## Deployment architecture and release blockers
 - This repository contains a Next.js application intended for Vercel.
