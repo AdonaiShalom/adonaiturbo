@@ -1,23 +1,58 @@
-# Dependencies
+# Dependencies and generated builds
 node_modules/
-
-# Next.js
+**/node_modules/
 .next/
+**/.next/
 out/
+dist/
+build/
+coverage/
 
-# Env files
+# Environment variables and secrets
 .env
-.env.local
-.env.production
+.env.*
+**/.env
+**/.env.*
 !.env.example
+!**/.env.example
+.vercel/
+**/.vercel/
+vercel-prod.env
+_vercel-prod.env
+jarvis-key.txt
+openjarvis-adonai-key.txt
+*.pem
+*.key
 
-# Vercel
-.vercel
-
-# Debug
+# Runtime data, logs, caches and Python artifacts
+*.log
 npm-debug.log*
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.venv/
+venv/
+temp_freellmapi/
+results/
+diagnostico_auditoria/
+dados_locais/
 
-# TypeScript
-*.tsbuildinfo
-next-env.d.ts
-.env*
+# Local backups and scratch artifacts; retain only intentionally curated source files
+*.bak
+*.bak-*
+*.backup
+*.backup-*
+*.bak_*
+*.pre-restauro
+*.before
+*_BACKUP_*/
+*_backup_*/
+_localhost.html
+_realrepo/
+instalar_estudio2_TESTE.js
+
+# Keep PSM Grupo Market in its own repository
+projetos/PSM-Grupo-Market/
+projetos/PSM-Grupo-Market_BACKUP_*/
