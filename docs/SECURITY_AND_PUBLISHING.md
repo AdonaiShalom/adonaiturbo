@@ -19,6 +19,10 @@
 - Keep PSM Grupo Market source, secrets, databases, backups, and deployment configuration in its own repository.
 - Publish only curated source files. Exclude dependencies, generated indexes/caches, runtime results, test recordings, and timestamped backups unless deliberately selected for a documented reason.
 
+## Automated validation
+- Pull requests and pushes to the integration branch run `npm ci` and `npm run build` through GitHub Actions.
+- A successful build verifies compilation only; it does not replace endpoint authorization, abuse/rate-limit, data-isolation, or deployed smoke tests.
+
 ## Release gate
 1. Review the staged diff and confirm no secrets or personal/local data are included.
 2. Install dependencies and run the production build.
