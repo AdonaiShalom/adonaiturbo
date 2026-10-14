@@ -87,3 +87,12 @@ Publicado [MAPA_CONHECIMENTO_QUANTICO_5_OPERACOES.md](quantica/MAPA_CONHECIMENTO
 4. Inspecionar RLS: a auditoria anterior encontrou tabelas com RLS habilitado e nenhuma política retornada; revisar permissões antes de habilitar acessos pela aplicação.
 5. Identificar e versionar o repositório correto do backend local; o repositório atual não contém os arquivos centrais do servidor local.
 6. Inventariar agentes reais, escopos e permissões das cinco operações e testar cada uma isoladamente.
+
+
+## Execucao de incorporacao de conhecimento — 2026-10-14
+
+- Publicado corpus sintetico original: `eu-sou/quantica/corpus/NUCLEO_CIENTIFICO_QUANTICA_NANOTECNOLOGIA.md` (commit `74cffa83671f618e82f8fa0b4690c10ab9367ff4`). Contem fundamentos de mecânica quântica, informação quântica, confinamento e pontos quânticos, nanoeletrônica, nanofotônica, química quântica, validação e checklist por operação.
+- Catálogo Supabase atualizado com 6 repositórios públicos candidatos (QuTiP, QuTiP Tutorials, Kwant, OSSCAR Quantum Mechanics, OpenQDC e AiiDA Common Workflows), 6 relações domínio-fonte e 6 ferramentas registradas em `eu_sou.scientific_tools`.
+- Todos os seis recursos estão marcados como `candidate`/`unreviewed`; nenhum motor foi instalado, nenhum dataset foi baixado e nenhum documento integral de terceiros foi copiado para o corpus.
+- O conteúdo do novo arquivo do GitHub ainda precisa ser ingerido pela biblioteca ativa em `C:\\AdonaiTurbo\\frontend\\eu-sou-completo\\biblioteca-local\\`. Não existe evidência de que o servidor 3000 o esteja consultando.
+- Próxima validação obrigatória: ingestão com backup, teste de pesquisa de Schrödinger/oscilador e ponto quântico, depois teste real LEVI → API EU SOU com referências retornadas.
