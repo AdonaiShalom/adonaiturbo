@@ -96,3 +96,12 @@ Publicado [MAPA_CONHECIMENTO_QUANTICO_5_OPERACOES.md](quantica/MAPA_CONHECIMENTO
 - Todos os seis recursos estão marcados como `candidate`/`unreviewed`; nenhum motor foi instalado, nenhum dataset foi baixado e nenhum documento integral de terceiros foi copiado para o corpus.
 - O conteúdo do novo arquivo do GitHub ainda precisa ser ingerido pela biblioteca ativa em `C:\\AdonaiTurbo\\frontend\\eu-sou-completo\\biblioteca-local\\`. Não existe evidência de que o servidor 3000 o esteja consultando.
 - Próxima validação obrigatória: ingestão com backup, teste de pesquisa de Schrödinger/oscilador e ponto quântico, depois teste real LEVI → API EU SOU com referências retornadas.
+
+
+## Pesquisa aprofundada e estratégia de cobertura — 2026-10-14
+
+- Publicado plano estratégico detalhado: `eu-sou/quantica/PLANO_ESTRATEGICO_CINCO_OPERACOES.md` (commit `89598ed6b6d7b9e12d17f237c232824444530fe1`).
+- Analisados READMEs públicos de QuTiP, Kwant, OSSCAR Quantum Mechanics, PennyLane, Qiskit Finance, quacc e QuantumDeviceSEM, além de um projeto de autômatos celulares de pontos quânticos. Tratados como referências/candidatos; não como resultados científicos certificados.
+- Tendências oficiais verificadas em fontes de 2026: fabricação escalável de componentes quânticos (NIST, 29/06/2026), materiais quânticos e manufatura (NSF, 21/07/2026), e em fontes técnicas contínuas: sensores/metrologia, fotônica integrada, nanoestruturas e segurança pós-quântica.
+- Conclusão estratégica: priorizar (1) recuperação científica com proveniência, (2) benchmarks e simulações reproduzíveis, (3) nanomateriais/nanoeletrônica/nanofotônica/sensores, (4) estatística e risco para Finanças/Trade, (5) validação de alegações e experimentação para Marketing, e (6) isolamento de permissões e dados por empresa.
+- Pendência crítica: o plano e os catálogos não são ingestão executável. A biblioteca local e o servidor 3000 ainda precisam passar testes de recuperação e de ponta a ponta; agentes e Adonai Trade não podem ser declarados operacionais sem inventário e testes.
