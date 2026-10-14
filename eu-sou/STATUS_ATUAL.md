@@ -145,3 +145,11 @@ Publicado [MAPA_CONHECIMENTO_QUANTICO_5_OPERACOES.md](quantica/MAPA_CONHECIMENTO
 - Supabase: entrada de catálogo criada para o corpus, marcada `unreviewed`; metadados registram que o texto integral está no GitHub e não há prova de ingestão local.
 - **Limite operacional importante:** ferramentas conectadas disponíveis nesta sessão permitem alterar GitHub e Supabase, mas não oferecem acesso a shell/arquivos do PC do usuário nem ao processo local `127.0.0.1:8765` / servidor `:3000`. Portanto, não foi possível promover índice local nem executar teste ponta a ponta. Não declarar integração funcional.
 - Próxima ação técnica: transferir o corpus para o staging local, preservar cópia do índice atual, validar consultas representativas e só depois promover o novo índice; reiniciar/testar o serviço de biblioteca e o LEVI em :3000.
+
+
+## Execução adicional — 2026-10-14
+- Criado plano operacional de promoção segura do corpus e testes de aceitação: `eu-sou/quantica/corpus/PLANO_PROMOCAO_INDICE_LOCAL_E_TESTES.md`.
+- Commit do plano: `cb1287bd87af0648e0aabee43f8f22e47f43684e`.
+- Supabase: registrei/reconciliei candidatos de ferramentas científicas e referências de software; as ferramentas permanecem `candidate`, sem afirmar instalação ou validação.
+- A consulta SQL confirmou 11 ferramentas candidatas na tabela `eu_sou.scientific_tools`; os metadados não provam que estejam instaladas.
+- Bloqueio permanece: não há ferramenta conectada nesta sessão para executar shell no PC nem chamar `127.0.0.1:8765` ou `:3000`. Índice local não foi alterado e integração LEVI → EU SOU não foi testada. A promoção deve seguir o plano acima a partir de um canal de execução local autorizado.
