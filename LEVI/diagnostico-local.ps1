@@ -31,7 +31,6 @@ foreach ($rel in $ficheiros) {
     Copy-Item -LiteralPath $origem -Destination $destino -Force
     $linhas.Add(('Backup: ' + $destino))
     if ($rel -ne 'frontend\index.html') {
-      $texto = Get-Content -LiteralPath $origem -Raw -Encoding UTF8
       $padroes = @('app\.(get|post|put|delete|patch)\s*\(', 'eu-sou', 'anchor', 'supabase', 'motor:', 'system', 'prompt', 'timeout', 'AbortController', 'listen', 'speechSynthesis', 'require\(')
       foreach ($p in $padroes) {
         $m = Select-String -LiteralPath $origem -Pattern $p -AllMatches -ErrorAction SilentlyContinue
@@ -59,8 +58,8 @@ foreach ($rel in $ficheiros) {
 $linhas.Add('=== Referências de âncora/LEVI no backend (sem ficheiros .env) ===')
 $backend = Join-Path $raiz 'backend'
 if (Test-Path -LiteralPath $backend) {
-  $hits = Get-ChildItem -LiteralPath $backend -File -Include '*.js','*.json' -Recurse -ErrorAction SilentlyContinue |
-    Where-Object { $_.Name -notmatch '\.env' } |
+  $hits = Get-ChildItem -LiteralPath $backend -Recurse -File -ErrorAction SilentlyContinue |
+    Where-Object { $_.Extension -in '.js','.json' } |
     Select-String -Pattern 'eu_sou_anchor|anchor_advance|anchor_read|api/levi/orquestrar|eu-sou/calcular' -ErrorAction SilentlyContinue |
     Select-Object -First 40
   foreach ($h in $hits) {
