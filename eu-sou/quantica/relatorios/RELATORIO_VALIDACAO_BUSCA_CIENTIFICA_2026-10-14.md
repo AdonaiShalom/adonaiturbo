@@ -29,3 +29,15 @@ Status: função de recuperação corrigida e testes SQL concluídos; integraç�
 - A consulta de nanotecnologia retornou fontes compartilhadas, não um playbook específico do Lab; deve-se ampliar a cobertura científica.
 - Ainda não foi executado teste ponta a ponta no runtime local `biblioteca-local:8765 → LEVI → Adonai Turbo:3000` nesta sessão, porque não há canal para o shell/localhost local.
 - Portanto, não declarar a fase de integração completa. Próximo passo: ampliar e curar os trechos do corpus para cada escopo, depois validar a API/runtime local e registrar latência, fonte e trechos usados.
+
+
+## Atualização de execução — 14/10/2026
+- Foram inseridos 13 trechos curados adicionais a partir do corpus e playbooks versionados no GitHub; total agora: 25 trechos curados/revisados/validados.
+- Distribuição confirmada por consulta SQL: `shared=10`, `adonai-turbo=3`, `adonai-marketing-digital=3`, `adonai-financas=3`, `adonai-lab=3`, `adonai-trade=3`.
+- Migração adicional: `eu_sou_search_knowledge_minimum_term_coverage_v3`, que exige pelo menos dois termos correspondentes em consultas com múltiplos termos, evitando falsos positivos por uma palavra genérica.
+- Reteste: a consulta desconhecida `xyzabcqwerty sem evidência inexistente` retornou zero resultados; consulta de um termo `nanotecnologia` continuou retornando resultado relevante.
+- Retestes com consultas de domínio retornaram trechos do escopo esperado para Marketing Digital, Lab, Trade e Adonai Turbo; Finanças já havia passado no teste anterior após a ingestão adicional.
+- A tentativa de buscar conteúdo de Marketing com escopo Finanças retornou zero resultados após a expansão do acervo.
+- Todos os novos trechos foram marcados `curated` com metadados de versão e origem; isso significa curadoria documental, não validação experimental.
+- O catálogo ainda é uma base de conhecimento inicial (25 trechos), não ingestão integral do corpus.
+- O teste ponta a ponta com servidor local `8765` e LEVI via `:3000` continua pendente porque esta sessão não possui canal de shell/localhost local.
