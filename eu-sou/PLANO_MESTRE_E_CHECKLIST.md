@@ -122,3 +122,7 @@ Estado registrado em 13/10/2026: ainda não iniciada como fase formal. Iniciar d
 3. Comparar as evidências históricas com o estado do código atual sem apagar conclusões já comprovadas.
 4. Atualizar este checklist com os dados originais e manter links para logs/relatórios.
 5. Depois: concluir → testar → validar → documentar → publicar → avançar.
+
+## Auditoria de fechamento por evidências — 13/10/2026
+
+A auditoria do fechamento, limites da verificação remota e critérios para comprovar 100% por fase estão em [AUDITORIA_FECHAMENTO_FASES_2026-10-13.md](./AUDITORIA_FECHAMENTO_FASES_2026-10-13.md). As fases historicamente concluídas são preservadas; não são declaradas revalidadas sem executar novamente os testes no ambiente local.
