@@ -21,6 +21,9 @@ Atualizado em: 2026-10-13
 
 Este quadro é um registro de continuidade baseado nas informações disponíveis em 2026-10-13; não substitui os planos e relatórios originais de aceitação.
 
+## Checklist mestre e subfases da Fase 4
+Consulte [PLANO_MESTRE_E_CHECKLIST.md](PLANO_MESTRE_E_CHECKLIST.md) para o registro consolidado das Fases 1–10, os estados históricos das Fases 4.1–4.4, as pendências de evidência e as subfases 4.5–4.10 cujos títulos precisam ser recuperados da fonte original. A ausência de um título nesta consolidação não significa que a etapa foi perdida ou não foi concluída.
+
 ## Fase 4.4 — biblioteca científica
 
 ### Biblioteca ativa
