@@ -52,3 +52,7 @@ A Edge Function e a base remota foram alteradas diretamente. Esta sessão não t
 - A busca no escopo Finanças para uma consulta de Marketing pode retornar um resultado `shared` genérico. Isso é permitido pelo contrato atual; o resultado não contém escopo empresarial de Marketing. Registrar como oportunidade de calibração de relevância, não como vazamento entre empresas.
 - A Edge Function `eu-sou-knowledge-search` está ativa com `verify_jwt=true`; seu código usa a função SQL e exige configuração server-side. Não foi possível executar um teste HTTP autenticado da Edge Function porque a sessão não fornece ferramenta de invocação HTTP genérica nem credencial JWT do usuário.
 - A integração runtime local permanece pendente: os conectores desta sessão não alcançam o shell/localhost do PC do usuário. O código local `C:\AdonaiTurbo\backend\levi-core.js` e o servidor `:3000` não foram modificados por esta sessão. Não declarar integração ponta a ponta concluída.
+
+
+- Criado script de diagnóstico local somente leitura: [DIAGNOSTICO_LOCAL_EU_SOU_LEVI_2026-10-14.ps1](https://github.com/AdonaiShalom/adonaiturbo/blob/main/eu-sou/quantica/DIAGNOSTICO_LOCAL_EU_SOU_LEVI_2026-10-14.ps1). Testa portas 3000/8765, busca local e rota de orquestração, sem alterar arquivos ou banco. Não foi executado, pois o runner desta sessão não tem acesso ao computador Windows.
+- Criado SQL de regressão repetível: [TESTES_REGRESSAO_BUSCA_SUPABASE_2026-10-14.sql](https://github.com/AdonaiShalom/adonaiturbo/blob/main/eu-sou/quantica/TESTES_REGRESSAO_BUSCA_SUPABASE_2026-10-14.sql).
