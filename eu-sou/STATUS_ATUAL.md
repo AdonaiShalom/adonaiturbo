@@ -64,3 +64,26 @@ Fonte primária: https://ocw.mit.edu/courses/8-04-quantum-physics-i-spring-2013/
 3. Medir a relevância das buscas com consultas de teste registradas.
 4. Executar e documentar o teste ponta a ponta LEVI ↔ EU SOU por texto e por voz.
 5. Só então aprovar eventual promoção do corpus experimental e preparar a validação formal da Fase 5.
+
+## Atualização de auditoria e catálogo — 2026-10-14
+
+### Engenharia reversa do repositório conectado
+A árvore de arquivos do repositório consultado contém o aplicativo FreeLLMAPI em Next.js e a função src/lib/knowledge.ts, que lê src/knowledge/manual_adonai.md. A árvore não contém backend/server.js, backend/levi-core.js nem frontend/eu-sou-completo/biblioteca-local/server.py. Portanto, este repositório documenta o projeto EU SOU, mas não é evidência de que o backend local em localhost:3000 esteja versionado ou sincronizado neste mesmo repositório. É necessário localizar o repositório/commit correspondente ao backend local antes de publicar alterações nele.
+
+### Catálogo científico Supabase
+- Domínios científicos: 12 no total, incluindo mecânica quântica, informação quântica, nanotecnologia quântica, sensores, nanofotônica, química quântica, materiais, nanoeletrônica, métodos científicos e criptografia pós-quântica.
+- Fontes candidatas: 11, incluindo MIT OCW 8.04/8.05, NIST Quantum Information Science, National Quantum Initiative, National Nanotechnology Initiative, NIST nanoworld e FIPS 203/204/205.
+- Relações fonte-domínio: 11.
+- Fontes revisadas/validadas: 0. Todas as novas fontes permanecem não revisadas e são apenas metadados/links; não foi armazenado o texto integral dos materiais.
+- Foi corrigida a restrição de unicidade de DOI para permitir múltiplas fontes sem DOI: o índice agora é único apenas para DOI não nulo. Isso preserva a unicidade de DOIs existentes e permite catalogar fontes institucionais sem DOI.
+
+### Mapa de conhecimento por operação
+Publicado [MAPA_CONHECIMENTO_QUANTICO_5_OPERACOES.md](quantica/MAPA_CONHECIMENTO_QUANTICO_5_OPERACOES.md), com os módulos curriculares Q01–Q05, fontes candidatas, aplicação às cinco operações e critérios de aceitação.
+
+### Pendências operacionais — não declarar concluído
+1. Ingerir e validar documentos completos autorizados; os metadados do catálogo não são o corpus de recuperação.
+2. Validar e integrar o índice experimental sem substituir o índice ativo às cegas.
+3. Demonstrar consulta LEVI → EU SOU com fontes/trechos reais e resposta que os utilize.
+4. Inspecionar RLS: a auditoria anterior encontrou tabelas com RLS habilitado e nenhuma política retornada; revisar permissões antes de habilitar acessos pela aplicação.
+5. Identificar e versionar o repositório correto do backend local; o repositório atual não contém os arquivos centrais do servidor local.
+6. Inventariar agentes reais, escopos e permissões das cinco operações e testar cada uma isoladamente.
