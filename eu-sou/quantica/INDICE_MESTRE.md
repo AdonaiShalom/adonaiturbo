@@ -63,3 +63,14 @@ Novas referências examinadas: DeepChem, PySCF, AiiDA Common Workflows, Cirq, Qi
 Tendências adicionadas: fabricação escalável de sistemas quânticos; infraestrutura para pesquisa em quantum/nanotecnologia; integração de sensores, redes e computação; química computacional e workflows reproduzíveis; materiais, nanofotônica e metrologia; benchmarks comparativos; separação entre software quântico, quantum-inspired e hardware real.
 
 **Status:** cinco documentos de pesquisa publicados no GitHub e catalogados no Supabase. O texto integral ainda precisa ser ingerido na biblioteca local e validado por consulta do LEVI.
+
+
+## Conteúdo curado adicional — 2026-10-14
+- Fundamentos: `fundamentos/FUNDAMENTOS_FISICA_QUANTICA_E_NANOTECNOLOGIA.md`
+- Adonai Turbo: `empresas/adonai-turbo/PLAYBOOK_CONHECIMENTO_OPERACIONAL.md`
+- Adonai Marketing Digital: `empresas/adonai-marketing-digital/PLAYBOOK_CONHECIMENTO_OPERACIONAL.md`
+- Adonai Finanças: `empresas/adonai-financas/PLAYBOOK_CONHECIMENTO_OPERACIONAL.md`
+- Adonai Lab: `empresas/adonai-lab/PLAYBOOK_CONHECIMENTO_OPERACIONAL.md`
+- Adonai Trade: `empresas/adonai-trade/PLAYBOOK_CONHECIMENTO_OPERACIONAL.md`
+
+Os seis documentos acrescentam fundamentos, contratos de evidência, requisitos operacionais e testes. São conhecimento documental publicado; permanecem `unreviewed` até revisão científica. Não representam prova de ingestão no índice local nem de runtime LEVI.
