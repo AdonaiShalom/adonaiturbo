@@ -165,3 +165,17 @@ Publicado [MAPA_CONHECIMENTO_QUANTICO_5_OPERACOES.md](quantica/MAPA_CONHECIMENTO
 - Prioridades: (P0) teste de recuperação e integração ponta a ponta; (P1) ampliar corpus de fundamentos, nanoestruturas, química computacional, sensores e metrologia; (P2) benchmarks e protocolos específicos de cada empresa; (P3) revisão formal de fontes, proveniência e governança.
 - Tendências recentes documentadas: materiais quânticos, sensores quânticos e engenharia de manufatura escalável. Fontes primárias listadas no relatório.
 - Limitação: esta é auditoria documental; não foram executados testes locais no PC nem instalação de ferramentas científicas.
+
+
+## Aquisição documental de conhecimento — 2026-10-14
+- Publicado o documento de fundamentos `eu-sou/quantica/fundamentos/FUNDAMENTOS_FISICA_QUANTICA_E_NANOTECNOLOGIA.md` (commit `a27e0f2a315bf7131e7a7aafa29ac99e6aa9aae5`).
+- Publicados playbooks específicos para Turbo, Marketing Digital, Finanças, Lab e Trade:
+  - Turbo: `42a12274a0124e8ad21afc9f789a3857fdef96c7`
+  - Marketing: `86b61dfad8e8ded479733fca398ea73787e2127c`
+  - Finanças: `7f14dd54b11cb167fbdb80725537ee98eb8b17f3`
+  - Lab: `247826d0c9ebf0096c34aa7738b2255dbe2ee02e`
+  - Trade: `4acabd8b6cff6be719a283e8e7fbd65a2b2a5502`
+- Índice mestre atualizado no commit `9f6660aeaafbfbc3042c9ad7f805a79972d9db09`.
+- Supabase: seis módulos registrados em `scientific_sources` com confiança `unreviewed`; seis vínculos fonte-domínio novos foram confirmados; três benchmarks foram criados com estado `draft`.
+- Conteúdo cobre fundamentos (estado, medida, Schrödinger, oscilador, decoerência), pontos quânticos, materiais 2D, DFT, transporte, sensores/metrologia, RAG científico, validação de campanhas, risco financeiro, backtesting e paper trading.
+- **Limite crítico:** esta sessão não dispõe de execução de shell no PC nem acesso ao serviço local `127.0.0.1:8765` / `:3000`. O conteúdo foi adquirido no repositório e catalogado no Supabase, mas a ingestão no índice local e a recuperação por LEVI não foram executadas ou comprovadas.
