@@ -105,3 +105,17 @@ Publicado [MAPA_CONHECIMENTO_QUANTICO_5_OPERACOES.md](quantica/MAPA_CONHECIMENTO
 - Tendências oficiais verificadas em fontes de 2026: fabricação escalável de componentes quânticos (NIST, 29/06/2026), materiais quânticos e manufatura (NSF, 21/07/2026), e em fontes técnicas contínuas: sensores/metrologia, fotônica integrada, nanoestruturas e segurança pós-quântica.
 - Conclusão estratégica: priorizar (1) recuperação científica com proveniência, (2) benchmarks e simulações reproduzíveis, (3) nanomateriais/nanoeletrônica/nanofotônica/sensores, (4) estatística e risco para Finanças/Trade, (5) validação de alegações e experimentação para Marketing, e (6) isolamento de permissões e dados por empresa.
 - Pendência crítica: o plano e os catálogos não são ingestão executável. A biblioteca local e o servidor 3000 ainda precisam passar testes de recuperação e de ponta a ponta; agentes e Adonai Trade não podem ser declarados operacionais sem inventário e testes.
+
+
+## Organização em cinco pastas empresariais — 2026-10-14
+
+- Publicado índice mestre: `eu-sou/quantica/INDICE_MESTRE.md` (commit `8925a1dce6da8bf13a06c7f20a3ec1b0b1139d15`).
+- Criadas cinco pastas no GitHub com README operacional e científico:
+  - `eu-sou/quantica/empresas/adonai-turbo/README.md` (commit `3567dfebd6be2d2ce866f219143a6e4c5e43f20a`)
+  - `eu-sou/quantica/empresas/adonai-marketing-digital/README.md` (commit `60c63279b4ac11a70fbd9f9b786f821b61452091`)
+  - `eu-sou/quantica/empresas/adonai-financas/README.md` (commit `2ca58386ea4a6442f9ae6599606336f924edc8c7`)
+  - `eu-sou/quantica/empresas/adonai-lab/README.md` (commit `bf9a71e9ef2a567ddc1d4392bd9ee424b5592dd2`)
+  - `eu-sou/quantica/empresas/adonai-trade/README.md` (commit `f06006d0c48a409d29495998ad67803906ff1c63`)
+- Os cinco documentos foram catalogados no schema `eu_sou` do Supabase em `scientific_sources`, com slug da empresa, domínio, URL e estado `unreviewed`; relações com domínios existentes também foram criadas.
+- A estrutura separa conteúdo científico comum de aplicação específica por empresa. Adonai Trade permanece não instalado até evidência; PSM Grupo Market permanece separado.
+- **Pendente:** ingestão real dos arquivos do GitHub na biblioteca local EU SOU, testes de recuperação por empresa e prova de consulta ponta a ponta do LEVI no servidor :3000. O catálogo Supabase guarda metadados/URLs, não o conteúdo integral dos documentos.
