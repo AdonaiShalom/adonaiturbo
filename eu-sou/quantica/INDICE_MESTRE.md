@@ -48,3 +48,18 @@ eu-sou/
 
 ## Limites
 Este índice organiza conhecimento e especificações. Não prova que as pastas estejam sincronizadas com a biblioteca local, que agentes estejam instalados, nem que o servidor 3000 já esteja consultando o conteúdo. Essas etapas precisam de testes verificáveis.
+
+
+## Nova rodada de pesquisa e engenharia reversa — 14/10/2026
+Cada pasta empresarial tem agora um documento dedicado de pesquisa/tendências:
+- [Adonai Turbo](./empresas/adonai-turbo/PESQUISA_TENDENCIAS_2026.md)
+- [Adonai Marketing Digital](./empresas/adonai-marketing-digital/PESQUISA_TENDENCIAS_2026.md)
+- [Adonai Finanças](./empresas/adonai-financas/PESQUISA_TENDENCIAS_2026.md)
+- [Adonai Lab](./empresas/adonai-lab/PESQUISA_TENDENCIAS_2026.md)
+- [Adonai Trade](./empresas/adonai-trade/PESQUISA_TENDENCIAS_2026.md)
+
+Novas referências examinadas: DeepChem, PySCF, AiiDA Common Workflows, Cirq, Qiskit Finance, PennyLane e o catálogo OSS Quantum Software. Os módulos descrevem usos, critérios de seleção, limites e testes; não instalam automaticamente dependências.
+
+Tendências adicionadas: fabricação escalável de sistemas quânticos; infraestrutura para pesquisa em quantum/nanotecnologia; integração de sensores, redes e computação; química computacional e workflows reproduzíveis; materiais, nanofotônica e metrologia; benchmarks comparativos; separação entre software quântico, quantum-inspired e hardware real.
+
+**Status:** cinco documentos de pesquisa publicados no GitHub e catalogados no Supabase. O texto integral ainda precisa ser ingerido na biblioteca local e validado por consulta do LEVI.
