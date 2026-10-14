@@ -119,3 +119,18 @@ Publicado [MAPA_CONHECIMENTO_QUANTICO_5_OPERACOES.md](quantica/MAPA_CONHECIMENTO
 - Os cinco documentos foram catalogados no schema `eu_sou` do Supabase em `scientific_sources`, com slug da empresa, domínio, URL e estado `unreviewed`; relações com domínios existentes também foram criadas.
 - A estrutura separa conteúdo científico comum de aplicação específica por empresa. Adonai Trade permanece não instalado até evidência; PSM Grupo Market permanece separado.
 - **Pendente:** ingestão real dos arquivos do GitHub na biblioteca local EU SOU, testes de recuperação por empresa e prova de consulta ponta a ponta do LEVI no servidor :3000. O catálogo Supabase guarda metadados/URLs, não o conteúdo integral dos documentos.
+
+
+## Nova pesquisa e expansão das cinco pastas — 2026-10-14
+
+- Publicados cinco documentos `PESQUISA_TENDENCIAS_2026.md`, um por empresa, com prioridades de conhecimento, engenharia reversa responsável, fontes, critérios de aceitação, limites e testes.
+- Repositórios adicionais examinados por README/documentação pública: `deepchem/deepchem`, `pyscf/pyscf`, `aiidateam/aiida-common-workflows`, `quantumlib/Cirq`, `qiskit-community/qiskit-finance`, `PennyLaneAI/pennylane` e `qosf/awesome-quantum-software`.
+- Fontes de tendência incluídas: NIST sobre manufatura quântica; NSF sobre engenharia, infraestrutura de quantum/nanotecnologia e integração de sensores/redes/computação; NIST sobre nanodispositivos, pontos quânticos e nano-óptica.
+- Documentos no GitHub:
+  - Adonai Turbo: `0920ad936a03bdb6c56f986ef8dcffc819344036`
+  - Marketing Digital: `bc2a76ecf18ce73b22b0067ac42308609beea0ab`
+  - Finanças: `870bddd767faefb2f4cc533ace83245da1290504`
+  - Adonai Lab: `2186651a71467e9a75df7e1c0f4483c2ec85298e`
+  - Adonai Trade: `fdd21f3373d979ad23dedb80c2da576fff3d4cdc`
+- Supabase: cinco novas entradas catalogadas em `eu_sou.scientific_sources` com empresa, domínio, URL e estado `unreviewed`. Os metadados confirmam catálogo, não armazenamento integral nem ingestão do texto.
+- Pendente crítico: ingestão segura no índice local EU SOU, teste de relevância por empresa, validação da consulta LEVI → EU SOU no servidor :3000 e revisão dos metadados no Supabase.
