@@ -153,3 +153,15 @@ Publicado [MAPA_CONHECIMENTO_QUANTICO_5_OPERACOES.md](quantica/MAPA_CONHECIMENTO
 - Supabase: registrei/reconciliei candidatos de ferramentas científicas e referências de software; as ferramentas permanecem `candidate`, sem afirmar instalação ou validação.
 - A consulta SQL confirmou 11 ferramentas candidatas na tabela `eu_sou.scientific_tools`; os metadados não provam que estejam instaladas.
 - Bloqueio permanece: não há ferramenta conectada nesta sessão para executar shell no PC nem chamar `127.0.0.1:8765` ou `:3000`. Índice local não foi alterado e integração LEVI → EU SOU não foi testada. A promoção deve seguir o plano acima a partir de um canal de execução local autorizado.
+
+
+## Auditoria profunda do conhecimento quântico — 2026-10-14
+- Publicada auditoria documental de 16 mil caracteres em `eu-sou/quantica/auditorias/AUDITORIA_PROFUNDA_CINCO_EMPRESAS_2026-10-14.md`.
+- Commit da auditoria: `6ace5d78604cb5d2bb8152c805d5fe8b30180274`.
+- Revisados os READMEs/documentação de QuTiP, Kwant, PySCF, AiiDA Common Workflows, OSSCAR Quantum Mechanics, PennyLane, Cirq, DeepChem e um benchmark open-source de otimização de carteiras.
+- Registradas quatro fontes institucionais no catálogo Supabase (NSF: materiais quânticos; NSF: sensores quânticos; NSF: Project Triad; NIST: manufatura quântica). Permanecem `unreviewed`; catalogar não equivale a validar.
+- Snapshot de auditoria Supabase: 34 fontes, 12 domínios, 27 vínculos fonte-domínio, 11 ferramentas candidatas; 0 fontes `reviewed` e 0 `validated` no snapshot consultado antes da adição das quatro fontes. Não tratar esses números como prova de ingestão local.
+- Conclusão principal: os documentos empresariais existem, mas falta provar a cadeia corpus GitHub → índice local → busca EU SOU → resposta LEVI. O índice local anteriormente observado era majoritariamente criptografia pós-quântica, insuficiente para atestar cobertura de física quântica/nanotecnologia.
+- Prioridades: (P0) teste de recuperação e integração ponta a ponta; (P1) ampliar corpus de fundamentos, nanoestruturas, química computacional, sensores e metrologia; (P2) benchmarks e protocolos específicos de cada empresa; (P3) revisão formal de fontes, proveniência e governança.
+- Tendências recentes documentadas: materiais quânticos, sensores quânticos e engenharia de manufatura escalável. Fontes primárias listadas no relatório.
+- Limitação: esta é auditoria documental; não foram executados testes locais no PC nem instalação de ferramentas científicas.
