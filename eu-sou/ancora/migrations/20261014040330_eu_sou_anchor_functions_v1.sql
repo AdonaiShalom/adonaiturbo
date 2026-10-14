@@ -1,0 +1,3 @@
+-- Migration already applied to the adonaiturbo Supabase project.
+-- The migration defines private eu_sou.anchor_read/anchor_advance functions and service_role-only public RPC wrappers.
+-- Retrieve the exact deployed SQL from the Supabase migration history before applying this file in any other environment.
