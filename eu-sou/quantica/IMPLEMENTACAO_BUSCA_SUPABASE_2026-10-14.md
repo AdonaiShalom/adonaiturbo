@@ -42,3 +42,13 @@ A Edge Function e a base remota foram alteradas diretamente. Esta sessão não t
 - Edge Function `eu-sou-knowledge-search` verificada como ACTIVE, versão 1, com `verify_jwt=true`. O código usa service-role no lado do servidor e não expõe a chave ao navegador.
 - Ainda pendente: teste HTTP autenticado real da Edge Function e teste ponta a ponta com o LEVI local em `127.0.0.1:3000` e a biblioteca local em `127.0.0.1:8765`. Os conectores desta sessão não fornecem execução de shell nem acesso aos serviços localhost do PC, portanto não é possível alegar esses testes como executados.
 - O repositório GitHub é um frontend Next.js e não contém os caminhos locais `backend/levi-core.js` e `backend/server.js` encontrados no PC. Nenhuma alteração de runtime foi feita remotamente para evitar modificar um projeto diferente ou quebrar a instalação local.
+
+
+## Atualização de regressão — 14/10/2026, 20:41 BRT
+- Acervo confirmado por SQL: 31 trechos ativos, distribuídos em 11 `shared` e 4 por escopo de empresa; conteúdo total armazenado aproximado de 25.468 caracteres.
+- Seis documentos-fonte integrais (cinco playbooks e o núcleo científico) foram obtidos do GitHub e gravados com URL, SHA de origem, versão e hash MD5. Verificação direta retornou `hash_ok=true` para todos os seis.
+- Migrações v1, v2 e v3 aparecem no histórico real do Supabase.
+- Matriz SQL repetida: física (3 resultados), nanotecnologia no escopo Lab (5), Marketing (4), Finanças (5), Trade (4), Turbo (3); consultas vazia e desconhecida (0).
+- A busca no escopo Finanças para uma consulta de Marketing pode retornar um resultado `shared` genérico. Isso é permitido pelo contrato atual; o resultado não contém escopo empresarial de Marketing. Registrar como oportunidade de calibração de relevância, não como vazamento entre empresas.
+- A Edge Function `eu-sou-knowledge-search` está ativa com `verify_jwt=true`; seu código usa a função SQL e exige configuração server-side. Não foi possível executar um teste HTTP autenticado da Edge Function porque a sessão não fornece ferramenta de invocação HTTP genérica nem credencial JWT do usuário.
+- A integração runtime local permanece pendente: os conectores desta sessão não alcançam o shell/localhost do PC do usuário. O código local `C:\AdonaiTurbo\backend\levi-core.js` e o servidor `:3000` não foram modificados por esta sessão. Não declarar integração ponta a ponta concluída.
