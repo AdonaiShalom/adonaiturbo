@@ -134,3 +134,14 @@ Publicado [MAPA_CONHECIMENTO_QUANTICO_5_OPERACOES.md](quantica/MAPA_CONHECIMENTO
   - Adonai Trade: `fdd21f3373d979ad23dedb80c2da576fff3d4cdc`
 - Supabase: cinco novas entradas catalogadas em `eu_sou.scientific_sources` com empresa, domínio, URL e estado `unreviewed`. Os metadados confirmam catálogo, não armazenamento integral nem ingestão do texto.
 - Pendente crítico: ingestão segura no índice local EU SOU, teste de relevância por empresa, validação da consulta LEVI → EU SOU no servidor :3000 e revisão dos metadados no Supabase.
+
+
+## Corpus integrado para ingestão — 2026-10-14
+
+- Consolidado o conteúdo dos cinco módulos num corpus de aproximadamente 24 mil caracteres:
+  `eu-sou/quantica/corpus/CORPUS_INTEGRADO_CINCO_EMPRESAS_2026-10-14.md`
+- Commit: `f942ab2e14c7dc4284812ee5925461bb890d17a9`.
+- O corpus inclui regras globais de evidência, referências de software e pesquisa, cinco módulos empresariais completos e checklist de aceitação.
+- Supabase: entrada de catálogo criada para o corpus, marcada `unreviewed`; metadados registram que o texto integral está no GitHub e não há prova de ingestão local.
+- **Limite operacional importante:** ferramentas conectadas disponíveis nesta sessão permitem alterar GitHub e Supabase, mas não oferecem acesso a shell/arquivos do PC do usuário nem ao processo local `127.0.0.1:8765` / servidor `:3000`. Portanto, não foi possível promover índice local nem executar teste ponta a ponta. Não declarar integração funcional.
+- Próxima ação técnica: transferir o corpus para o staging local, preservar cópia do índice atual, validar consultas representativas e só depois promover o novo índice; reiniciar/testar o serviço de biblioteca e o LEVI em :3000.
