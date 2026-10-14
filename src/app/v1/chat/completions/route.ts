@@ -6,9 +6,10 @@ function validateAuth(request: NextRequest): boolean {
   const token = request.headers.get('authorization')?.replace(/^Bearer\s+/i, '');
   const apiKey = process.env.API_KEY;
   const openJarvisApiKey = process.env.OPENJARVIS_API_KEY;
-  if (!apiKey && !openJarvisApiKey) return true; // No auth required if no keys are configured
+  // Fail closed: never expose the OpenAI-compatible endpoint when no server key is configured.
+  if (!apiKey && !openJarvisApiKey) return false;
   if (!token) return false;
-  return token === apiKey || token === openJarvisApiKey;
+  return Boolean((apiKey && token === apiKey) || (openJarvisApiKey && token === openJarvisApiKey));
 }
 
 // ── Request schema ──
