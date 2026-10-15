@@ -274,6 +274,36 @@
   .cvvoz{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:6px;font-size:13px}.cvvoz label{display:flex;gap:6px;align-items:center;cursor:pointer}
   .e2g{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;margin:8px 0}.e2g label{display:flex;flex-direction:column;gap:4px;font-size:13px}.e2g input[type=text],.e2g input:not([type]),.e2g textarea,.e2g select{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font:inherit}.e2g input[type=checkbox]{margin-right:6px}
   @media(max-width:860px){.cvw{grid-template-columns:1fr;height:auto}.cvh{max-height:220px}.cvcol{min-height:320px}}
+
+  /* ---------- RH Adonai: módulo isolado ---------- */
+  .rh-wrap{display:grid;gap:14px}
+  .rh-grid{display:grid;grid-template-columns:minmax(210px,.78fr) minmax(0,2fr);gap:14px}
+  .rh-panel{border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:14px;min-width:0}
+  .rh-panel h2{font-size:16px;color:var(--head);margin-bottom:8px}
+  .rh-muted{font-size:12px;color:var(--muted)}
+  .rh-companies{display:flex;flex-wrap:wrap;gap:7px;margin:8px 0 12px}
+  .rh-chip{border:1px solid var(--line);border-radius:999px;padding:6px 10px;background:var(--panel-2);font-size:12px}
+  .rh-chip[aria-pressed=true]{background:var(--acento-soft);border-color:var(--acento);font-weight:700}
+  .rh-cats{display:grid;gap:7px}
+  .rh-cat{width:100%;text-align:left;border:1px solid var(--line);border-radius:9px;padding:9px 10px;background:var(--panel-2);display:flex;justify-content:space-between;gap:8px}
+  .rh-branch{padding:6px 8px 8px 15px;display:grid;gap:5px}
+  .rh-branch button{background:transparent;border:0;text-align:left;color:var(--muted);padding:5px;font-size:12px}
+  .rh-branch button:hover{color:var(--head);background:var(--acento-soft)}
+  .rh-network-shell{perspective:1000px;min-height:370px;overflow:hidden;border-radius:12px;background:radial-gradient(ellipse at center,rgba(181,140,255,.13),transparent 68%),var(--bg);border:1px solid var(--line);padding:8px}
+  .rh-network{position:relative;min-height:350px;transform-style:preserve-3d;transform:rotateX(8deg);transition:transform .35s}
+  .rh-network:hover{transform:rotateX(3deg) rotateY(-2deg)}
+  .rh-network svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+  .rh-edge{stroke:var(--acento);stroke-opacity:.38;stroke-width:1.3;stroke-dasharray:5 5;animation:rhFlow 12s linear infinite}
+  @keyframes rhFlow{to{stroke-dashoffset:-100}}
+  .rh-node{position:absolute;transform:translate(-50%,-50%) translateZ(var(--z,0px));width:88px;min-height:48px;border:1px solid rgba(181,140,255,.7);border-radius:13px;background:linear-gradient(145deg,var(--panel),var(--panel-2));box-shadow:0 8px 18px rgba(8,18,48,.24),inset 0 0 12px rgba(181,140,255,.09);padding:6px 4px;font-size:11px;line-height:1.2;text-align:center}
+  .rh-node strong{display:block;color:var(--head);font-size:11px}.rh-node small{display:block;color:var(--muted);font-size:9px;margin-top:3px}
+  .rh-node[aria-pressed=true]{outline:2px solid var(--acento);box-shadow:0 0 22px rgba(181,140,255,.35)}
+  .rh-detail{display:grid;gap:8px}.rh-detail dl{display:grid;grid-template-columns:100px 1fr;gap:5px 8px;font-size:12px}.rh-detail dt{color:var(--muted)}.rh-detail dd{margin:0;overflow-wrap:anywhere}
+  .rh-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.rh-stat{border:1px solid var(--line);border-radius:11px;background:var(--panel);padding:11px}.rh-stat small{display:block;color:var(--muted);font-size:11px}.rh-stat b{font-size:19px;color:var(--head)}
+  .rh-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.rh-log{display:grid;gap:8px}.rh-log-item{border-left:3px solid var(--acento);padding:7px 10px;background:var(--panel-2);border-radius:0 8px 8px 0;font-size:12px}
+  .rh-badge{display:inline-block;font-size:10px;border-radius:999px;padding:3px 7px;background:var(--acento-soft);color:var(--acento-txt);margin-right:4px}
+  @media(max-width:860px){.rh-grid{grid-template-columns:1fr}.rh-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.rh-network-shell{min-height:330px}.rh-network{min-height:310px}.rh-node{width:76px;font-size:10px}}
+
 </style>
 </head>
 <body>
@@ -481,11 +511,12 @@
     memoria: '<ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/>',
     docs: '<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 16h5"/>',
     estudio: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9.5v5l4.5-2.5z"/>',
-    dados: '<path d="M12 3l8 3v6c0 4.5-3.2 7.6-8 9-4.8-1.4-8-4.5-8-9V6z"/>'
+    dados: '<path d="M12 3l8 3v6c0 4.5-3.2 7.6-8 9-4.8-1.4-8-4.5-8-9V6z"/>',
+    rh: '<circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c0-3.5 2.5-6 6-6s6 2.5 6 6M15 15c3.5-.5 6 1.7 6 5"/>'
   };
   const NAV = [
     ["central", "Central"], ["conversas", "Conversas"], ["agentes", "Agentes"], ["tarefas", "Tarefas"], ["aprov", "Aprovações"],
-    ["desemp", "Desempenho"], ["estudio", "Estúdio de mídia"], ["conect", "Conectores"], ["turnos", "Turnos 24/7"], ["memoria", "Memória"], ["docs", "Documentos"], ["dados", "Dados"]
+    ["desemp", "Desempenho"], ["estudio", "Estúdio de mídia"], ["conect", "Conectores"], ["turnos", "Turnos 24/7"], ["memoria", "Memória"], ["docs", "Documentos"], ["dados", "Dados"], ["rh", "RH Adonai"]
   ];
 
   /* ---------- Estrutura fixa ---------- */
@@ -528,6 +559,7 @@
     $$(".nav").forEach((b) => b.addEventListener("click", () => navegar(b.dataset.v)));
     $("#main").innerHTML = (VIEWS[v] || VIEWS.espera)();
     if (v === "central") { desenharTeia(); patch(); }
+    if (v === "rh") inicializarRH();
     $("#main").scrollTop = 0;
   }
 
@@ -807,7 +839,74 @@
   }
 
   /* ---------- Telas ---------- */
+  const RH_COMPANHIAS = ["Adonai Turbo","Adonai Marketing Digital","Adonai Finanças","Adonai Lab","Adonai Trade"];
+  const RH_CATEGORIAS = [
+    {id:"talentos",nome:"Talentos e recrutamento",ramos:["Planejamento de vagas","Descrição de cargos","Triagem assistida","Entrevistas estruturadas","Integração de novos colaboradores"]},
+    {id:"desenvolvimento",nome:"Treinamento e desenvolvimento",ramos:["Matriz de competências","Trilhas de capacitação","Treinamento de agentes","Avaliação de aprendizagem","Plano de desenvolvimento"]},
+    {id:"desempenho",nome:"Desempenho e carreira",ramos:["Metas por empresa","Feedback estruturado","Avaliação com evidências","Plano de carreira","Sucessão e capacidade"]},
+    {id:"relacoes",nome:"Pessoas, clima e segurança",ramos:["Atendimento interno","Clima e bem-estar","Saúde e segurança","Conflitos e mediação","Acessibilidade e inclusão"]},
+    {id:"administracao",nome:"Administração e conformidade",ramos:["Políticas e documentos","Jornada e escalas","Remuneração e benefícios","LGPD e acesso mínimo","Auditoria e retenção"]},
+    {id:"inteligencia",nome:"Inteligência e melhoria contínua",ramos:["Indicadores de RH","Pesquisa em fontes públicas","Experimentos em sandbox","Validação e avaliação","Recomendações auditáveis"]}
+  ];
+  const RH_AGENTES = [
+    {id:"direcao",nome:"Direção de RH",cargo:"Direção",funcao:"Governança, prioridades e prestação de contas",x:50,y:12,z:50,cat:"administração"},
+    {id:"recrutamento",nome:"Recrutamento",cargo:"Especialista",funcao:"Vagas, critérios estruturados e triagem assistida",x:19,y:34,z:18,cat:"talentos"},
+    {id:"integracao",nome:"Integração",cargo:"Especialista",funcao:"Onboarding e documentação inicial",x:39,y:34,z:28,cat:"talentos"},
+    {id:"capacitacao",nome:"Capacitação",cargo:"Especialista",funcao:"Trilhas, cursos e avaliação de aprendizagem",x:61,y:34,z:28,cat:"desenvolvimento"},
+    {id:"desempenho",nome:"Desempenho",cargo:"Especialista",funcao:"Metas, feedback e desenvolvimento profissional",x:81,y:34,z:18,cat:"desempenho"},
+    {id:"relacoes",nome:"Relações humanas",cargo:"Especialista",funcao:"Atendimento, clima, mediação e bem-estar",x:18,y:62,z:10,cat:"relacoes"},
+    {id:"administracao",nome:"Administração",cargo:"Especialista",funcao:"Políticas, jornadas, benefícios e documentos",x:39,y:62,z:25,cat:"administracao"},
+    {id:"privacidade",nome:"Privacidade e compliance",cargo:"Controle independente",funcao:"LGPD, segregação de acesso e auditoria",x:61,y:62,z:25,cat:"administracao"},
+    {id:"dados",nome:"Analytics de pessoas",cargo:"Especialista",funcao:"Indicadores agregados e planejamento de capacidade",x:82,y:62,z:10,cat:"inteligencia"},
+    {id:"pesquisa",nome:"Pesquisa EU SOU",cargo:"Pesquisa",funcao:"Avalia fontes públicas e registra proveniência",x:28,y:84,z:22,cat:"inteligencia"},
+    {id:"validacao",nome:"Validação e testes",cargo:"Controle",funcao:"Testes em sandbox, métricas e regressão",x:50,y:84,z:34,cat:"inteligencia"},
+    {id:"auditoria",nome:"Auditoria de recomendações",cargo:"Controle independente",funcao:"Revisão, riscos, evidências e aprovação humana",x:72,y:84,z:22,cat:"inteligencia"}
+  ];
+  const RH_EDGES = [["direcao","recrutamento"],["direcao","integracao"],["direcao","capacitacao"],["direcao","desempenho"],["direcao","relacoes"],["direcao","administracao"],["direcao","privacidade"],["direcao","dados"],["pesquisa","validacao"],["validacao","auditoria"],["auditoria","direcao"],["capacitacao","desempenho"],["privacidade","recrutamento"],["dados","direcao"]];
+  const RH_STATE = {empresa:RH_COMPANHIAS[0],agente:"direcao",categoria:"talentos",aberta:"talentos",logs:[],recomendacoes:[]};
+  function rhView() {
+    const cards = [["12","Agentes especializados"],["5","Empresas cobertas"],["6","Áreas funcionais"],["0","Recomendações aprovadas"]];
+    return '<div class="cab"><h1>RH Adonai</h1><p>Gestão de pessoas para as cinco empresas Adonai, com dados segregados por empresa e decisões auditáveis.</p></div>'+
+      '<div class="rh-wrap"><div class="rh-stats">'+cards.map((c,i)=>'<div class="rh-stat"><small>'+c[1]+'</small><b id="rhStat'+i+'">'+c[0]+'</b></div>').join('')+'</div>'+
+      '<section class="rh-panel"><h2>Escopo da empresa</h2><p class="rh-muted">Selecione a empresa para filtrar contexto e tarefas. A seleção não concede acesso aos dados reais nem mistura bases.</p><div class="rh-companies" id="rhCompanies">'+RH_COMPANHIAS.map((n,i)=>'<button class="rh-chip" data-rh-company="'+i+'" aria-pressed="'+(i===0)+'">'+n+'</button>').join('')+'</div><span class="rh-badge">EU SOU: pesquisa e evidências</span><span class="rh-badge">LEVI: orquestração e encaminhamento</span><span class="rh-badge">Produção: exige aprovação</span></section>'+
+      '<div class="rh-grid"><section class="rh-panel"><h2>Menu RH Adonai</h2><p class="rh-muted">Categorias e ramificações do RH</p><div class="rh-cats" id="rhCats">'+RH_CATEGORIAS.map(c=>'<div><button class="rh-cat" data-rh-cat="'+c.id+'" aria-expanded="'+(c.id===RH_STATE.aberta)+'"><span>'+c.nome+'</span><span>'+(c.id===RH_STATE.aberta?'−':'+')+'</span></button><div class="rh-branch" data-rh-branch="'+c.id+'" '+(c.id===RH_STATE.aberta?'':'hidden')+'>'+c.ramos.map(r=>'<button data-rh-branch-action="'+r.replace(/"/g,'&quot;')+'" data-rh-cat="'+c.id+'">↳ '+r+'</button>').join('')+'</div></div>').join('')+'</div></section>'+
+      '<section class="rh-panel"><h2>Teia 3D de agentes</h2><p class="rh-muted">Selecione um agente para ver sua função e hierarquia. As conexões representam supervisão e revisão, não autorização automática.</p><div class="rh-network-shell"><div class="rh-network" id="rhNetwork"><svg id="rhEdges" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg>'+RH_AGENTES.map(a=>'<button class="rh-node" data-rh-agent="'+a.id+'" aria-pressed="'+(a.id===RH_STATE.agente)+'" style="left:'+a.x+'%;top:'+a.y+'%;--z:'+a.z+'px"><strong>'+a.nome+'</strong><small>'+a.cargo+'</small></button>').join('')+'</div></div><div class="rh-actions"><button class="btn" data-rh-action="tarefa">Criar tarefa de capacitação</button><button class="btn" data-rh-action="recomendacao">Registrar recomendação para revisão</button></div></section></div>'+
+      '<div class="rh-grid"><section class="rh-panel"><h2>Agente selecionado</h2><div class="rh-detail" id="rhDetail"></div></section><section class="rh-panel"><h2>Aprendizado controlado EU SOU → LEVI</h2><p class="rh-muted">Pipeline versionado: pesquisar fontes públicas → registrar origem/licença → avaliar evidências → testar em sandbox → comparar métricas → solicitar revisão humana → publicar somente após aprovação. Sem autoalteração em produção.</p><div class="rh-actions"><button class="btn" data-rh-action="pesquisa">Registrar pesquisa</button><button class="btn" data-rh-action="teste">Registrar teste em sandbox</button><button class="btn pri" data-rh-action="revisao">Solicitar revisão humana</button></div><div class="rh-log" id="rhLog" aria-live="polite"></div></section></div></div>';
+  }
+  function rhRegistrar(tipo, texto) {
+    const item = {id:Date.now(),tipo,texto,empresa:RH_STATE.empresa,agente:RH_STATE.agente,quando:new Date().toLocaleString("pt-BR"),status:tipo==="Recomendação"||tipo==="Revisão solicitada"?"Aguardando revisão":"Registrado"};
+    RH_STATE.logs.unshift(item); RH_STATE.logs=RH_STATE.logs.slice(0,20);
+    try { const k="adonai.rh.adonai.v1"; const prev=JSON.parse(localStorage.getItem(k)||"[]"); prev.unshift(item); localStorage.setItem(k,JSON.stringify(prev.slice(0,100))); } catch(e){}
+    rhRenderLog();
+  }
+  function rhRenderLog(){
+    const box=$("#rhLog"); if(!box)return;
+    let items=[]; try{items=JSON.parse(localStorage.getItem("adonai.rh.adonai.v1")||"[]").filter(x=>x.empresa===RH_STATE.empresa).slice(0,8)}catch(e){}
+    box.innerHTML=items.length?items.map(x=>'<div class="rh-log-item"><span class="rh-badge">'+esc(x.status)+'</span><b>'+esc(x.tipo)+'</b><br>'+esc(x.texto)+'<br><span class="rh-muted">'+esc(x.quando)+' · '+esc(x.empresa)+'</span></div>').join(''):'<p class="rh-muted">Nenhum registro local para esta empresa. Os registros deste protótipo ficam neste navegador; ainda não são enviados ao servidor.</p>';
+    const approved=items.filter(x=>x.status==="Aprovado").length; const n=$("#rhStat3"); if(n)n.textContent=String(approved);
+  }
+  function rhRenderDetail(){
+    const a=RH_AGENTES.find(x=>x.id===RH_STATE.agente)||RH_AGENTES[0], box=$("#rhDetail"); if(!box)return;
+    box.innerHTML='<h3>'+esc(a.nome)+'</h3><p class="rh-muted">'+esc(a.cargo)+' · '+esc(RH_CATEGORIAS.find(c=>c.id===a.cat).nome)+'</p><dl><dt>Função</dt><dd>'+esc(a.funcao)+'</dd><dt>Hierarquia</dt><dd>'+(a.id==="direcao"?"Direção RH Adonai":a.id==="pesquisa"||a.id==="validacao"||a.id==="auditoria"?"Linha de controle e evidência; reporta à Direção RH":"Reporta à Direção de RH; atua sob políticas e escopo da empresa selecionada")+'</dd><dt>Empresa ativa</dt><dd>'+esc(RH_STATE.empresa)+'</dd><dt>Limites</dt><dd>Sem decisões automáticas de contratação, demissão, remuneração ou avaliação final.</dd></dl>';
+    $("#rhNetwork .rh-node").forEach(n=>n.setAttribute("aria-pressed",String(n.dataset.rhAgent===a.id)));
+  }
+  function rhDrawEdges(){
+    const svg=$("#rhEdges"); if(!svg)return;
+    const by=Object.fromEntries(RH_AGENTES.map(a=>[a.id,a]));
+    svg.innerHTML=RH_EDGES.map(e=>{const a=by[e[0]],b=by[e[1]];return '<line class="rh-edge" x1="'+a.x+'" y1="'+a.y+'" x2="'+b.x+'" y2="'+b.y+'"/>'}).join('');
+  }
+  function rhRenderLogAndDetails(){rhDrawEdges();rhRenderDetail();rhRenderLog();}
+  function inicializarRH(){
+    if(!$("#rhNetwork"))return;
+    $("#rhCompanies").addEventListener("click",e=>{const b=e.target.closest("[data-rh-company]");if(!b)return;RH_STATE.empresa=RH_COMPANHIAS[Number(b.dataset.rhCompany)];$("#rhCompanies [data-rh-company]").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));rhRegistrar("Escopo alterado","Contexto selecionado para "+RH_STATE.empresa);rhRenderLog();rhRenderDetail();});
+    $("#rhCats").addEventListener("click",e=>{const b=e.target.closest("[data-rh-cat]");if(!b)return;const id=b.dataset.rhCat;if(b.hasAttribute("data-rh-branch-action")){RH_STATE.categoria=id;rhRegistrar("Ramo selecionado",b.dataset.rhBranchAction);return;}RH_STATE.aberta=RH_STATE.aberta===id?"":id;$("#rhCats [data-rh-branch]").forEach(x=>x.hidden=x.dataset.rhBranch!==RH_STATE.aberta);$("#rhCats .rh-cat").forEach(x=>{x.setAttribute("aria-expanded",String(x.dataset.rhCat===RH_STATE.aberta));x.lastElementChild.textContent=x.dataset.rhCat===RH_STATE.aberta?"−":"+";});});
+    $("#rhNetwork").addEventListener("click",e=>{const b=e.target.closest("[data-rh-agent]");if(!b)return;RH_STATE.agente=b.dataset.rhAgent;rhRenderDetail();});
+    $("#main").addEventListener("click",e=>{const b=e.target.closest("[data-rh-action]");if(!b||S.view!=="rh")return;const ac=b.dataset.rhAction;const msg={tarefa:"Plano de capacitação atribuído para "+RH_STATE.empresa,recomendacao:"Recomendação criada para revisão humana; sem execução em produção",pesquisa:"Pesquisa pública registrada como pendente de anexar fonte, licença e data",teste:"Teste em sandbox registrado; anexar cenário, versão, métrica e resultado",revisao:"Revisão humana solicitada para a evidência e recomendação selecionadas"}[ac];const tipo={tarefa:"Capacitação",recomendacao:"Recomendação",pesquisa:"Pesquisa",teste:"Teste em sandbox",revisao:"Revisão solicitada"}[ac];rhRegistrar(tipo,msg);});
+    rhRenderLogAndDetails();
+  }
+
   const VIEWS = {
+    rh() { return rhView(); },
     central() {
       const p = S.proj;
       return '<div class="cab"><h1>Central de comando</h1><p>' + esc(PROJ[p].nome) + ": " + esc(PROJ[p].frase) + "</p></div>" +
