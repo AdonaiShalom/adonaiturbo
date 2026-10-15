@@ -3,12 +3,17 @@ import { loadProviders, routeRequest, getChatUrl, getHeaders, isRetryableError, 
 
 // ── Auth ──
 function validateAuth(request: NextRequest): boolean {
-  const token = request.headers.get('authorization')?.replace(/^Bearer\s+/i, '');
-  const apiKey = process.env.API_KEY;
-  const openJarvisApiKey = process.env.OPENJARVIS_API_KEY;
-  if (!apiKey && !openJarvisApiKey) return true; // No auth required if no keys are configured
-  if (!token) return false;
-  return token === apiKey || token === openJarvisApiKey;
+  const authorization = request.headers.get('authorization') || '';
+  const match = authorization.match(/^Bearer\s+(\S+)$/i);
+  const token = match?.[1];
+  const configuredKeys = [
+    process.env.API_KEY,
+    process.env.OPENJARVIS_API_KEY,
+  ].filter((key): key is string => Boolean(key?.trim()));
+
+  // Fail closed: never expose the API when server-side keys are missing.
+  if (!token || configuredKeys.length === 0) return false;
+  return configuredKeys.some((key) => token === key);
 }
 
 // ── Request schema ──
