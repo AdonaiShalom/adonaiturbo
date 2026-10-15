@@ -42,6 +42,9 @@
   .aviso{grid-column:1/-1;background:var(--acento-soft);color:var(--text);font-size:13px;padding:6px 16px;border-bottom:1px solid var(--line)}
   .top{grid-column:1/-1;display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--line);background:var(--panel);flex-wrap:wrap}
   .proj{display:flex;align-items:center;gap:10px;background:transparent;border:1px solid var(--line);border-radius:12px;padding:6px 12px 6px 8px;text-align:left}
+  .rh-tab-top{display:flex;align-items:center;gap:8px;background:transparent;border:1px solid var(--line);border-radius:12px;padding:9px 12px;color:var(--head);font-weight:650;white-space:nowrap}
+  .rh-tab-top:before{content:"RH";display:grid;place-items:center;width:30px;height:30px;border-radius:9px;background:var(--acento-soft);color:var(--acento-txt);font-size:11px}
+  .rh-tab-top[aria-pressed="true"]{border-color:var(--acento);background:var(--acento-soft)}
   .proj img{width:34px;height:34px;flex:none}
   .proj b{display:block;font-family:var(--serif);font-size:15px;color:var(--head);line-height:1.2}
   .proj small{display:block;color:var(--muted);font-size:12px;line-height:1.2}
@@ -527,6 +530,7 @@
         '<button class="proj" data-p="turbo" aria-pressed="false"><img alt="" src="' + LOGO.turbo + '"><span><b>Adonai Turbo</b><small>Programa desenvolvedor</small></span></button>' +
         '<button class="proj" data-p="market" aria-pressed="true"><img alt="" src="' + LOGO.market + '"><span><b>Adonai Market Digital</b><small>Sistema operacional do negócio</small></span></button>' +
         '<button class="proj" data-p="financas" aria-pressed="false"><img alt="" src="' + LOGO.financas + '"><span><b>Adonai Finanças</b><small>Estrutura de agentes; dados locais em construção</small></span></button>' +
+        '<button class="rh-tab-top" id="rhTabTop" aria-pressed="false">RH Adonai</button>' +
         '<span class="espaco"></span>' +
         '<span class="chip" id="chipO" data-ok="false"><i></i>Ollama</span><span class="chip" id="chip2" data-ok="false"></span>' +
         '<button class="btn" id="bSim">Atualizar agora</button>' +
@@ -534,7 +538,8 @@
       "</header>" +
       '<nav class="side" id="nav" aria-label="Ferramentas"></nav>' +
       '<main class="main" id="main"></main>';
-    $$(".proj").forEach((b) => b.addEventListener("click", () => { S.proj = b.dataset.p; S.sel = null; navegar(S.view); }));
+    $(".proj").forEach((b) => b.addEventListener("click", () => { S.proj = b.dataset.p; S.sel = null; navegar(S.view); }));
+    $("#rhTabTop").addEventListener("click", () => { S.sel = null; navegar("rh"); });
     $("#bSim").addEventListener("click", () => { if (window.rSync) window.rSync(); });
     $("#bTema").addEventListener("click", () => {
       const escuro = document.documentElement.dataset.theme === "dark" || (!document.documentElement.dataset.theme && matchMedia("(prefers-color-scheme: dark)").matches);
@@ -551,7 +556,8 @@
   function navegar(v) {
     pararAudio();
     S.view = v;
-    $$(".proj").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.p === S.proj)));
+    $(".proj").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.p === S.proj)));
+    const rhTop = $("#rhTabTop"); if (rhTop) rhTop.setAttribute("aria-pressed", String(v === "rh"));
     const c2 = $("#chip2"); if (c2) c2.innerHTML = "<i></i>" + "Supabase";
     $("#nav").innerHTML = NAV.map((n) =>
       '<button class="nav" data-v="' + n[0] + '"' + (n[0] === v ? ' aria-current="page"' : "") + '><svg viewBox="0 0 24 24" aria-hidden="true">' + IC[n[0]] + "</svg>" + n[1] +
