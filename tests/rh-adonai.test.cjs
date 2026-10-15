@@ -10,7 +10,7 @@ new vm.Script(scriptMatch[1], { filename: htmlPath });
 
 for (const [label, pattern] of [
   ["top-level RH tab", /id="rhTabTop"/],
-  ["top-level tab event handler", /\$\("#rhTabTop"\)\.addEventListener\("click",\s*\(\)\s*=>\s*navegar\("rh"\)\)/],
+  ["top-level tab event handler", /\$\("#rhTabTop"\)\.addEventListener\("click",\s*\(\)\s*=>\s*\{\s*S\.sel\s*=\s*null;\s*navegar\("rh"\);\s*\}\)/],
   ["RH in side menu", /\["rh",\s*"RH Adonai"\]/],
   ["RH view registration", /rh\(\)\s*\{\s*return rhView\(\);\s*\}/],
   ["RH initialization on navigation", /if\s*\(v\s*===\s*"rh"\)\s*inicializarRH\(\)/],
