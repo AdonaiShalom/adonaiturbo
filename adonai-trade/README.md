@@ -7,11 +7,13 @@ Módulo independente de análise e operações de mercado do ecossistema Adonai.
 - O Adonai Turbo permanece na porta `3000`.
 - Este módulo não deve ser misturado ao PSM Grupo Market.
 
-## Integrações planejadas / a validar
-- GitHub: versionamento do código deste módulo.
-- Supabase: schema privado `adonai_trade` no projeto Supabase `adonaiturbo`.
-- EU SOU: consumir conhecimento e recomendações científicas por contrato de API explícito.
-- LEVI: receber solicitações/orquestração por endpoint autenticado e auditável.
+## Estado das integrações
+Consulte [INTEGRACAO.md](./INTEGRACAO.md) para o estado verificado, os contratos conhecidos e os critérios necessários para considerar cada integração ativa.
+
+- GitHub: o diretório existe; o código executável local ainda não foi confirmado/publicado neste diretório.
+- Supabase: schema `adonai_trade` e tabela de estado existem no projeto `adonaiturbo`; a conexão de runtime do processo Trade ainda precisa de teste.
+- EU SOU: endpoint local conhecido, integração ponta a ponta pendente de validação.
+- LEVI: endpoint local conhecido, integração ponta a ponta pendente de validação.
 
 ## Regras de segurança
 - Não armazenar segredos, tokens ou chaves neste repositório.
