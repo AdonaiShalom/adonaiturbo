@@ -1,23 +1,22 @@
 # Dependencies
 node_modules/
 
-# Next.js
+# Next.js build output
 .next/
 out/
-
-# Env files
-.env
-.env.local
-.env.production
-!.env.example
-
-# Vercel
-.vercel
-
-# Debug
-npm-debug.log*
-
-# TypeScript
+coverage/
 *.tsbuildinfo
 next-env.d.ts
+
+# Environment files: keep all local secrets private; allow only the sanitized template
 .env*
+!.env.example
+
+# Deployment tooling
+.vercel/
+
+# Debug and local artifacts
+npm-debug.log*
+*.log
+.DS_Store
+Thumbs.db
