@@ -1,7 +1,7 @@
 'use strict';
 
 const assert = require('node:assert/strict');
-const { validateEnvelope, evaluatePolicy } = require('../runtime/policy-gate.cjs');
+const { validateEnvelope, evaluatePolicy } = require('../../runtime/policy-gate.cjs');
 
 const nowMs = Date.parse('2026-10-17T12:00:00.000Z');
 const envelope = {
