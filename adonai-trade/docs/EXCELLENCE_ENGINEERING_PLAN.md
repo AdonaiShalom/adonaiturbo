@@ -191,10 +191,10 @@ A conexão do GitHub permite trabalhar no repositório e no branch; a conexão d
 
 ## 10. Engenharia do registro de backlog/evidências (implementado no Supabase)
 
-O schema `adonai_trade` agora inclui `excellence_work_items` e `excellence_evidence`, versionadas por migration. As tabelas novas usam RLS, sem leitura para `anon` ou `authenticated`, e acesso de serviço explícito. A segunda migration adiciona:
+O schema `adonai_trade` agora inclui `excellence_work_items` e `excellence_evidence`, versionadas por migration. As tabelas novas usam RLS, sem leitura para `anon` ou `authenticated`, e acesso de serviço explícito. As migrations de integridade adicionam:
 - `updated_at` automático e bloqueio de estado `verified` sem evidência técnica revisada com referência;
 - constraint `NOT VALID` que bloqueia novas evidências documentais marcadas como verificadas, preservando dois registros históricos legados sem reescrita;
 - evidências append-only para operações normais, sem UPDATE/DELETE concedido a `service_role`;
 - testes pgTAP em `supabase/tests/adonai_trade_excellence_integrity.test.sql`.
 
-Verificação direta no projeto conectado confirmou: ambas as tabelas existem, RLS está ativo, triggers estão instalados, `anon/authenticated` não podem ler o backlog, `service_role` pode ler tarefas e não pode atualizar/apagar evidências. O teste pgTAP foi adicionado ao repositório, mas ainda precisa ser executado em ambiente descartável/CI para ser considerado teste automatizado aprovado. As políticas e grants existentes em outras tabelas não foram alterados.
+Verificação direta no projeto conectado confirmou: ambas as tabelas existem, RLS está ativo, triggers estão instalados, `anon/authenticated` não podem ler o backlog, `service_role` pode ler tarefas e não pode atualizar/apagar evidências. Testes transacionais no Supabase confirmaram o bloqueio de evidência documental marcada como verificada e de tarefas sem evidência técnica; os testes foram revertidos. O workflow GitHub Actions de consistência de documentação/IDs passou no commit consultado. O pgTAP está versionado, mas ainda precisa ser executado num banco descartável com pgTAP instalado; não confundir o CI de documentação com a aprovação dos testes SQL. As políticas e grants existentes em outras tabelas não foram alterados.
