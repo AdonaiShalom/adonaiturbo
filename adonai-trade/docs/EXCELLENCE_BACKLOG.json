@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.0",
   "project": "Adonai Trade",
   "status_semantics": {
     "planned": "Ainda não iniciado ou aguardando dependências",
@@ -28,7 +28,9 @@
         "testes de cadeia íntegra e adulteração",
         "retry/replay/concorrência testados",
         "dados originais preservados"
-      ]
+      ],
+      "supabase_key": "AT-001",
+      "evidence_required": true
     },
     {
       "id": "AT-002",
@@ -41,7 +43,9 @@
         "políticas justificadas",
         "testes anon/authenticated/service_role",
         "revisão SECURITY DEFINER"
-      ]
+      ],
+      "supabase_key": "AT-002",
+      "evidence_required": true
     },
     {
       "id": "AT-003",
@@ -54,7 +58,9 @@
         "health/readiness e contrato testados",
         "timeout falha fechado",
         "paper não chama corretora"
-      ]
+      ],
+      "supabase_key": "AT-003",
+      "evidence_required": true
     },
     {
       "id": "AT-004",
@@ -67,7 +73,9 @@
         "persistência auditável",
         "falha não gera ordem",
         "evidência temporal"
-      ]
+      ],
+      "supabase_key": "AT-004",
+      "evidence_required": true
     },
     {
       "id": "AT-005",
@@ -80,7 +88,9 @@
         "execução registrada",
         "fonte/modelo/benchmark versionados",
         "resultado reproduzível"
-      ]
+      ],
+      "supabase_key": "AT-005",
+      "evidence_required": true
     },
     {
       "id": "AT-006",
@@ -93,7 +103,9 @@
         "precisão e taxas",
         "feed freshness",
         "paper-only comprovado"
-      ]
+      ],
+      "supabase_key": "AT-006",
+      "evidence_required": true
     },
     {
       "id": "AT-007",
@@ -106,7 +118,9 @@
         "pip/lot e conversão",
         "sessões/feriados/rollover",
         "falhas bloqueadas"
-      ]
+      ],
+      "supabase_key": "AT-007",
+      "evidence_required": true
     },
     {
       "id": "AT-008",
@@ -119,7 +133,9 @@
         "calendário e ajustes",
         "proveniência/licença",
         "atraso detectado"
-      ]
+      ],
+      "supabase_key": "AT-008",
+      "evidence_required": true
     },
     {
       "id": "AT-009",
@@ -132,7 +148,9 @@
         "calendários por bolsa",
         "corporate actions",
         "divergências de provedores"
-      ]
+      ],
+      "supabase_key": "AT-009",
+      "evidence_required": true
     },
     {
       "id": "AT-010",
@@ -146,7 +164,9 @@
         "baseline",
         "out-of-sample e walk-forward",
         "métricas de drawdown"
-      ]
+      ],
+      "supabase_key": "AT-010",
+      "evidence_required": true
     },
     {
       "id": "AT-011",
@@ -159,7 +179,9 @@
         "qualificação",
         "histórico de aprendizado",
         "sem promoção sem evidência"
-      ]
+      ],
+      "supabase_key": "AT-011",
+      "evidence_required": true
     },
     {
       "id": "AT-012",
@@ -173,7 +195,9 @@
         "SBOM/dependências",
         "backup e rollback",
         "hash do artefato"
-      ]
+      ],
+      "supabase_key": "AT-012",
+      "evidence_required": true
     }
   ],
   "evidence_policy": "Nunca marcar item verified nem integração active sem evidência reproduzível vinculada ao commit/artefato e timestamp.",
@@ -181,5 +205,7 @@
     "engineering_plan": "adonai-trade/docs/EXCELLENCE_ENGINEERING_PLAN.md",
     "supabase_schema": "adonai_trade.excellence_work_items",
     "supabase_evidence": "adonai_trade.excellence_evidence"
-  }
+  },
+  "last_reviewed": "2026-10-17",
+  "source_of_truth": "Supabase adonai_trade.excellence_work_items; GitHub file is the reviewed planning mirror."
 }
