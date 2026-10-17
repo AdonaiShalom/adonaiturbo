@@ -8,6 +8,8 @@ BOARD_PATH = ROOT / "adonai-trade" / "docs" / "EXCELLENCE_EXECUTION_BOARD.md"
 SCHEMA_PATH = ROOT / "adonai-trade" / "docs" / "EXCELLENCE_SCHEMA_CONTRACT.md"
 ARCH_REVIEW_PATH = ROOT / "adonai-trade" / "docs" / "OPEN_SOURCE_ENGINEERING_REVIEW.md"
 WORKFLOW_PATH = ROOT / ".github" / "workflows" / "adonai-trade-quality.yml"
+ARCH_REVIEW_PATH = ROOT / "adonai-trade" / "docs" / "OPEN_SOURCE_ENGINEERING_REVIEW.md"
+WORKFLOW_PATH = ROOT / ".github" / "workflows" / "adonai-trade-quality.yml"
 MIGRATION_1 = ROOT / "supabase" / "migrations" / "20261017145301_adonai_trade_excellence_backlog_and_evidence.sql"
 MIGRATION_2 = ROOT / "supabase" / "migrations" / "20261017150214_adonai_trade_excellence_integrity_guards.sql"
 MIGRATION_3 = ROOT / "supabase" / "migrations" / "20261017150842_adonai_trade_verified_requires_technical_evidence.sql"
@@ -25,6 +27,8 @@ class ExcellenceBacklogTests(unittest.TestCase):
         cls.backlog = json.loads(BACKLOG_PATH.read_text(encoding="utf-8"))
         cls.board = BOARD_PATH.read_text(encoding="utf-8")
         cls.schema = SCHEMA_PATH.read_text(encoding="utf-8")
+        cls.arch_review = ARCH_REVIEW_PATH.read_text(encoding="utf-8")
+        cls.workflow = WORKFLOW_PATH.read_text(encoding="utf-8")
         cls.arch_review = ARCH_REVIEW_PATH.read_text(encoding="utf-8")
         cls.workflow = WORKFLOW_PATH.read_text(encoding="utf-8")
 
@@ -66,6 +70,14 @@ class ExcellenceBacklogTests(unittest.TestCase):
         self.assertIn("ALTA", self.arch_review)
         self.assertIn("TradingAgents", self.arch_review)
         self.assertIn("paper-only", self.arch_review)
+        self.assertIn("11bd71901bbe5b1630ceea73d27597364c9af683", self.workflow)
+        self.assertIn("42375524e23c412d93fb67b49958b491fce71c38", self.workflow)
+
+    def test_open_source_review_and_supply_chain_pinning(self):
+        self.assertIn("OpenTradex", self.arch_review)
+        self.assertIn("ALTA", self.arch_review)
+        self.assertIn("TradingAgents", self.arch_review)
+        self.assertIn("Paper-only", self.arch_review)
         self.assertIn("11bd71901bbe5b1630ceea73d27597364c9af683", self.workflow)
         self.assertIn("42375524e23c412d93fb67b49958b491fce71c38", self.workflow)
 
