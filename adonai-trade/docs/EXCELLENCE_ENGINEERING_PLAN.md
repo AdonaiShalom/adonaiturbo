@@ -192,7 +192,8 @@ A conexão do GitHub permite trabalhar no repositório e no branch; a conexão d
 ## 10. Engenharia do registro de backlog/evidências (implementado no Supabase)
 
 O schema `adonai_trade` agora inclui `excellence_work_items` e `excellence_evidence`, versionadas por migration. As tabelas novas usam RLS, sem leitura para `anon` ou `authenticated`, e acesso de serviço explícito. A segunda migration adiciona:
-- `updated_at` automático e bloqueio de estado `verified` sem evidência revisada com referência;
+- `updated_at` automático e bloqueio de estado `verified` sem evidência técnica revisada com referência;
+- constraint `NOT VALID` que bloqueia novas evidências documentais marcadas como verificadas, preservando dois registros históricos legados sem reescrita;
 - evidências append-only para operações normais, sem UPDATE/DELETE concedido a `service_role`;
 - testes pgTAP em `supabase/tests/adonai_trade_excellence_integrity.test.sql`.
 
