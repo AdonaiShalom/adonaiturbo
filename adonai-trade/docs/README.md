@@ -10,6 +10,10 @@ Este diretório documenta o módulo Adonai Trade dentro do repositório. O READM
 - [Contrato do registro de excelência](./EXCELLENCE_SCHEMA_CONTRACT.md) — modelo de dados, permissões e invariantes.
 - [Gates de liberação](./EXCELLENCE_RELEASE_GATES.md) — condições obrigatórias de segurança, integração, testes e release.
 
+## Verificações automáticas
+
+O workflow `.github/workflows/adonai-trade-quality.yml` executa `tests/test_excellence_backlog.py` em pull requests e no branch de trabalho. O pgTAP de banco é separado e deve ser executado num banco descartável com pgTAP instalado.
+
 ## Fonte da verdade
 
 - **Código executável:** commit revisado do runtime real do Trade, quando publicado após inspeção do pacote local.
