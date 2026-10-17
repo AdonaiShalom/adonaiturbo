@@ -63,9 +63,13 @@ class ExcellenceBacklogTests(unittest.TestCase):
                 self.assertTrue(path.is_file(), f"Missing versioned artifact: {path}")
         sql_1 = MIGRATION_1.read_text(encoding="utf-8").lower()
         sql_2 = MIGRATION_2.read_text(encoding="utf-8").lower()
+        sql_3 = MIGRATION_3.read_text(encoding="utf-8").lower()
+        sql_4 = MIGRATION_4.read_text(encoding="utf-8").lower()
         pgtap = PGTAP_PATH.read_text(encoding="utf-8").lower()
         self.assertIn("enable row level security", sql_1)
         self.assertIn("append-only", sql_2)
+        self.assertIn("technical/test evidence", sql_3)
+        self.assertIn("not valid", sql_4)
         self.assertIn("plan(14)", pgtap)
         self.assertIn("throws_ok", pgtap)
 
