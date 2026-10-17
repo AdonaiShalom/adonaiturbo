@@ -8,6 +8,7 @@ Este diretório documenta o módulo Adonai Trade dentro do repositório. O READM
 - [Backlog legível por máquina](./EXCELLENCE_BACKLOG.json) — IDs estáveis AT-001..AT-012 e critérios por item.
 - [Quadro de execução](./EXCELLENCE_EXECUTION_BOARD.md) — visão humana do backlog; o estado operacional é lido do Supabase.
 - [Contrato do registro de excelência](./EXCELLENCE_SCHEMA_CONTRACT.md) — modelo de dados, permissões e invariantes.
+- [Gates de liberação](./EXCELLENCE_RELEASE_GATES.md) — condições obrigatórias de segurança, integração, testes e release.
 
 ## Fonte da verdade
 
