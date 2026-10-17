@@ -187,3 +187,13 @@ A conexão do GitHub permite trabalhar no repositório e no branch; a conexão d
 - [ ] Backtest fora da amostra e paper trading reproduzíveis.
 - [ ] CI verde, documentação, SBOM, release hash, backup e rollback.
 - [ ] Nenhuma ordem real habilitada sem processo de autorização separado e explícito.
+
+
+## 10. Engenharia do registro de backlog/evidências (implementado no Supabase)
+
+O schema `adonai_trade` agora inclui `excellence_work_items` e `excellence_evidence`, versionadas por migration. As tabelas novas usam RLS, sem leitura para `anon` ou `authenticated`, e acesso de serviço explícito. A segunda migration adiciona:
+- `updated_at` automático e bloqueio de estado `verified` sem evidência revisada com referência;
+- evidências append-only para operações normais, sem UPDATE/DELETE concedido a `service_role`;
+- testes pgTAP em `supabase/tests/adonai_trade_excellence_integrity.test.sql`.
+
+Verificação direta no projeto conectado confirmou: ambas as tabelas existem, RLS está ativo, triggers estão instalados, `anon/authenticated` não podem ler o backlog, `service_role` pode ler tarefas e não pode atualizar/apagar evidências. O teste pgTAP foi adicionado ao repositório, mas ainda precisa ser executado em ambiente descartável/CI para ser considerado teste automatizado aprovado. As políticas e grants existentes em outras tabelas não foram alterados.
