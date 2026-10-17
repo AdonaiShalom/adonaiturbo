@@ -1,0 +1,211 @@
+{
+  "schema_version": "1.1.0",
+  "project": "Adonai Trade",
+  "status_semantics": {
+    "planned": "Ainda não iniciado ou aguardando dependências",
+    "in_progress": "Trabalho iniciado, ainda sem critério de aceite completo",
+    "blocked": "Dependência ou risco impede conclusão",
+    "verified": "Critérios de aceite cumpridos com evidência revisada",
+    "deferred": "Adiado explicitamente com justificativa"
+  },
+  "guardrails": {
+    "execution_mode": "paper",
+    "live_orders_enabled": false,
+    "merge_to_main_without_review": false,
+    "supabase_rls_must_remain_enabled": true,
+    "integration_status_must_reflect_observed_tests": true
+  },
+  "work_items": [
+    {
+      "id": "AT-001",
+      "priority": "P0",
+      "component": "audit",
+      "status": "blocked",
+      "title": "Diagnosticar cadeia de auditoria",
+      "acceptance": [
+        "reprodução isolada",
+        "causa-raiz documentada",
+        "testes de cadeia íntegra e adulteração",
+        "retry/replay/concorrência testados",
+        "dados originais preservados"
+      ],
+      "supabase_key": "AT-001",
+      "evidence_required": true
+    },
+    {
+      "id": "AT-002",
+      "priority": "P0",
+      "component": "security",
+      "status": "in_progress",
+      "title": "Revisar RLS, grants e schemas expostos",
+      "acceptance": [
+        "inventário de privilégios",
+        "políticas justificadas",
+        "testes anon/authenticated/service_role",
+        "revisão SECURITY DEFINER"
+      ],
+      "supabase_key": "AT-002",
+      "evidence_required": true
+    },
+    {
+      "id": "AT-003",
+      "priority": "P1",
+      "component": "core",
+      "status": "blocked",
+      "title": "Validar runtime e contrato HTTP do Trade",
+      "acceptance": [
+        "fonte executável revisada",
+        "health/readiness e contrato testados",
+        "timeout falha fechado",
+        "paper não chama corretora"
+      ],
+      "supabase_key": "AT-003",
+      "evidence_required": true
+    },
+    {
+      "id": "AT-004",
+      "priority": "P1",
+      "component": "levi",
+      "status": "blocked",
+      "title": "Comprovar integração LEVI ponta a ponta",
+      "acceptance": [
+        "correlation_id preservado",
+        "persistência auditável",
+        "falha não gera ordem",
+        "evidência temporal"
+      ],
+      "supabase_key": "AT-004",
+      "evidence_required": true
+    },
+    {
+      "id": "AT-005",
+      "priority": "P1",
+      "component": "eu_sou",
+      "status": "blocked",
+      "title": "Comprovar EU SOU e persistência científica",
+      "acceptance": [
+        "contrato e autenticação",
+        "execução registrada",
+        "fonte/modelo/benchmark versionados",
+        "resultado reproduzível"
+      ],
+      "supabase_key": "AT-005",
+      "evidence_required": true
+    },
+    {
+      "id": "AT-006",
+      "priority": "P2",
+      "component": "crypto",
+      "status": "planned",
+      "title": "Validar mesa cripto",
+      "acceptance": [
+        "fixtures offline",
+        "precisão e taxas",
+        "feed freshness",
+        "paper-only comprovado"
+      ],
+      "supabase_key": "AT-006",
+      "evidence_required": true
+    },
+    {
+      "id": "AT-007",
+      "priority": "P2",
+      "component": "forex",
+      "status": "planned",
+      "title": "Validar mesa Forex",
+      "acceptance": [
+        "bid/ask e spread",
+        "pip/lot e conversão",
+        "sessões/feriados/rollover",
+        "falhas bloqueadas"
+      ],
+      "supabase_key": "AT-007",
+      "evidence_required": true
+    },
+    {
+      "id": "AT-008",
+      "priority": "P2",
+      "component": "b3",
+      "status": "planned",
+      "title": "Validar mesa B3/nacional",
+      "acceptance": [
+        "fixtures versionadas",
+        "calendário e ajustes",
+        "proveniência/licença",
+        "atraso detectado"
+      ],
+      "supabase_key": "AT-008",
+      "evidence_required": true
+    },
+    {
+      "id": "AT-009",
+      "priority": "P2",
+      "component": "international",
+      "status": "planned",
+      "title": "Validar mesa internacional",
+      "acceptance": [
+        "UTC e moedas",
+        "calendários por bolsa",
+        "corporate actions",
+        "divergências de provedores"
+      ],
+      "supabase_key": "AT-009",
+      "evidence_required": true
+    },
+    {
+      "id": "AT-010",
+      "priority": "P3",
+      "component": "core",
+      "status": "planned",
+      "title": "Backtest reproduzível",
+      "acceptance": [
+        "sem look-ahead",
+        "custos/slippage",
+        "baseline",
+        "out-of-sample e walk-forward",
+        "métricas de drawdown"
+      ],
+      "supabase_key": "AT-010",
+      "evidence_required": true
+    },
+    {
+      "id": "AT-011",
+      "priority": "P4",
+      "component": "rh",
+      "status": "planned",
+      "title": "Governança e evidências do RH",
+      "acceptance": [
+        "papéis e donos",
+        "qualificação",
+        "histórico de aprendizado",
+        "sem promoção sem evidência"
+      ],
+      "supabase_key": "AT-011",
+      "evidence_required": true
+    },
+    {
+      "id": "AT-012",
+      "priority": "P4",
+      "component": "delivery",
+      "status": "planned",
+      "title": "Release candidate reproduzível",
+      "acceptance": [
+        "CI verde",
+        "varredura de segredos",
+        "SBOM/dependências",
+        "backup e rollback",
+        "hash do artefato"
+      ],
+      "supabase_key": "AT-012",
+      "evidence_required": true
+    }
+  ],
+  "evidence_policy": "Nunca marcar item verified nem integração active sem evidência reproduzível vinculada ao commit/artefato e timestamp.",
+  "links": {
+    "engineering_plan": "adonai-trade/docs/EXCELLENCE_ENGINEERING_PLAN.md",
+    "supabase_schema": "adonai_trade.excellence_work_items",
+    "supabase_evidence": "adonai_trade.excellence_evidence"
+  },
+  "last_reviewed": "2026-10-17",
+  "source_of_truth": "Supabase adonai_trade.excellence_work_items; GitHub file is the reviewed planning mirror."
+}
