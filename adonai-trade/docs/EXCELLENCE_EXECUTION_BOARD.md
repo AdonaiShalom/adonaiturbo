@@ -39,6 +39,12 @@ O GitHub contém documentação e contratos iniciais, mas a branch `main` consul
 7. Não misturar Turbo (3000), Trade (3100) e PSM (3001).
 8. Não mesclar ou implantar sem revisão humana e gates verdes.
 
+## Migrações e guardas adicionais
+
+- `20261017150842_adonai_trade_verified_requires_technical_evidence.sql` exige evidência técnica revisada antes de `verified`.
+- `20261017150927_adonai_trade_verified_evidence_type.sql` impede novas evidências documentais de serem marcadas como verificadas. A constraint é `NOT VALID` para preservar registros históricos existentes; novas gravações são verificadas. Os dois registros históricos documentais permanecem identificados como legado e não são prova de conclusão.
+- O teste de regressão pgTAP cobre o bloqueio de evidência documental e a trilha append-only.
+
 ## Próxima sequência
 
 1. Inspecionar ZIP/fonte executável e gerar inventário + hashes + scan de segredos.
