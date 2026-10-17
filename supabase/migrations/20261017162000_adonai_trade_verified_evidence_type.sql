@@ -10,7 +10,7 @@ alter table adonai_trade.excellence_evidence
       and source_reference is not null
       and pg_catalog.btrim(source_reference) <> ''
     )
-  );
+  ) not valid;
 
 comment on constraint excellence_evidence_verified_type_check
   on adonai_trade.excellence_evidence is
