@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://adonai.example/schemas/trade-task-envelope.v1.json",
+  "title": "Adonai Trade Task Envelope v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "correlation_id",
+    "task_id",
+    "requested_by",
+    "market",
+    "task_type",
+    "mode",
+    "created_at",
+    "payload"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "correlation_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "task_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "requested_by": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "market": {
+      "enum": [
+        "B3",
+        "INTERNATIONAL",
+        "CRYPTO",
+        "FOREX"
+      ]
+    },
+    "task_type": {
+      "enum": [
+        "market_research",
+        "analyze_instrument",
+        "paper_order_proposal",
+        "portfolio_risk_check",
+        "news_digest",
+        "health_check"
+      ]
+    },
+    "mode": {
+      "const": "paper"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "payload": {
+      "type": "object"
+    },
+    "data_context": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "provider": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "observed_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "license_reference": {
+          "type": "string",
+          "maxLength": 512
+        },
+        "data_quality": {
+          "enum": [
+            "verified",
+            "partial",
+            "stale",
+            "invalid",
+            "unknown"
+          ]
+        }
+      }
+    },
+    "scientific_context": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "method": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "baseline": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "uncertainty": {
+          "type": "string",
+          "maxLength": 1024
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 512
+          },
+          "maxItems": 30
+        }
+      }
+    }
+  }
+}
