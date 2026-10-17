@@ -1,0 +1,31 @@
+name: Adonai Trade contract checks
+
+on:
+  pull_request:
+    paths:
+      - 'adonai-trade/contracts/v1/**'
+      - '.github/workflows/adonai-trade-contract.yml'
+  push:
+    branches:
+      - 'work/adonai-trade-runtime-contracts-20261017'
+    paths:
+      - 'adonai-trade/contracts/v1/**'
+      - '.github/workflows/adonai-trade-contract.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  contract-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Validate JSON schema syntax
+        run: node -e "JSON.parse(require('node:fs').readFileSync('adonai-trade/contracts/v1/task-envelope.v1.schema.json','utf8')); console.log('Schema JSON valid')"
+      - name: Run contract safety tests
+        run: node adonai-trade/contracts/v1/test-contract.cjs
