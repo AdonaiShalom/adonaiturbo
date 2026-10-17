@@ -17,22 +17,23 @@ select ok(exists(select 1 from pg_trigger where tgname='excellence_evidence_appe
 
 -- Behavior tests execute in this transaction and are rolled back at the end.
 select throws_ok(
-  $update adonai_trade.excellence_work_items set status='verified' where work_key='AT-006'$,
+  $$update adonai_trade.excellence_work_items set status='verified' where work_key='AT-006'$$,
   '23514', null,
   'cannot verify a work item without reviewed technical evidence'
 );
 
 select throws_ok(
-  $insert into adonai_trade.excellence_evidence (work_item_id,evidence_type,source_reference,summary,verified)
+  $$insert into adonai_trade.excellence_evidence (work_item_id,evidence_type,source_reference,summary,verified)
     select id,'document','test://document-only','documentary evidence cannot verify task',true
-    from adonai_trade.excellence_work_items where work_key='AT-006'$,
+    from adonai_trade.excellence_work_items where work_key='AT-006'$$,
   '23514', null,
   'document-only evidence cannot be marked verified'
 );
+
 select throws_ok(
-  $update adonai_trade.excellence_evidence
+  $$update adonai_trade.excellence_evidence
     set summary=summary
-    where id=(select id from adonai_trade.excellence_evidence order by recorded_at limit 1)$,
+    where id=(select id from adonai_trade.excellence_evidence order by recorded_at limit 1)$$,
   '55000', null,
   'evidence history is append-only'
 );
