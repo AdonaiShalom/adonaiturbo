@@ -9,6 +9,7 @@ Este diretório documenta o módulo Adonai Trade dentro do repositório. O READM
 - [Quadro de execução](./EXCELLENCE_EXECUTION_BOARD.md) — visão humana do backlog; o estado operacional é lido do Supabase.
 - [Contrato do registro de excelência](./EXCELLENCE_SCHEMA_CONTRACT.md) — modelo de dados, permissões e invariantes.
 - [Gates de liberação](./EXCELLENCE_RELEASE_GATES.md) — condições obrigatórias de segurança, integração, testes e release.
+- [Revisão de engenharia reversa](./OPEN_SOURCE_ENGINEERING_REVIEW.md) — padrões públicos analisados e plano de adaptação sem cópia de código.
 
 ## Verificações automáticas
 
