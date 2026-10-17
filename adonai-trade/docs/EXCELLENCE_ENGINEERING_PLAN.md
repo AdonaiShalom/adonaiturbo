@@ -1,7 +1,7 @@
 # Adonai Trade — Plano de engenharia reversa e excelência
 
 **Data da auditoria:** 2026-10-17  
-**Branch:** `work/adonai-trade-excellence-roadmap-20261017`  
+**Branch:** `docs/adonai-trade-excellence-20261017`  
 **Estado deste artefato:** plano versionado para execução incremental; não é certificação nem prova de integração ponta a ponta.  
 **Regra de segurança:** paper trading apenas. Nenhuma chave de corretora, ordem real ou alteração de schema Supabase é autorizada por este documento.
 
