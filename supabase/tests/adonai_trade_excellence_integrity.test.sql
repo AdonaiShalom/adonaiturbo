@@ -1,7 +1,7 @@
 -- pgTAP regression tests for Adonai Trade excellence registry.
 -- Run in a disposable Supabase test database after applying migrations.
 begin;
-select plan(13);
+select plan(14);
 
 select has_table('adonai_trade', 'excellence_work_items', 'work-item registry exists');
 select has_table('adonai_trade', 'excellence_evidence', 'evidence registry exists');
@@ -17,9 +17,17 @@ select ok(exists(select 1 from pg_trigger where tgname='excellence_evidence_appe
 
 -- Behavior tests execute in this transaction and are rolled back at the end.
 select throws_ok(
-  $$update adonai_trade.excellence_work_items set status='verified' where work_key='AT-006'$$,
+  $update adonai_trade.excellence_work_items set status='verified' where work_key='AT-006'$,
   '23514', null,
-  'cannot verify a work item without verified evidence'
+  'cannot verify a work item without reviewed technical evidence'
+);
+
+select throws_ok(
+  $insert into adonai_trade.excellence_evidence (work_item_id,evidence_type,source_reference,summary,verified)
+    select id,'document','test://document-only','documentary evidence cannot verify task',true
+    from adonai_trade.excellence_work_items where work_key='AT-006'$,
+  '23514', null,
+  'document-only evidence cannot be marked verified'
 );
 select throws_ok(
   $update adonai_trade.excellence_evidence
