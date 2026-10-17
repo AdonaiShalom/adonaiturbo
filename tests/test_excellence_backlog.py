@@ -1,5 +1,4 @@
 import json
-import re
 import unittest
 from pathlib import Path
 
@@ -9,6 +8,8 @@ BOARD_PATH = ROOT / "adonai-trade" / "docs" / "EXCELLENCE_EXECUTION_BOARD.md"
 SCHEMA_PATH = ROOT / "adonai-trade" / "docs" / "EXCELLENCE_SCHEMA_CONTRACT.md"
 MIGRATION_1 = ROOT / "supabase" / "migrations" / "20261017145301_adonai_trade_excellence_backlog_and_evidence.sql"
 MIGRATION_2 = ROOT / "supabase" / "migrations" / "20261017150214_adonai_trade_excellence_integrity_guards.sql"
+MIGRATION_3 = ROOT / "supabase" / "migrations" / "20261017150842_adonai_trade_verified_requires_technical_evidence.sql"
+MIGRATION_4 = ROOT / "supabase" / "migrations" / "20261017150927_adonai_trade_verified_evidence_type.sql"
 PGTAP_PATH = ROOT / "supabase" / "tests" / "adonai_trade_excellence_integrity.test.sql"
 
 EXPECTED_IDS = [f"AT-{number:03d}" for number in range(1, 13)]
@@ -57,7 +58,7 @@ class ExcellenceBacklogTests(unittest.TestCase):
         self.assertIn("excellence_evidence", self.schema)
 
     def test_migrations_and_regression_test_exist(self):
-        for path in (MIGRATION_1, MIGRATION_2, PGTAP_PATH):
+        for path in (MIGRATION_1, MIGRATION_2, MIGRATION_3, MIGRATION_4, PGTAP_PATH):
             with self.subTest(path=path.name):
                 self.assertTrue(path.is_file(), f"Missing versioned artifact: {path}")
         sql_1 = MIGRATION_1.read_text(encoding="utf-8").lower()
@@ -65,7 +66,7 @@ class ExcellenceBacklogTests(unittest.TestCase):
         pgtap = PGTAP_PATH.read_text(encoding="utf-8").lower()
         self.assertIn("enable row level security", sql_1)
         self.assertIn("append-only", sql_2)
-        self.assertIn("plan(13)", pgtap)
+        self.assertIn("plan(14)", pgtap)
         self.assertIn("throws_ok", pgtap)
 
 
