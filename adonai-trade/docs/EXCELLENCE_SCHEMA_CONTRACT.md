@@ -38,6 +38,8 @@
 
 - `supabase/migrations/20261017145301_adonai_trade_excellence_backlog_and_evidence.sql`
 - `supabase/migrations/20261017150214_adonai_trade_excellence_integrity_guards.sql`
+- `supabase/migrations/20261017150842_adonai_trade_verified_requires_technical_evidence.sql`
+- `supabase/migrations/20261017150927_adonai_trade_verified_evidence_type.sql`
 - `supabase/tests/adonai_trade_excellence_integrity.test.sql`
 
-A migration de schema e a migration de guards foram aplicadas ao projeto Supabase conectado e verificadas por consultas de catálogo. O teste pgTAP está versionado; a execução automatizada em CI ainda está pendente. Não reaplicar migrations manualmente em produção sem verificar a tabela de histórico e o diff de schema.
+As quatro migrations foram aplicadas ao projeto Supabase conectado e aparecem no histórico. A última constraint está `NOT VALID` para preservar duas evidências documentais históricas marcadas como verificadas; ela bloqueia novas evidências documentais verificadas. Testes transacionais diretos confirmaram o bloqueio de novos registros documentais e de conclusão sem evidência técnica. O workflow Python de consistência do backlog passou; pgTAP permanece pendente de execução num banco descartável com pgTAP instalado. Não reaplicar migrations manualmente em produção sem verificar a tabela de histórico e o diff de schema.
