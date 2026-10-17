@@ -4,12 +4,14 @@ on:
   pull_request:
     paths:
       - 'adonai-trade/contracts/v1/**'
+      - 'adonai-trade/runtime/**'
       - '.github/workflows/adonai-trade-contract.yml'
   push:
     branches:
       - 'work/adonai-trade-runtime-contracts-20261017'
     paths:
       - 'adonai-trade/contracts/v1/**'
+      - 'adonai-trade/runtime/**'
       - '.github/workflows/adonai-trade-contract.yml'
 
 permissions:
@@ -29,3 +31,5 @@ jobs:
         run: node -e "JSON.parse(require('node:fs').readFileSync('adonai-trade/contracts/v1/task-envelope.v1.schema.json','utf8')); console.log('Schema JSON valid')"
       - name: Run contract safety tests
         run: node adonai-trade/contracts/v1/test-contract.cjs
+      - name: Run deterministic policy gate tests
+        run: node adonai-trade/contracts/v1/test-policy-gate.cjs
