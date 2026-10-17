@@ -26,7 +26,7 @@
 
 ## Invariantes
 
-1. Uma tarefa não pode passar a `verified` sem evidência marcada `verified=true` com referência de origem.
+1. Uma tarefa não pode passar a `verified` sem evidência marcada `verified=true`, com referência de origem e tipo técnico (`automated_test`, `manual_test`, `security_review`, `benchmark` ou `deployment_check`). Evidência apenas documental não basta.
 2. Evidências são append-only para operações normais; correções devem gerar novo registro, sem reescrever histórico.
 3. `anon` e `authenticated` não têm leitura direta dessas tabelas.
 4. `service_role` tem acesso operacional explícito ao backlog; para evidências, pode ler/inserir, não atualizar/apagar.
