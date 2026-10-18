@@ -45,4 +45,57 @@ on conflict (role_key) do update set label=excluded.label,purpose=excluded.purpo
 comment on table adonai_trade.rh_roles is 'Catalogo de funcoes RH; activity_status not_reported nao significa agente ativo.';
 comment on table adonai_trade.rh_tasks is 'Tarefas RH reais; cada registro representa trabalho persistido e rastreavel.';
 
+
+create or replace function adonai_trade.rh_create_task_with_audit(
+  p_task_key text, p_title text, p_role_key text, p_market text default null, p_evidence jsonb default '{}'::jsonb
+) returns jsonb
+language plpgsql security definer
+set search_path = adonai_trade, public
+as $
+declare v_task adonai_trade.rh_tasks;
+begin
+  if length(trim(p_task_key)) < 3 or length(p_task_key) > 80 then raise exception 'invalid_task_key'; end if;
+  if length(trim(p_title)) < 3 or length(p_title) > 240 then raise exception 'invalid_task_title'; end if;
+  if p_market is not null and p_market not in ('CRYPTO','FOREX','B3','INTERNATIONAL') then raise exception 'invalid_market'; end if;
+  insert into adonai_trade.rh_tasks(task_key,title,role_key,market,status,evidence)
+  values(trim(p_task_key),trim(p_title),p_role_key,p_market,'queued',coalesce(p_evidence,'{}'::jsonb))
+  returning * into v_task;
+  insert into adonai_trade.runtime_audit_events(event_id,created_at,service,service_version,task_id,market,decision,reason_codes,details)
+  values(gen_random_uuid(),now(),'adonai-trade','0.1.0',v_task.task_id,v_task.market,'rh_task_created',
+    jsonb_build_array('task_persisted','paper_only'),
+    jsonb_build_object('task_key',v_task.task_key,'role_key',v_task.role_key,'status',v_task.status,'execution_performed',false));
+  return to_jsonb(v_task);
+end;
+$;
+
+create or replace function adonai_trade.rh_update_task_status_with_audit(
+  p_task_id uuid, p_status text, p_evidence jsonb default null
+) returns jsonb
+language plpgsql security definer
+set search_path = adonai_trade, public
+as $
+declare v_task adonai_trade.rh_tasks;
+begin
+  if p_status not in ('queued','in_progress','blocked','review','completed','cancelled') then raise exception 'invalid_task_status'; end if;
+  update adonai_trade.rh_tasks
+    set status=p_status,
+        evidence=case when p_evidence is null then evidence else evidence || p_evidence end,
+        updated_at=now(),
+        completed_at=case when p_status='completed' then now() when p_status in ('queued','in_progress','blocked','review') then null else completed_at end
+    where task_id=p_task_id
+    returning * into v_task;
+  if not found then raise exception 'task_not_found'; end if;
+  insert into adonai_trade.runtime_audit_events(event_id,created_at,service,service_version,task_id,market,decision,reason_codes,details)
+  values(gen_random_uuid(),now(),'adonai-trade','0.1.0',v_task.task_id,v_task.market,'rh_task_status_updated',
+    jsonb_build_array('task_status_persisted','paper_only'),
+    jsonb_build_object('task_key',v_task.task_key,'role_key',v_task.role_key,'status',v_task.status,'execution_performed',false));
+  return to_jsonb(v_task);
+end;
+$;
+
+revoke all on function adonai_trade.rh_create_task_with_audit(text,text,text,text,jsonb) from public, anon, authenticated;
+revoke all on function adonai_trade.rh_update_task_status_with_audit(uuid,text,jsonb) from public, anon, authenticated;
+grant execute on function adonai_trade.rh_create_task_with_audit(text,text,text,text,jsonb) to service_role;
+grant execute on function adonai_trade.rh_update_task_status_with_audit(uuid,text,jsonb) to service_role;
+
 commit;
