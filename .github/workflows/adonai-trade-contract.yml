@@ -14,6 +14,9 @@ on:
     paths:
       - 'adonai-trade/contracts/v1/**'
       - 'adonai-trade/runtime/**'
+      - 'adonai-trade/supabase/**'
+      - 'adonai-trade/package.json'
+      - 'adonai-trade/README.md'
       - '.github/workflows/adonai-trade-contract.yml'
 
 permissions:
