@@ -32,3 +32,8 @@ Sem ledger disponível, `/ready` permanece em HTTP 503 e a avaliação falha fec
 ### Descoberta das quatro mesas
 
 `GET /api/v1/markets` lista Cripto, Forex, B3 e Internacional. Até que provedores sejam configurados e testados, cada mesa informa `quote_status: unavailable`, `provider_configured: false` e `execution_enabled: false`. Isso é um catálogo de capacidades, não um feed de cotações.
+
+
+### Estado explícito das integrações LEVI e EU SOU
+
+`GET /api/v1/integrations` expõe endpoints de configuração para LEVI e EU SOU, mas não os chama nem afirma conectividade. Configure `LEVI_ENDPOINT` e `EU_SOU_ENDPOINT` apenas no ambiente do servidor. Até um teste autenticado ponta a ponta, o status permanece `not_verified`; nenhuma integração habilita execução.
