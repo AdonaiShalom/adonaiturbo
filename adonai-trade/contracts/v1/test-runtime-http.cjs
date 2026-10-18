@@ -1,9 +1,17 @@
 'use strict';
 const assert = require('node:assert/strict');
 const { createServer } = require('../../runtime/server.cjs');
-(async () => {
+async function main() {
   const nowMs = Date.parse('2026-10-17T12:00:00.000Z');
-  const server = createServer({ now: () => nowMs });
+  let persisted = [];
+  const auditLedger = {
+    async check() { return true; },
+    async append(event) {
+      persisted.push(event);
+      return { persisted: true, event_id: '00000000-0000-4000-8000-000000000001' };
+    }
+  };
+  const server = createServer({ now: () => nowMs, auditLedger });
   await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
   const base = 'http://127.0.0.1:' + server.address().port;
   try {
@@ -11,8 +19,8 @@ const { createServer } = require('../../runtime/server.cjs');
     assert.equal(health.status, 200);
     assert.equal((await health.json()).mode, 'paper');
     const ready = await fetch(base + '/ready');
-    assert.equal(ready.status, 503);
-    assert.ok((await ready.json()).reason_codes.includes('audit_persistence_not_configured'));
+    assert.equal(ready.status, 200);
+    assert.equal((await ready.json()).status, 'ready');
     assert.equal((await fetch(base + '/does-not-exist')).status, 404);
     const badJson = await fetch(base + '/api/v1/policy/evaluate', { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{' });
     assert.equal(badJson.status, 400);
@@ -20,10 +28,29 @@ const { createServer } = require('../../runtime/server.cjs');
     assert.equal(blocked.status, 422);
     const body = await blocked.json();
     assert.equal(body.execution_performed, false);
-    assert.equal(body.audit_persisted, false);
+    assert.equal(body.audit_persisted, true);
     assert.equal(body.decision.decision, 'blocked');
-    console.log('PASS: runtime HTTP health, fail-closed readiness, 404, malformed JSON, and no-execution policy response');
+    assert.equal(persisted.length, 1);
+    console.log('PASS: runtime HTTP readiness, audit success, 404, malformed JSON, and no-execution policy response');
   } finally {
     await new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
   }
-})().catch((error) => { process.stderr.write(String(error.stack || error) + '\n'); process.exitCode = 1; });
+
+  const failing = createServer({ now: () => nowMs, auditLedger: { async check() { throw new Error('offline'); }, async append() { throw new Error('offline'); } } });
+  await new Promise((resolve) => failing.listen(0, '127.0.0.1', resolve));
+  const failedBase = 'http://127.0.0.1:' + failing.address().port;
+  try {
+    const ready = await fetch(failedBase + '/ready');
+    assert.equal(ready.status, 503);
+    const response = await fetch(failedBase + '/api/v1/policy/evaluate', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ envelope: { mode: 'live' } }) });
+    assert.equal(response.status, 503);
+    const body = await response.json();
+    assert.equal(body.audit_persisted, false);
+    assert.equal(body.execution_performed, false);
+    assert.ok(body.reason_codes.includes('audit_persistence_failed'));
+    console.log('PASS: runtime fails closed when durable audit is unavailable');
+  } finally {
+    await new Promise((resolve, reject) => failing.close((error) => error ? reject(error) : resolve()));
+  }
+}
+main().catch((error) => { process.stderr.write(String(error.stack || error) + '\n'); process.exitCode = 1; });
