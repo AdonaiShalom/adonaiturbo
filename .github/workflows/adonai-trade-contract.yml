@@ -66,6 +66,8 @@ jobs:
         run: node adonai-trade/contracts/v1/test-runtime-http-fixed.cjs
       - name: Run read-only market adapter regressions
         run: node adonai-trade/contracts/v1/test-market-adapters.cjs
+      - name: Run original 3D prototype runtime bridge contract
+        run: node adonai-trade/contracts/v1/test-runtime-bridge.cjs
 
   windows-powershell-runtime:
     runs-on: windows-latest
