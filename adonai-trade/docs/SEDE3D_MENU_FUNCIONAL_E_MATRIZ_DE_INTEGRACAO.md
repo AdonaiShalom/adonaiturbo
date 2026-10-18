@@ -48,7 +48,7 @@ Em todas as mesas: respostas `verified / stale / unverified / unavailable`; nunc
 
 ### 4. Gráficos e fontes externas
 - **TradingView:** gráfico/widget oficial por símbolo e mercado, com atribuição e configuração de símbolo; distinguir visualização do gráfico de fonte de dados autorizada para cálculo/execução. Não raspar nem contornar acesso pago.
-- **Investing.com:** acesso ao calendário econômico e páginas/recursos permitidos pelo fornecedor. A incorporação deve respeitar widgets oficiais, termos e licenciamento; se não houver widget autorizado, abrir a fonte em nova aba e registrar a referência.
+- **Investing.com:** acesso ao calendário econômico e páginas/recursos permitidos pelo fornecedor. A incorporação deve respeitar widgets oficiais, termos e licenciamento; o painel aponta para o [calendário econômico](https://www.investing.com/economic-calendar/) e para o [gerador oficial do widget](https://br.investing.com/webmaster-tools/economic-calendar). O widget só deve ser incorporado depois que o proprietário aceitar os termos e gerar o código oficial; se não houver widget autorizado, abrir a fonte em nova aba e registrar a referência.
 - **Fear & Greed (GREED):** tratar como indicador de sentimento separado, com provedor, timestamp, escala, fonte e estado de verificação. Não usar índice de sentimento como probabilidade de lucro ou sinal automático. Se a fonte estiver ausente, mostrar “não conectado”.
 - Cada fonte deve ter status de conexão, última atualização, limitações e link para a origem. O fato de o menu exibir o nome da fonte não prova integração.
 
