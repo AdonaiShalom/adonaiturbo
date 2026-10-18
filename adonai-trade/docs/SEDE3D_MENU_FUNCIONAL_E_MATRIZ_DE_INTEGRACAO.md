@@ -165,9 +165,20 @@ Em todas as mesas: respostas `verified / stale / unverified / unavailable`; nunc
 - CI verde no run [39151228085](https://github.com/AdonaiShalom/adonaiturbo/actions/runs/39151228085): `contract-tests` e `windows-powershell-runtime` passaram, incluindo o contrato do menu e a verificação isolada em PowerShell 5.1.
 - Essa validação reduz o risco de mostrar preço inválido como real; não prova cotação live, credenciais do provedor ou instalação do HTML original no Turbo.
 
+### Watchlists instrumentais nas quatro mesas
+
+- A interface das mesas agora oferece seleção de instrumento por lista inicial:
+  - Cripto: BTCUSDT, ETHUSDT, BNBUSDT, SOLUSDT, XRPUSDT.
+  - Forex: EURUSD, GBPUSD, USDJPY, AUDUSD, USDCAD, USDCHF, NZDUSD.
+  - B3: PETR4, VALE3, ITUB4, BBDC4, BBAS3, B3SA3, WEGE3.
+  - Internacional: AAPL, MSFT, NVDA, AMZN, GOOGL, META, TSLA.
+- A consulta usa o símbolo selecionado, preservando o contrato de leitura e os gates de cotação verificada. A lista não afirma que todos os símbolos estejam cobertos pelo plano/credenciais do provedor; cada consulta ainda pode resultar em `unavailable`, `stale` ou `unverified`.
+- Contrato de menu passou no CI [39151566175](https://github.com/AdonaiShalom/adonaiturbo/actions/runs/39151566175). No último ponto de verificação, o job Windows PowerShell 5.1 ainda estava em andamento.
+- A sede visual original e a aba do Turbo continuam sem instalação comprovada.
+
 ### Percentual oficial nesta atualização
 
-**36% concluído / 64% restante.** Avanço de 1 ponto pela proteção de exibição de cotações: a interface não apresenta `null`, vazio, zero ou valor não numérico como preço verificado; o contrato do menu e a verificação Windows PowerShell 5.1 passaram no CI. A ponte com timeout explícito e o instalador reversível já possuem testes aprovados. Isso fortalece a integração segura, mas não equivale à instalação visual nem comprova cotações live. O HTML original ainda não foi modificado, e o proxy autenticado do Turbo e as integrações LEVI/EU SOU ponta a ponta seguem pendentes.
+**37% concluído / 63% restante.** Avanço de 1 ponto pela inclusão de listas de instrumentos selecionáveis nas quatro mesas e consultas de cotação baseadas no símbolo escolhido. O contrato do menu passou no CI; a verificação Windows PowerShell 5.1 da execução mais recente ainda está pendente. A proteção contra preços inválidos, a ponte com timeout e o instalador reversível têm testes anteriores aprovados. Isso melhora a funcionalidade do menu, mas não comprova cotações live nem instalação visual. O HTML original ainda não foi modificado, e o proxy autenticado do Turbo e as integrações LEVI/EU SOU ponta a ponta seguem pendentes.
 
 ### Documentos de planejamento anteriores
 
@@ -192,4 +203,4 @@ Os antigos documentos de planejamento não constituem planos ativos independente
 
 Não considerar documentação ou CI de contratos como instalação visual concluída. A medição deve ponderar: protótipo original e aba Turbo 25%; menu/RH/funções 15%; quatro mercados com dados comprovados 20%; TradingView/Investing.com/GREED 10%; Supabase/auditoria/segurança 10%; LEVI + EU SOU 10%; testes de regressão, rollback e release 10%.
 
-Estado oficial atual desta revisão: **36% concluído / 64% restante (estimativa ponderada por evidências, não telemetria automática)**. O valor reconhece os contratos de runtime e adaptadores testados, o menu de módulos implementado no branch e as funções RH/auditoria transacionais testadas no Supabase. Não contabiliza como concluídos os gates visuais, a instalação do protótipo original na aba real, as cotações live com credenciais, o proxy autenticado local, nem os testes de LEVI/EU SOU ponta a ponta. Atualizar a porcentagem somente com evidências reproduzíveis anexadas a cada gate.
+Estado oficial atual desta revisão: **37% concluído / 63% restante (estimativa ponderada por evidências, não telemetria automática)**. O valor reconhece os contratos de runtime e adaptadores testados, o menu de módulos implementado no branch e as funções RH/auditoria transacionais testadas no Supabase. Não contabiliza como concluídos os gates visuais, a instalação do protótipo original na aba real, as cotações live com credenciais, o proxy autenticado local, nem os testes de LEVI/EU SOU ponta a ponta. Atualizar a porcentagem somente com evidências reproduzíveis anexadas a cada gate.
