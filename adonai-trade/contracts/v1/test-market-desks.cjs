@@ -5,13 +5,18 @@ const { listMarketDesks } = require('../../runtime/market-desks.cjs');
 const result = listMarketDesks();
 assert.equal(result.mode, 'paper');
 assert.equal(result.execution_enabled, false);
-assert.equal(result.data_status, 'unavailable');
+assert.equal(result.data_status, 'partially_configured');
 assert.deepEqual(result.desks.map((desk) => desk.id), ['CRYPTO', 'FOREX', 'B3', 'INTERNATIONAL']);
 for (const desk of result.desks) {
-  assert.equal(desk.provider_configured, false);
-  assert.equal(desk.quote_status, 'unavailable');
+  assert.equal(desk.quote_status, 'not_checked');
   assert.equal(desk.execution_enabled, false);
-  assert.equal(desk.data_mode, 'historical_or_fixture_only');
+}
+assert.equal(result.desks.find((desk) => desk.id === 'CRYPTO').provider_configured, true);
+assert.equal(result.desks.find((desk) => desk.id === 'FOREX').provider_configured, true);
+assert.equal(result.desks.find((desk) => desk.id === 'B3').provider_configured, false);
+assert.equal(result.desks.find((desk) => desk.id === 'INTERNATIONAL').provider_configured, false);
+assert.equal(result.desks.find((desk) => desk.id === 'FOREX').data_mode, 'daily_reference_not_intraday');
+assert.equal(result.desks.find((desk) => desk.id === 'INTERNATIONAL').data_mode, 'provider_timestamp_verification_required');
 }
 const configured = listMarketDesks({ BRAPI_TOKEN: 'configured-test-token', ALPHAVANTAGE_API_KEY: 'configured-test-key' });
 assert.equal(configured.data_status, 'providers_configured');
