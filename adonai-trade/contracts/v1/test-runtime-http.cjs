@@ -21,6 +21,12 @@ async function main() {
     const ready = await fetch(base + '/ready');
     assert.equal(ready.status, 200);
     assert.equal((await ready.json()).status, 'ready');
+    const markets = await fetch(base + '/api/v1/markets');
+    assert.equal(markets.status, 200);
+    const marketBody = await markets.json();
+    assert.deepEqual(marketBody.desks.map((desk) => desk.id), ['CRYPTO', 'FOREX', 'B3', 'INTERNATIONAL']);
+    assert.equal(marketBody.data_status, 'unavailable');
+    assert.equal(marketBody.execution_enabled, false);
     assert.equal((await fetch(base + '/does-not-exist')).status, 404);
     const badJson = await fetch(base + '/api/v1/policy/evaluate', { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{' });
     assert.equal(badJson.status, 400);
