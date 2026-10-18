@@ -124,5 +124,5 @@
     render('overview');refresh();timer=setInterval(refresh,Number.isFinite(options.pollIntervalMs)&&options.pollIntervalMs>=1000?options.pollIntervalMs:15000);
     return {refresh,destroy(){destroyed=true;if(timer)clearInterval(timer);menu.remove();panel.remove();style.remove();}};
   }
-  return Object.freeze({getMenu,mount,MENU,SYMBOLS});
+  return Object.freeze({getMenu,mount,MENU,SYMBOLS,CHART_SYMBOLS});
 });
