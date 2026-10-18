@@ -30,7 +30,7 @@ Modo permitido nesta etapa: paper trading. Nenhuma ordem real.
 
 - Migration proposta: `supabase/migrations/20261018100000_runtime_audit_events.sql`.
 - Adaptador: `runtime/audit-ledger.cjs`; usa `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY` apenas no processo servidor, TLS para endpoints remotos, timeout de 4 segundos e insert-only na API do PostgREST.
-- A migration cria `adonai_trade.runtime_audit_events`, ativa RLS, remove grants de `public`/`anon`/`authenticated`, concede `SELECT`/`INSERT` a `service_role` e bloqueia `UPDATE`/`DELETE` por trigger.
+- A migration cria `adonai_trade.runtime_audit_events`, ativa RLS, restringe o uso do schema a `service_role`, remove grants da tabela de `public`/`anon`/`authenticated`, concede `SELECT`/`INSERT` a `service_role`, restringe a função do trigger e bloqueia `UPDATE`/`DELETE` por trigger.
 - A migration **não foi aplicada** ao projeto conectado. Antes da aplicação, revisar grants de schema, exposição do schema no PostgREST, política de retenção e auditoria operacional. Nunca expor a chave service-role ao navegador.
 - `/ready` só retorna 200 depois de conseguir consultar o ledger. A avaliação só retorna 200/422 depois de persistir o evento; falha ou ausência do ledger retorna 503 sem executar ordens.
 
