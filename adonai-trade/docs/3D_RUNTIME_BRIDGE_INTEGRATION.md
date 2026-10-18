@@ -49,6 +49,8 @@ Em falha de rede, o cliente publica um estado explícito `status: 'unavailable'`
 
 Este trecho é o ponto de integração preparado, não uma afirmação de que o HTML original já o contém. A ligação visual final depende da inspeção e alteração controlada do protótipo original.
 
+A resposta normalizada distingue `fetchedAt` (hora local em que o cliente leu os endpoints) de `runtimeTimestamps.markets` e `runtimeTimestamps.integrations` (carimbos devolvidos pelo servidor). A hora de busca não deve ser apresentada como hora da cotação nem como prova de atualidade dos dados.
+
 ## Regras de renderização obrigatórias
 
 1. Mostrar o modo `paper` e manter execução desabilitada.
