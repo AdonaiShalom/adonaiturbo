@@ -1,6 +1,6 @@
 'use strict';
 const assert = require('node:assert/strict');
-const { readState, normalize } = require('../public/runtime-bridge.js');
+const { readState, normalize } = require('../../public/runtime-bridge.js');
 async function main() {
  const requests=[];
  const fakeFetch=async(url)=>{
