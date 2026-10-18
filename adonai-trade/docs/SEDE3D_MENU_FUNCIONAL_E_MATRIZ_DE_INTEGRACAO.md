@@ -101,9 +101,15 @@ Em todas as mesas: respostas `verified / stale / unverified / unavailable`; nunc
 - Commit de alteração da workflow: `46e3a2aa030cc1784c58be73f049a77f8107d291`. Validação concluída: os runs [39146806219](https://github.com/AdonaiShalom/adonaiturbo/actions/runs/39146806219) e [39146806260](https://github.com/AdonaiShalom/adonaiturbo/actions/runs/39146806260) passaram; os passos `Run Fear & Greed source adapter and HTTP endpoint tests` e `Run 3D sede menu contract` tiveram conclusão `success`, assim como `windows-powershell-runtime`. A evidência está registrada no Supabase. Isso valida o código no branch, não a instalação local.
 - O código está na branch de integração; não está instalado no Windows nem incorporado no HTML original. A sede visual, o RH real e a integração da aba Turbo continuam pendentes.
 
+### Atualização de execução — TradingView multi-mercado
+
+- O módulo TradingView do menu agora oferece seleção de gráfico para quatro mesas: `BINANCE:BTCUSDT`, `OANDA:EURUSD`, `BMFBOVESPA:PETR4` e `NASDAQ:AAPL`. A seleção troca o widget oficial e fornece link para abrir o símbolo selecionado no TradingView.
+- O contrato automatizado verifica a existência e o mapeamento dos quatro símbolos. Os runs [39147273715](https://github.com/AdonaiShalom/adonaiturbo/actions/runs/39147273715) passaram nos jobs `contract-tests` e `windows-powershell-runtime`, incluindo o teste do menu.
+- Limite da evidência: isto valida o código do ramo e o mapeamento dos símbolos; ainda não valida renderização real do widget no navegador nem prova que o script esteja incorporado ao protótipo original. Investing.com continua sendo um link para recurso oficial permitido; não está sendo alegada integração de dados direta.
+
 ### Percentual oficial nesta atualização
 
-**26% concluído / 74% restante.** Aumentado em 1 ponto percentual porque o adaptador read-only Fear & Greed, seu endpoint com rate limit, a ligação ao painel e os testes passaram no CI do branch. Este avanço cobre apenas código validado por testes automatizados; o dado live ainda não foi validado no serviço instalado, e a sede visual continua sem integração comprovada no HTML original. Não contar esse avanço como instalação local.
+**27% concluído / 73% restante.** Aumentado em 1 ponto percentual porque o módulo TradingView passou a permitir seleção de símbolos para as quatro mesas e o contrato do menu passou no CI em Linux e Windows. O adaptador Fear & Greed também segue validado pelo CI anterior. O aumento mede apenas código e contratos no ramo; não significa que o widget foi testado no navegador, que o provedor live está validado ou que a sede visual foi instalada no HTML original.
 
 ### Documentos de planejamento anteriores
 
