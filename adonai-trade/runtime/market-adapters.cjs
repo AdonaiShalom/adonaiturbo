@@ -98,7 +98,12 @@ async function getQuote({ desk, symbol, env = process.env, fetchImpl = globalThi
     const data = await getJson(fetchImpl, 'https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=' + encodeURIComponent(normalizedSymbol) + '&apikey=' + encodeURIComponent(env.ALPHAVANTAGE_API_KEY));
     const item = data['Global Quote'];
     if (!item || !item['05. price'] || !item['07. latest trading day']) return quote('unavailable', { desk: id, symbol: normalizedSymbol, source: 'alphavantage', reason_code: 'provider_quote_missing' });
-    return quote('unverified', { desk: id, symbol: normalizedSymbol, source: 'alphavantage_global_quote', price: Number(item['05. price']), provider_trading_day: item['07. latest trading day'], reason_code: 'provider_intraday_timestamp_unavailable' });
+    const internationalPrice = Number(item['05. price']);
+    const tradingDay = String(item['07. latest trading day']);
+    const parsedTradingDay = /^\\d{4}-\\d{2}-\\d{2}$/.test(tradingDay) ? new Date(tradingDay + 'T00:00:00Z') : null;
+    const validTradingDay = Boolean(parsedTradingDay && Number.isFinite(parsedTradingDay.getTime()) && parsedTradingDay.toISOString().slice(0, 10) === tradingDay);
+    if (!Number.isFinite(internationalPrice) || internationalPrice <= 0 || !validTradingDay) return quote('unverified', { desk: id, symbol: normalizedSymbol, source: 'alphavantage_global_quote', reason_code: 'invalid_provider_quote_data' });
+    return quote('unverified', { desk: id, symbol: normalizedSymbol, source: 'alphavantage_global_quote', price: internationalPrice, provider_trading_day: tradingDay, reason_code: 'provider_intraday_timestamp_unavailable' });
   } catch (error) {
     const reason = error && error.code === 'PROVIDER_RESPONSE_TOO_LARGE' ? 'provider_response_too_large' : error && error.name === 'AbortError' ? 'provider_timeout' : 'provider_request_failed';
     return quote('unavailable', { desk: id, symbol: normalizedSymbol, reason_code: reason });
