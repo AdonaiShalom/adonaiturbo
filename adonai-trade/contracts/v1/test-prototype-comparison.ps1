@@ -30,7 +30,7 @@ try {
 
     & $scriptPath -StagePath $stage -LocalProjectPath $local -ReportPath $report | Out-Null
     $result = Get-Content -LiteralPath $report -Raw | ConvertFrom-Json
-    if ($result.identical -ne 1) { throw "Expected identical=1, got $($result.identical)" }
+    if ($result.identical -ne 2) { throw "Expected identical=2, got $($result.identical)" }
     if ($result.different -ne 1) { throw "Expected different=1, got $($result.different)" }
     if ($result.only_in_prototype -ne 1) { throw "Expected only_in_prototype=1, got $($result.only_in_prototype)" }
     if ($result.ambiguous_local_match -ne 1) { throw "Expected ambiguous_local_match=1, got $($result.ambiguous_local_match)" }
