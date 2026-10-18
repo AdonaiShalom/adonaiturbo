@@ -16,7 +16,7 @@ assert.equal(result.desks.find((desk) => desk.id === 'FOREX').provider_configure
 assert.equal(result.desks.find((desk) => desk.id === 'B3').provider_configured, false);
 assert.equal(result.desks.find((desk) => desk.id === 'INTERNATIONAL').provider_configured, false);
 assert.equal(result.desks.find((desk) => desk.id === 'FOREX').data_mode, 'daily_reference_not_intraday');
-assert.equal(result.desks.find((desk) => desk.id === 'INTERNATIONAL').data_mode, 'provider_timestamp_verification_required');
+assert.equal(result.desks.find((desk) => desk.id === 'INTERNATIONAL').data_mode, 'intraday_1min_timestamp_checked');
 const configured = listMarketDesks({ BRAPI_TOKEN: 'configured-test-token', ALPHAVANTAGE_API_KEY: 'configured-test-key' });
 assert.equal(configured.data_status, 'providers_configured');
 assert.equal(configured.desks.find((desk) => desk.id === 'CRYPTO').provider_configured, true);
@@ -24,7 +24,7 @@ assert.equal(configured.desks.find((desk) => desk.id === 'FOREX').provider_confi
 assert.equal(configured.desks.find((desk) => desk.id === 'B3').provider_configured, true);
 assert.equal(configured.desks.find((desk) => desk.id === 'INTERNATIONAL').provider_configured, true);
 assert.equal(configured.desks.find((desk) => desk.id === 'FOREX').data_mode, 'daily_reference_not_intraday');
-assert.equal(configured.desks.find((desk) => desk.id === 'INTERNATIONAL').data_mode, 'provider_timestamp_verification_required');
+assert.equal(configured.desks.find((desk) => desk.id === 'INTERNATIONAL').data_mode, 'intraday_1min_timestamp_checked');
 assert.equal(configured.execution_enabled, false);
 const partial = listMarketDesks({ BRAPI_TOKEN: 'configured-test-token' });
 assert.equal(partial.data_status, 'partially_configured');
