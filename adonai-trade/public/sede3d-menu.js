@@ -83,7 +83,24 @@
       } else if(id==='investing'){
         panel.append(card('Investing.com','Fonte externa','Calendário e páginas oficiais; integração embutida depende dos recursos permitidos pelo fornecedor.'),external('https://www.investing.com/economic-calendar/','Abrir calendário econômico Investing.com'));
       } else if(id==='greed'){
-        panel.append(card('Fear & Greed','Não conectado ao runtime','O indicador exige provedor, escala, timestamp e verificação. Não é probabilidade de lucro nem sinal automático.'),external('https://alternative.me/crypto/fear-and-greed-index/','Abrir fonte pública Crypto Fear & Greed'));
+        panel.append(card('Fear & Greed','Indicador de sentimento — não é sinal de trade','Fonte: Alternative.me. Escala 0–100; dado diário. Não é probabilidade de lucro nem habilita ordens.'));
+        const load=node('button','Consultar índice');load.type='button';
+        load.addEventListener('click',async()=>{
+          load.disabled=true;load.textContent='Consultando fonte…';let result;
+          try{const r=await fetch(baseUrl+'/api/v1/sentiment/fear-greed',{headers:{accept:'application/json'},cache:'no-store'});result={ok:r.ok,data:await r.json(),status:r.status};}
+          catch(e){result={ok:false,error:e&&e.message?e.message:'erro de rede'};}
+          load.disabled=false;load.textContent='Consultar índice';
+          const old=panel.querySelector('[data-greed]');if(old)old.remove();
+          const out=node('div',undefined,'card');out.dataset.greed='1';
+          if(!result.ok){out.append(node('strong','Índice indisponível'),node('p',result.error||('HTTP '+result.status)));}
+          else{const d=result.data;out.append(node('strong','Estado: '+String(d.status||'não verificado')));
+            if(Number.isInteger(d.value)&&d.value>=0&&d.value<=100)out.append(node('p','Valor: '+d.value+'/100 — '+String(d.classification||'classificação não informada')));
+            else out.append(node('p','Valor não validado; não usar.'));
+            out.append(node('p','Observado em: '+formatTime(d.observed_at)),node('p','Idade do dado: '+(Number.isFinite(d.age_seconds)?Math.round(d.age_seconds/3600)+' h':'não verificada')),node('p','Fonte: '+String(d.source_url||'não informada')),node('p','Execução habilitada: não'));
+          }
+          panel.appendChild(out);
+        });
+        panel.append(load,external('https://alternative.me/crypto/fear-and-greed-index/','Abrir fonte pública Crypto Fear & Greed'),node('p','Dado de sentimento separado das cotações de mercado; status stale/unverified não deve ser usado para decisões automáticas.'));
       } else if(id==='levi'||id==='eu-sou'){
         const target=id==='levi'?'levi':'eu_sou';const i=state&&state.integrations.find(x=>String(x.id).toLowerCase()===target);
         panel.append(card(id==='levi'?'LEVI':'EU SOU',i?i.status:'Não verificado',id==='levi'?'A integração exige teste ponta a ponta, correlação da tarefa e evento de auditoria.':'O motor científico precisa devolver entrada, método, unidades, resultado e evidência reproduzível.'));
