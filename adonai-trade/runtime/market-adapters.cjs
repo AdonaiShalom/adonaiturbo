@@ -15,56 +15,39 @@ async function getJson(fetchImpl, url, headers = {}) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
   try {
-    const response = await fetchImpl(url, {
-      method: 'GET',
-      headers: { accept: 'application/json', ...headers },
-      signal: controller.signal,
-      redirect: 'error'
-    });
+    const response = await fetchImpl(url, { method: 'GET', headers: { accept: 'application/json', ...headers }, signal: controller.signal, redirect: 'error' });
     if (!response.ok) throw new Error('provider_http_' + response.status);
     return await response.json();
-  } finally {
-    clearTimeout(timer);
-  }
-}
-function validatePrice(price) {
-  const n = Number(price);
-  if (!Number.isFinite(n) || n <= 0) throw new Error('invalid_provider_price');
-  return n;
+  } finally { clearTimeout(timer); }
 }
 function freshQuote({ desk, symbol, price, currency, source, observedAt, nowMs }) {
   const timestamp = safeTimestamp(observedAt);
   if (!timestamp) return quote('unverified', { desk, symbol, source, reason_code: 'provider_timestamp_missing' });
-  const ageMs = Math.max(0, nowMs - Date.parse(timestamp));
-  if (ageMs > MAX_AGE_MS) {
-    return quote('stale', { desk, symbol, source, observed_at: timestamp, age_ms: ageMs, reason_code: 'quote_stale' });
-  }
-  return quote('verified', {
-    desk, symbol, price: validatePrice(price), currency, source,
-    observed_at: timestamp, age_ms: ageMs, provider_timestamp_verified: true
-  });
+  const ageMs = nowMs - Date.parse(timestamp);
+  if (ageMs < -30000) return quote('unverified', { desk, symbol, source, observed_at: timestamp, reason_code: 'provider_timestamp_in_future' });
+  if (ageMs > MAX_AGE_MS) return quote('stale', { desk, symbol, source, observed_at: timestamp, age_ms: ageMs, reason_code: 'quote_stale' });
+  const n = Number(price);
+  if (!Number.isFinite(n) || n <= 0) return quote('unverified', { desk, symbol, source, observed_at: timestamp, reason_code: 'invalid_provider_price' });
+  return quote('verified', { desk, symbol, price: n, currency, source, observed_at: timestamp, age_ms: Math.max(0, ageMs), provider_timestamp_verified: true });
 }
-
 async function getQuote({ desk, symbol, env = process.env, fetchImpl = globalThis.fetch, nowMs = Date.now() }) {
   const id = String(desk || '').toUpperCase();
   const normalizedSymbol = String(symbol || '').trim().toUpperCase();
   if (!DESK_IDS.has(id)) return quote('unavailable', { reason_code: 'unknown_market_desk' });
   if (!/^[A-Z0-9._-]{3,20}$/.test(normalizedSymbol)) return quote('unavailable', { reason_code: 'invalid_symbol' });
   if (typeof fetchImpl !== 'function') return quote('unavailable', { reason_code: 'fetch_unavailable' });
-
   try {
     if (id === 'CRYPTO') {
       if (!/^[A-Z0-9]{5,15}$/.test(normalizedSymbol)) return quote('unavailable', { reason_code: 'invalid_crypto_symbol' });
-      const data = await getJson(fetchImpl, 'https://api.binance.com/api/v3/ticker/price?symbol=' + encodeURIComponent(normalizedSymbol));
-      return freshQuote({ desk: id, symbol: normalizedSymbol, price: data.price, currency: normalizedSymbol.endsWith('USDT') ? 'USDT' : 'quote_currency_in_symbol', source: 'binance_spot', observedAt: new Date(nowMs).toISOString(), nowMs });
+      const data = await getJson(fetchImpl, 'https://api.binance.com/api/v3/ticker/24hr?symbol=' + encodeURIComponent(normalizedSymbol));
+      return freshQuote({ desk: id, symbol: normalizedSymbol, price: data.lastPrice, currency: normalizedSymbol.endsWith('USDT') ? 'USDT' : 'quote_currency_in_symbol', source: 'binance_spot_24hr', observedAt: Number.isFinite(Number(data.closeTime)) ? new Date(Number(data.closeTime)).toISOString() : null, nowMs });
     }
     if (id === 'FOREX') {
       const match = normalizedSymbol.match(/^([A-Z]{3})[-_]?([A-Z]{3})$/);
       if (!match) return quote('unavailable', { reason_code: 'invalid_forex_pair' });
       const [, base, target] = match;
       const data = await getJson(fetchImpl, 'https://api.frankfurter.dev/v1/latest?base=' + base + '&symbols=' + target);
-      const rate = data.rates && data.rates[target];
-      return freshQuote({ desk: id, symbol: base + '/' + target, price: rate, currency: target, source: 'frankfurter_ecb_reference', observedAt: data.date, nowMs });
+      return freshQuote({ desk: id, symbol: base + '/' + target, price: data.rates && data.rates[target], currency: target, source: 'frankfurter_ecb_reference', observedAt: data.date, nowMs });
     }
     if (id === 'B3') {
       if (!env.BRAPI_TOKEN) return quote('unavailable', { desk: id, symbol: normalizedSymbol, reason_code: 'brapi_token_not_configured' });
@@ -77,14 +60,9 @@ async function getQuote({ desk, symbol, env = process.env, fetchImpl = globalThi
     const data = await getJson(fetchImpl, 'https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=' + encodeURIComponent(normalizedSymbol) + '&apikey=' + encodeURIComponent(env.ALPHAVANTAGE_API_KEY));
     const item = data['Global Quote'];
     if (!item || !item['05. price'] || !item['07. latest trading day']) return quote('unavailable', { desk: id, symbol: normalizedSymbol, source: 'alphavantage', reason_code: 'provider_quote_missing' });
-    return freshQuote({ desk: id, symbol: normalizedSymbol, price: item['05. price'], currency: 'provider_reported', source: 'alphavantage_global_quote', observedAt: item['07. latest trading day'] + 'T23:59:59Z', nowMs });
+    return quote('unverified', { desk: id, symbol: normalizedSymbol, source: 'alphavantage_global_quote', price: Number(item['05. price']), provider_trading_day: item['07. latest trading day'], reason_code: 'provider_intraday_timestamp_unavailable' });
   } catch (error) {
-    return quote('unavailable', {
-      desk: id, symbol: normalizedSymbol,
-      reason_code: error && error.name === 'AbortError' ? 'provider_timeout' :
-        error && error.message === 'invalid_provider_price' ? 'invalid_provider_price' : 'provider_request_failed'
-    });
+    return quote('unavailable', { desk: id, symbol: normalizedSymbol, reason_code: error && error.name === 'AbortError' ? 'provider_timeout' : 'provider_request_failed' });
   }
 }
-
 module.exports = { getQuote, MAX_AGE_MS, TIMEOUT_MS };
