@@ -137,6 +137,13 @@ Em todas as mesas: respostas `verified / stale / unverified / unavailable`; nunc
 - CI atual: [39149834223](https://github.com/AdonaiShalom/adonaiturbo/actions/runs/39149834223). Os jobs `contract-tests` e `windows-powershell-runtime` passaram; a verificação isolada em PowerShell 5.1 e o teste HTTP também passaram.
 - Esta correção elimina um bloqueio de navegador no contrato, mas **não** prova que o Turbo local já tenha proxy autenticado nem que a sede original esteja instalada.
 
+### Correção da experiência do menu — polling sem perda de estado
+
+- Corrigido `public/sede3d-menu.js`: a atualização periódica do runtime agora só redesenha automaticamente a visão geral. Ao abrir RH, mercados, TradingView, Investing.com, Fear & Greed, LEVI, EU SOU ou auditoria, o polling deixa de apagar controles, consultas e resultados do painel ativo.
+- O contrato do menu inclui agora uma asserção que impede regressão dessa regra.
+- CI verde nos runs [39150169131](https://github.com/AdonaiShalom/adonaiturbo/actions/runs/39150169131) e [39150167299](https://github.com/AdonaiShalom/adonaiturbo/actions/runs/39150167299), commit `032fed825cbaef3d9e88654e5310b341cc044f69`; testes de contrato e runtime passaram.
+- A evidência foi registrada no Supabase em AT-014. O percentual global não sobe: o HTML do Turbo continua sem receber o protótipo original no ambiente real.
+
 ### Percentual oficial nesta atualização
 
 **33% concluído / 67% restante.** Aumentado em 2 pontos porque, além do RH com tarefas e auditoria transacionais, Cripto/Forex/B3/Internacional agora têm contratos de dados mais rigorosos; Forex e Internacional possuem caminho intradiário de 1 minuto com conversão de fuso, checagem de timestamp e falha segura, e os testes dos adaptadores passaram no CI. Não significa que as credenciais dos provedores foram configuradas nem que cotações reais foram confirmadas. O token do runtime e o proxy autenticado do Turbo ainda não foram validados localmente; a instalação visual do protótipo original e o teste do widget no navegador continuam pendentes.
