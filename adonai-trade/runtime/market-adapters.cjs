@@ -105,6 +105,18 @@ async function getQuote({ desk, symbol, env = process.env, fetchImpl = globalThi
       const match = normalizedSymbol.match(/^([A-Z]{3})[-_]?([A-Z]{3})$/);
       if (!match) return quote('unavailable', { reason_code: 'invalid_forex_pair' });
       const [, base, target] = match;
+      if (env.ALPHAVANTAGE_API_KEY) {
+        const data = await getJson(fetchImpl, 'https://www.alphavantage.co/query?function=FX_INTRADAY&from_symbol=' + base + '&to_symbol=' + target + '&interval=1min&outputsize=compact&apikey=' + encodeURIComponent(env.ALPHAVANTAGE_API_KEY));
+        const metadata = data['Meta Data'];
+        const series = data['Time Series FX (1min)'];
+        if (!metadata || !series || typeof series !== 'object') return quote('unavailable', { desk: id, symbol: base + '/' + target, source: 'alphavantage_fx_intraday_1min', reason_code: data.Note || data.Information ? 'provider_limit_or_error' : 'provider_quote_missing' });
+        const timestamps = Object.keys(series).sort().reverse();
+        const latestTimestamp = timestamps[0];
+        const row = latestTimestamp ? series[latestTimestamp] : null;
+        const observedAt = zonedLocalTimestampToIso(latestTimestamp, metadata['6. Time Zone']);
+        if (!row || !observedAt) return quote('unverified', { desk: id, symbol: base + '/' + target, source: 'alphavantage_fx_intraday_1min', reason_code: 'invalid_provider_timestamp_or_timezone' });
+        return freshQuote({ desk: id, symbol: base + '/' + target, price: row['4. close'], currency: target, source: 'alphavantage_fx_intraday_1min', observedAt, nowMs });
+      }
       const data = await getJson(fetchImpl, 'https://api.frankfurter.dev/v1/latest?base=' + base + '&symbols=' + target);
       const referenceDate = /^\d{4}-\d{2}-\d{2}$/.test(String(data.date || '')) ? data.date : null;
       const referencePrice = Number(data.rates && data.rates[target]);
