@@ -21,6 +21,11 @@ async function main() {
     const ready = await fetch(base + '/ready');
     assert.equal(ready.status, 200);
     assert.equal((await ready.json()).status, 'ready');
+    const integrations = await fetch(base + '/api/v1/integrations');
+    assert.equal(integrations.status, 200);
+    const integrationBody = await integrations.json();
+    assert.deepEqual(integrationBody.integrations.map((item) => item.id), ['levi', 'eu_sou']);
+    assert.ok(integrationBody.integrations.every((item) => item.status === 'not_verified' && item.execution_enabled === false));
     const markets = await fetch(base + '/api/v1/markets');
     assert.equal(markets.status, 200);
     const marketBody = await markets.json();
