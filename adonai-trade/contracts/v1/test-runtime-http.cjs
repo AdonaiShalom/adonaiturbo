@@ -64,6 +64,21 @@ async function main() {
   }
 
 
+  const unconfirmed = createServer({ now: () => nowMs, auditLedger: { async check() { return true; }, async append() { return { persisted: false, event_id: null }; } } });
+  await new Promise((resolve) => unconfirmed.listen(0, '127.0.0.1', resolve));
+  const unconfirmedBase = 'http://127.0.0.1:' + unconfirmed.address().port;
+  try {
+    const response = await fetch(unconfirmedBase + '/api/v1/policy/evaluate', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ envelope: { mode: 'live' } }) });
+    assert.equal(response.status, 503);
+    const body = await response.json();
+    assert.equal(body.audit_persisted, false);
+    assert.equal(body.execution_performed, false);
+    assert.ok(body.reason_codes.includes('audit_persistence_unconfirmed'));
+    console.log('PASS: runtime blocks policy response when audit append is not confirmed persisted');
+  } finally {
+    await new Promise((resolve, reject) => unconfirmed.close((error) => error ? reject(error) : resolve()));
+  }
+
   const failing = createServer({ now: () => nowMs, auditLedger: { async check() { throw new Error('offline'); }, async append() { throw new Error('offline'); } } });
   await new Promise((resolve) => failing.listen(0, '127.0.0.1', resolve));
   const failedBase = 'http://127.0.0.1:' + failing.address().port;
