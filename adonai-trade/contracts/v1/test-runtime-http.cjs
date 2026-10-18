@@ -53,6 +53,9 @@ async function main() {
     assert.match(rhPreflight.headers.get('access-control-allow-methods') || '', /PATCH/);
     assert.match(rhPreflight.headers.get('access-control-allow-headers') || '', /Authorization/i);
     assert.match(rhPreflight.headers.get('access-control-allow-headers') || '', /Content-Type/i);
+    const deniedMethodPreflight = await fetch(base + '/api/v1/markets', { method: 'OPTIONS', headers: { origin: 'http://127.0.0.1:3000', 'access-control-request-method': 'DELETE' } });
+    assert.equal(deniedMethodPreflight.status, 403);
+    assert.equal((await deniedMethodPreflight.json()).reason_codes[0], 'method_not_allowed');
     const deniedPreflight = await fetch(base + '/api/v1/markets', {
       method: 'OPTIONS',
       headers: { origin: 'https://untrusted.example', 'access-control-request-method': 'GET' }
