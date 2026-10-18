@@ -48,6 +48,11 @@ async function main() {
     });
     assert.equal(preflight.status, 204);
     assert.equal(preflight.headers.get('access-control-allow-origin'), 'http://127.0.0.1:3000');
+    const rhPreflight = await fetch(base + '/api/v1/rh/tasks/00000000-0000-4000-8000-000000000001/status', { method: 'OPTIONS', headers: { origin: 'http://127.0.0.1:3000', 'access-control-request-method': 'PATCH', 'access-control-request-headers': 'authorization,content-type' } });
+    assert.equal(rhPreflight.status, 204);
+    assert.match(rhPreflight.headers.get('access-control-allow-methods') || '', /PATCH/);
+    assert.match(rhPreflight.headers.get('access-control-allow-headers') || '', /Authorization/i);
+    assert.match(rhPreflight.headers.get('access-control-allow-headers') || '', /Content-Type/i);
     const deniedPreflight = await fetch(base + '/api/v1/markets', {
       method: 'OPTIONS',
       headers: { origin: 'https://untrusted.example', 'access-control-request-method': 'GET' }
