@@ -1,6 +1,7 @@
 'use strict';
 
 const TIMEOUT_MS = 5000;
+const MAX_RESPONSE_BYTES = 1024 * 1024;
 const MAX_AGE_MS = 120000;
 const DESK_IDS = new Set(['CRYPTO', 'FOREX', 'B3', 'INTERNATIONAL']);
 
@@ -17,7 +18,36 @@ async function getJson(fetchImpl, url, headers = {}) {
   try {
     const response = await fetchImpl(url, { method: 'GET', headers: { accept: 'application/json', ...headers }, signal: controller.signal, redirect: 'error' });
     if (!response.ok) throw new Error('provider_http_' + response.status);
-    return await response.json();
+    const declaredLength = Number(response.headers && response.headers.get && response.headers.get('content-length'));
+    if (Number.isFinite(declaredLength) && declaredLength > MAX_RESPONSE_BYTES) throw Object.assign(new Error('provider_response_too_large'), { code: 'PROVIDER_RESPONSE_TOO_LARGE' });
+    // Real fetch responses stream. Enforce a byte limit before buffering/parsing JSON.
+    if (response.body && typeof response.body.getReader === 'function') {
+      const reader = response.body.getReader();
+      const chunks = [];
+      let size = 0;
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          size += value.byteLength;
+          if (size > MAX_RESPONSE_BYTES) {
+            await reader.cancel().catch(() => {});
+            throw Object.assign(new Error('provider_response_too_large'), { code: 'PROVIDER_RESPONSE_TOO_LARGE' });
+          }
+          chunks.push(value);
+        }
+      } finally {
+        try { reader.releaseLock(); } catch {}
+      }
+      const merged = new Uint8Array(size);
+      let offset = 0;
+      for (const chunk of chunks) { merged.set(chunk, offset); offset += chunk.byteLength; }
+      return JSON.parse(new TextDecoder().decode(merged));
+    }
+    // Small compatibility path for injected test doubles without a stream body.
+    const data = await response.json();
+    if (Buffer.byteLength(JSON.stringify(data), 'utf8') > MAX_RESPONSE_BYTES) throw Object.assign(new Error('provider_response_too_large'), { code: 'PROVIDER_RESPONSE_TOO_LARGE' });
+    return data;
   } finally { clearTimeout(timer); }
 }
 function freshQuote({ desk, symbol, price, currency, source, observedAt, nowMs }) {
@@ -62,7 +92,8 @@ async function getQuote({ desk, symbol, env = process.env, fetchImpl = globalThi
     if (!item || !item['05. price'] || !item['07. latest trading day']) return quote('unavailable', { desk: id, symbol: normalizedSymbol, source: 'alphavantage', reason_code: 'provider_quote_missing' });
     return quote('unverified', { desk: id, symbol: normalizedSymbol, source: 'alphavantage_global_quote', price: Number(item['05. price']), provider_trading_day: item['07. latest trading day'], reason_code: 'provider_intraday_timestamp_unavailable' });
   } catch (error) {
-    return quote('unavailable', { desk: id, symbol: normalizedSymbol, reason_code: error && error.name === 'AbortError' ? 'provider_timeout' : 'provider_request_failed' });
+    const reason = error && error.code === 'PROVIDER_RESPONSE_TOO_LARGE' ? 'provider_response_too_large' : error && error.name === 'AbortError' ? 'provider_timeout' : 'provider_request_failed';
+    return quote('unavailable', { desk: id, symbol: normalizedSymbol, reason_code: reason });
   }
 }
-module.exports = { getQuote, MAX_AGE_MS, TIMEOUT_MS };
+module.exports = { getQuote, MAX_AGE_MS, TIMEOUT_MS, MAX_RESPONSE_BYTES };
