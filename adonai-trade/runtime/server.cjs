@@ -21,21 +21,37 @@ function send(res, status, payload) {
 function readJson(req) {
   return new Promise((resolve, reject) => {
     let size = 0;
+    let overflow = false;
+    let settled = false;
     const chunks = [];
     req.on('data', (chunk) => {
+      if (overflow) return;
       size += chunk.length;
       if (size > MAX_BODY_BYTES) {
+        overflow = true;
+        chunks.length = 0;
+        settled = true;
         reject(Object.assign(new Error('request_too_large'), { statusCode: 413 }));
-        req.destroy();
         return;
       }
       chunks.push(chunk);
     });
     req.on('end', () => {
+      if (overflow || settled) return;
+      settled = true;
       try { resolve(JSON.parse(Buffer.concat(chunks).toString('utf8'))); }
       catch { reject(Object.assign(new Error('invalid_json'), { statusCode: 400 })); }
     });
-    req.on('error', reject);
+    req.on('error', (error) => {
+      if (settled) return;
+      settled = true;
+      reject(error);
+    });
+    req.on('aborted', () => {
+      if (settled) return;
+      settled = true;
+      reject(Object.assign(new Error('request_aborted'), { statusCode: 400 }));
+    });
   });
 }
 function createServer(options = {}) {
@@ -82,8 +98,8 @@ function createServer(options = {}) {
         }
         return send(res, decision.decision === 'blocked' ? 422 : 200, {
           service: SERVICE, version: VERSION, timestamp, mode: 'paper',
-          audit_persisted: audit && audit.persisted === true,
-          audit_event_id: audit && audit.event_id || null,
+          audit_persisted: audit.persisted === true,
+          audit_event_id: audit.event_id,
           execution_performed: false, decision
         });
       } catch {
