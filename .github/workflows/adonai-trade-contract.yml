@@ -50,3 +50,5 @@ jobs:
         run: node adonai-trade/contracts/v1/test-runtime-http.cjs
       - name: Run HTTP body-limit regression tests
         run: node adonai-trade/contracts/v1/test-runtime-http-fixed.cjs
+      - name: Run read-only market adapter regressions
+        run: node adonai-trade/contracts/v1/test-market-adapters.cjs
