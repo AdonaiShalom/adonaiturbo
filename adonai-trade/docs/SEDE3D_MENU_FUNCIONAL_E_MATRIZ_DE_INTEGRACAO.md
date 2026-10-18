@@ -184,6 +184,14 @@ Em todas as mesas: respostas `verified / stale / unverified / unavailable`; nunc
 - CI aprovado no commit `b52f3c5fb1d208c9b8a82bdecd7f59649f42926f`: [run 39152139127](https://github.com/AdonaiShalom/adonaiturbo/actions/runs/39152139127), incluindo `contract-tests` e `windows-powershell-runtime`.
 - O teste usa respostas controladas para validar o contrato. Não prova que o provedor esteja disponível em produção nem que o indicador esteja visualmente instalado no protótipo original.
 
+### RH/Supabase — proteção contra respostas excessivas (validação em andamento)
+
+- O módulo RH limita respostas Supabase a 1 MiB antes de parsear JSON; para respostas em streaming, cancela a leitura ao exceder o limite. O mesmo limite é aplicado aos RPCs de criação/atualização de tarefas com auditoria.
+- O endpoint RH informa `supabase_response_too_large` explicitamente e falha fechado, sem retornar tarefas/roles parciais como se fossem válidas.
+- Foram adicionados contratos para `Content-Length` acima do limite e JSON excessivo.
+- CI desta alteração ainda está em execução: [run 39152345672](https://github.com/AdonaiShalom/adonaiturbo/actions/runs/39152345672). Não contabilizar como gate aprovado até os dois jobs terminarem verdes.
+- A alteração não modifica nem instala o HTML original e não confirma a disponibilidade real das tabelas Supabase.
+
 ### Percentual oficial nesta atualização
 
 **38% concluído / 62% restante.** Avanço de 1 ponto pela conclusão da proteção de transporte do Fear & Greed: timeout limitado e testável, limite de 64 KiB, bloqueio de redirecionamentos e testes para timeout e payload excessivo. Os testes de contrato e Windows PowerShell 5.1 passaram no CI. As listas das quatro mesas e as proteções contra preços inválidos também estão cobertas por contratos. Isso é avanço de robustez, não comprova fonte live em produção nem instalação visual. O HTML original ainda não está na árvore do branch e não foi instalado no Turbo; proxy autenticado e integrações LEVI/EU SOU ponta a ponta seguem pendentes.
