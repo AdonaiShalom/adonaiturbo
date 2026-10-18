@@ -13,7 +13,7 @@ Limites de ambiente:
 
 1. O ZIP local de referência registrado pelo usuário é `AdonaiTrade_COMPLETO.zip`, SHA-256 `573AFEF41813311C4411B943802F649D0A66ABB9C5771C3DCC7E485CDEFE343C`. A comparação somente leitura registrada em 18/10 encontrou 144 arquivos no protótipo e 175 na instalação: 130 idênticos, 11 diferentes, 1 só no protótipo, 29 só na instalação e 2 ambíguos. `public/sede3d.html` e `public/teia3d.js` eram idênticos; `public/index.html`, `server.js`, `package.json`, arquivos de ordens/estado e testes tinham diferenças. `test/unit_seguranca.js` aparecia apenas no protótipo.
 2. A branch conectada contém um runtime HTTP isolado, adaptadores de mercado, política fail-closed, ponte read-only e testes de contrato. A ponte não foi inserida no HTML original.
-3. Os quatro mercados já nomeados pelo runtime são Cripto, Forex, B3 e Internacional. Adaptadores configurados não equivalem a cotação atual validada: Forex usa taxa diária de referência e não é intraday; B3 depende de `BRAPI_TOKEN`; Internacional depende de `ALPHAVANTAGE_API_KEY` e o timestamp do Global Quote não prova atualidade. Cripto usa Binance Spot 24h com janela de frescor de 120 s.
+3. Os quatro mercados já nomeados pelo runtime são Cripto, Forex, B3 e Internacional. Adaptadores configurados não equivalem a cotação atual validada: Forex usa taxa diária de referência e não é intraday; B3 depende de `BRAPI_TOKEN`; Internacional usa `TIME_SERIES_INTRADAY` de 1 minuto da Alpha Vantage e só pode ser marcado `verified` se o timestamp local da bolsa for convertido corretamente e estiver dentro de 120 s; chave/limite do plano pode resultar em indisponibilidade. Cripto usa Binance Spot 24h com janela de frescor de 120 s.
 4. O ledger de auditoria está criado no Supabase com RLS habilitado, mas a última consulta registrada encontrou zero eventos; a gravação/leitura real pelo runtime permanece pendente.
 5. LEVI e EU SOU estão declarados por endpoints no Turbo, mas a integração autenticada de ponta a ponta não foi provada.
 6. A execução financeira permanece desabilitada. A instalação pode ficar pronta para operar em modo de análise/paper e passar por gates de segurança; isso não significa habilitar ordens reais sem testes, aprovação e controles explícitos.
@@ -42,7 +42,7 @@ Cada mesa deve ter painel próprio, watchlist, instrumentos, horário de sessão
 - **Cripto:** adaptador Binance Spot; validar símbolo, frescor, limites, custos e falha do provedor.
 - **Forex:** taxa de referência diária deve ser rotulada como diária; não apresentar como cotação intradiária. Adicionar provedor intraday antes de prometer análise operacional intraday.
 - **B3:** integrar Brapi com token privado no servidor; validar timestamp e limites do plano/provedor.
-- **Internacional:** Alpha Vantage com chave privada; não chamar Global Quote de tempo real sem timestamp confiável.
+- **Internacional:** Alpha Vantage `TIME_SERIES_INTRADAY` de 1 minuto, com conversão do fuso informado pelo provedor e frescor máximo de 120 s. Se a chave/plano não fornecer a série ou o horário não puder ser validado, retornar `unavailable`/`unverified`; não degradar para `Global Quote` diário.
 
 Em todas as mesas: respostas `verified / stale / unverified / unavailable`; nunca transformar indisponibilidade em zero, nunca reutilizar preço antigo como atual, nunca gerar probabilidade sem modelo validado e evidência.
 
