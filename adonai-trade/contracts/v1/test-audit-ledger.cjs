@@ -5,6 +5,10 @@ const { createSupabaseAuditLedger } = require('../../runtime/audit-ledger.cjs');
 async function main() {
   assert.equal(createSupabaseAuditLedger({}), null, 'missing credentials must disable the adapter');
   assert.equal(createSupabaseAuditLedger({ SUPABASE_URL: 'http://example.com', SUPABASE_SERVICE_ROLE_KEY: 'x' }), null, 'non-TLS remote endpoint must be rejected');
+  assert.equal(createSupabaseAuditLedger({ SUPABASE_URL: 'ftp://localhost', SUPABASE_SERVICE_ROLE_KEY: 'x' }), null, 'non-HTTP schemes must be rejected even for loopback hostnames');
+  assert.equal(createSupabaseAuditLedger({ SUPABASE_URL: 'https://user:pass@project.supabase.co', SUPABASE_SERVICE_ROLE_KEY: 'x' }), null, 'URL userinfo must be rejected');
+  assert.equal(createSupabaseAuditLedger({ SUPABASE_URL: 'https://project.supabase.co?redirect=elsewhere', SUPABASE_SERVICE_ROLE_KEY: 'x' }), null, 'URL query parameters must be rejected');
+  assert.ok(createSupabaseAuditLedger({ SUPABASE_URL: 'http://127.0.0.1:54321', SUPABASE_SERVICE_ROLE_KEY: 'x' }, async () => ({ ok: true, status: 200 })), 'local HTTP is allowed for development');
 
   const calls = [];
   const fetchImpl = async (url, init) => {
