@@ -134,7 +134,7 @@ Em todas as mesas: respostas `verified / stale / unverified / unavailable`; nunc
 - A revisão de integração encontrou um bloqueio real: o runtime aceitava a origem local do Turbo, mas o preflight CORS não permitia `PATCH` nem o cabeçalho `Authorization` necessários para alterar estado de tarefas do RH.
 - Corrigido `runtime/server.cjs`: allowlist local continua restrita, agora permite `PATCH` e `Authorization`, e rejeita métodos de preflight não autorizados.
 - Ampliado `test-runtime-http.cjs` para provar o preflight `PATCH` com `Authorization`/`Content-Type` e bloquear `DELETE`.
-- CI atual: [39149834223](https://github.com/AdonaiShalom/adonaiturbo/actions/runs/39149834223). Os jobs `contract-tests` e `windows-powershell-runtime` passaram; a verificação isolada em PowerShell 5.1 e o teste HTTP também passaram.
+- CI confirmado mais recente: [39150646803](https://github.com/AdonaiShalom/adonaiturbo/actions/runs/39150646803). Os jobs `contract-tests` e `windows-powershell-runtime` passaram, incluindo o teste do instalador reversível e a verificação isolada em PowerShell 5.1.
 - Esta correção elimina um bloqueio de navegador no contrato, mas **não** prova que o Turbo local já tenha proxy autenticado nem que a sede original esteja instalada.
 
 ### Correção da experiência do menu — polling sem perda de estado
@@ -148,12 +148,12 @@ Em todas as mesas: respostas `verified / stale / unverified / unavailable`; nunc
 
 - Criado `scripts/install-sede3d-menu.cjs`: por padrão opera em dry-run; exige HTML completo e os três assets de runtime/menu; injeta scripts antes de `</body>`, preserva o canvas/cena existente, detecta instalação repetida e cria backup antes de escrever.
 - Criado `contracts/v1/test-install-sede3d-menu.cjs`: verifica dry-run sem mutação, preservação da cena, instalação, idempotência e restauração exata a partir do backup.
-- Incluído no `npm test`. O contrato do instalador passou no job `contract-tests` do run [39150520833](https://github.com/AdonaiShalom/adonaiturbo/actions/runs/39150520833). O job Windows completo ainda estava em andamento no último ponto de verificação.
+- Incluído no `npm test`. O contrato do instalador passou no job `contract-tests` e a verificação completa Windows PowerShell 5.1 também passou no run [39150646803](https://github.com/AdonaiShalom/adonaiturbo/actions/runs/39150646803), após corrigir o caminho do módulo no teste.
 - Para executar no computador que contém os assets e o HTML original, primeiro copiar os três assets para a mesma pasta do protótipo e rodar sem `--write`; só depois da revisão do dry-run usar `--write`. **Não foi executado no HTML original**, porque ele não está disponível no ambiente do GitHub conectado. A instalação visual segue pendente.
 
 ### Percentual oficial nesta atualização
 
-**34% concluído / 66% restante.** Avanço de 1 ponto pela entrega de um instalador reversível e idempotente para anexar o menu ao HTML original sem substituir a cena 3D, com dry-run, backup e teste automatizado de restauração; o teste do instalador passou no job de contratos do CI. Isso é ferramenta de integração, não instalação concluída. O HTML original ainda não foi modificado, os dados live com credenciais válidas não foram comprovados, e o proxy autenticado do Turbo e as integrações LEVI/EU SOU ponta a ponta seguem pendentes.
+**34% concluído / 66% restante.** Avanço de 1 ponto pela entrega de um instalador reversível e idempotente para anexar o menu ao HTML original sem substituir a cena 3D, com dry-run, backup e teste automatizado de restauração; o teste do instalador passou nos jobs de contratos e runtime Windows do CI. Isso é ferramenta de integração, não instalação concluída. O HTML original ainda não foi modificado, os dados live com credenciais válidas não foram comprovados, e o proxy autenticado do Turbo e as integrações LEVI/EU SOU ponta a ponta seguem pendentes.
 
 ### Documentos de planejamento anteriores
 
