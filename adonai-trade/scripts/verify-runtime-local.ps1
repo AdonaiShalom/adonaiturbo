@@ -16,9 +16,36 @@ function Assert-Equal {
 }
 function Get-JsonResponse {
     param([string]$Url, [int[]]$AllowedStatus = @(200))
-    $Response = Invoke-WebRequest -Uri $Url -Method Get -TimeoutSec 4 -UseBasicParsing -ErrorAction Stop
-    if ($AllowedStatus -notcontains [int]$Response.StatusCode) { throw "HTTP inesperado em $Url : $($Response.StatusCode)" }
-    return [pscustomobject]@{ StatusCode = [int]$Response.StatusCode; Headers = $Response.Headers; Body = ($Response.Content | ConvertFrom-Json) }
+    $StatusCode = 0
+    $Headers = $null
+    $Content = $null
+    try {
+        $Response = Invoke-WebRequest -Uri $Url -Method Get -TimeoutSec 4 -UseBasicParsing -ErrorAction Stop
+        $StatusCode = [int]$Response.StatusCode
+        $Headers = $Response.Headers
+        $Content = [string]$Response.Content
+    } catch {
+        # PowerShell 5.1 throws on HTTP 4xx/5xx; capture the response so 503 readiness can be tested.
+        $HttpResponse = $_.Exception.Response
+        if ($null -eq $HttpResponse) { throw }
+        $StatusCode = [int]$HttpResponse.StatusCode
+        $Headers = $HttpResponse.Headers
+        $Stream = $HttpResponse.GetResponseStream()
+        if ($Stream) {
+            $Reader = New-Object System.IO.StreamReader($Stream)
+            try { $Content = $Reader.ReadToEnd() } finally { $Reader.Dispose() }
+        } else { $Content = '{}' }
+    }
+    if ($AllowedStatus -notcontains $StatusCode) {
+        throw "HTTP inesperado em $Url : $StatusCode"
+    }
+    try { $Body = $Content | ConvertFrom-Json -ErrorAction Stop }
+    catch { throw "Resposta JSON inválida em $Url (HTTP $StatusCode)." }
+    return [pscustomobject]@{
+        StatusCode = $StatusCode
+        Headers = $Headers
+        Body = $Body
+    }
 }
 try {
     if ([int]((& $Node.Source --version).TrimStart('v').Split('.')[0]) -lt 22) { throw 'Node.js 22 ou superior é obrigatório.' }
