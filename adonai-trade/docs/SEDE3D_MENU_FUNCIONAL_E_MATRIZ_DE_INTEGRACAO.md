@@ -199,6 +199,13 @@ Em todas as mesas: respostas `verified / stale / unverified / unavailable`; nunc
 - CI verde no commit `5cf08d5e5a5ccad8cee678d22f2dbe89ced2e324`: [run 39152518809](https://github.com/AdonaiShalom/adonaiturbo/actions/runs/39152518809), ambos os jobs `contract-tests` e `windows-powershell-runtime` aprovados.
 - Os testes são determinísticos e não comprovam que credenciais live estejam configuradas nem que os quatro provedores estejam disponíveis no ambiente de execução.
 
+### Busca ampliada do protótipo original — bloqueio confirmado
+
+- Foram verificados os trees recursivos do branch de integração e dos branches `main`, `work/adonai-trade-excellence-roadmap-20261017`, `work/adonai-trade-professionalization-20261016`, `chore/adonai-trade-integration-baseline-2026-10-15` e `feature/rh-adonai-5-empresas`. Nenhum contém `PROTOTIPO_Sede3D_abrir_no_navegador.html`, `public/sede3d.html`, `public/teia3d.js` ou `frontend/index.html`.
+- A pesquisa de código GitHub pelo nome exato do protótipo também retornou zero resultados. A Library do ChatGPT não contém os dois ZIPs nomeados anteriormente, e o diretório de anexos desta conversa está vazio.
+- Por isso, o instalador reversível está pronto e testado, mas não pode ser executado contra o HTML de produção a partir do conector. A integração real exige uma leitura/alteração local do `C:\AdonaiTurbo\frontend\index.html` e do protótipo em `C:\AdonaiTurbo\AdonaiTrade\public\sede3d.html` (ou do caminho real confirmado no Windows).
+- Esse bloqueio não é resolvido por novos commits de contratos; a próxima ação útil é um inventário PowerShell curto dos arquivos reais e dos pontos da aba Trade, sem modificar nada.
+
 ### Percentual oficial nesta atualização
 
 **40% concluído / 60% restante.** Avanço de 1 ponto pelo diagnóstico correto de falhas HTTP dos provedores de mercado: limites de taxa como HTTP 429 agora são distinguíveis de falhas de rede, com contrato de regressão aprovado. A proteção de RH/Supabase com limite de 1 MiB também passou nos testes, assim como o runtime Windows PowerShell 5.1. São melhorias comprovadas de robustez e diagnóstico; não comprovam cotações live em produção, credenciais configuradas ou instalação visual. O HTML original ainda não está na árvore do branch e não foi instalado no Turbo; proxy autenticado e integrações LEVI/EU SOU ponta a ponta seguem pendentes.
