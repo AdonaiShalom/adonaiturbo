@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
-const { MARKER, plan, install } = require('../scripts/install-sede3d-menu.cjs');
+const { MARKER, plan, install } = require('../../scripts/install-sede3d-menu.cjs');
 
 const original = '<!doctype html><html><head><title>Prototype 3D</title></head><body><canvas id="scene3d"></canvas><script>window.scene3d=true;</script></body></html>';
 const result = plan(original);
