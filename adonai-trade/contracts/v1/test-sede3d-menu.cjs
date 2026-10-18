@@ -13,4 +13,6 @@ assert.equal(CHART_SYMBOLS.B3.symbol,'BMFBOVESPA:PETR4');
 assert.equal(CHART_SYMBOLS.INTERNATIONAL.symbol,'NASDAQ:AAPL');
 assert.ok(Object.values(CHART_SYMBOLS).every(x=>x.label&&x.symbol));
 assert.throws(()=>mount(),/browser_document_required/);
+const menuSource = require('node:fs').readFileSync(require.resolve('../../public/sede3d-menu.js'),'utf8');
+assert.match(menuSource,/if\(!destroyed && current==='overview'\)render\(current\)/,'runtime polling must not rerender and erase active module controls/results');
 console.log('3D sede menu: PASS (13 modules, four market desks, external sources, LEVI/EU SOU, fail-closed browser requirement)');
