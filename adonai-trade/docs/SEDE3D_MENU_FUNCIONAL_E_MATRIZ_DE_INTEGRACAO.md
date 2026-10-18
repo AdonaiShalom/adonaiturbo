@@ -144,9 +144,16 @@ Em todas as mesas: respostas `verified / stale / unverified / unavailable`; nunc
 - CI verde nos runs [39150169131](https://github.com/AdonaiShalom/adonaiturbo/actions/runs/39150169131) e [39150167299](https://github.com/AdonaiShalom/adonaiturbo/actions/runs/39150167299), commit `032fed825cbaef3d9e88654e5310b341cc044f69`; testes de contrato e runtime passaram.
 - A evidência foi registrada no Supabase em AT-014. O percentual global não sobe: o HTML do Turbo continua sem receber o protótipo original no ambiente real.
 
+### Instalador reversível para a sede 3D original — ferramenta entregue
+
+- Criado `scripts/install-sede3d-menu.cjs`: por padrão opera em dry-run; exige HTML completo e os três assets de runtime/menu; injeta scripts antes de `</body>`, preserva o canvas/cena existente, detecta instalação repetida e cria backup antes de escrever.
+- Criado `contracts/v1/test-install-sede3d-menu.cjs`: verifica dry-run sem mutação, preservação da cena, instalação, idempotência e restauração exata a partir do backup.
+- Incluído no `npm test`. O contrato do instalador passou no job `contract-tests` do run [39150520833](https://github.com/AdonaiShalom/adonaiturbo/actions/runs/39150520833). O job Windows completo ainda estava em andamento no último ponto de verificação.
+- Para executar no computador que contém os assets e o HTML original, primeiro copiar os três assets para a mesma pasta do protótipo e rodar sem `--write`; só depois da revisão do dry-run usar `--write`. **Não foi executado no HTML original**, porque ele não está disponível no ambiente do GitHub conectado. A instalação visual segue pendente.
+
 ### Percentual oficial nesta atualização
 
-**33% concluído / 67% restante.** Aumentado em 2 pontos porque, além do RH com tarefas e auditoria transacionais, Cripto/Forex/B3/Internacional agora têm contratos de dados mais rigorosos; Forex e Internacional possuem caminho intradiário de 1 minuto com conversão de fuso, checagem de timestamp e falha segura, e os testes dos adaptadores passaram no CI. Não significa que as credenciais dos provedores foram configuradas nem que cotações reais foram confirmadas. O token do runtime e o proxy autenticado do Turbo ainda não foram validados localmente; a instalação visual do protótipo original e o teste do widget no navegador continuam pendentes.
+**34% concluído / 66% restante.** Avanço de 1 ponto pela entrega de um instalador reversível e idempotente para anexar o menu ao HTML original sem substituir a cena 3D, com dry-run, backup e teste automatizado de restauração; o teste do instalador passou no job de contratos do CI. Isso é ferramenta de integração, não instalação concluída. O HTML original ainda não foi modificado, os dados live com credenciais válidas não foram comprovados, e o proxy autenticado do Turbo e as integrações LEVI/EU SOU ponta a ponta seguem pendentes.
 
 ### Documentos de planejamento anteriores
 
