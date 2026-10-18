@@ -83,7 +83,7 @@ jobs:
           $files = @(
             @{ Path = 'adonai-trade/scripts/prepare-prototype-intake.ps1'; Required = @('ExpectedSha256', 'ExtractToDirectory', 'production_files_changed = \$false', 'maxEntryBytes = 50MB', 'maxTotalBytes = 250MB', 'entries.Count -gt 5000', 'public/index\\.html') },
             @{ Path = 'adonai-trade/scripts/compare-prototype-staging.ps1'; Required = @('Get-FileHash', 'production_files_changed = \$false', 'IDENTICAL', 'DIFFERENT') }
-            @{ Path = 'adonai-trade/scripts/review-local-prototype.ps1'; Required = @('prepare-prototype-intake.ps1', 'compare-prototype-staging.ps1', 'ExpectedSha256', 'production_files_changed -ne', 'somente leitura') },
+            @{ Path = 'adonai-trade/scripts/review-local-prototype.ps1'; Required = @('prepare-prototype-intake.ps1', 'compare-prototype-staging.ps1', 'ExpectedSha256', 'production_files_changed -ne', 'somente leitura') }
           )
           foreach ($file in $files) {
             Write-Host ("Parsing PowerShell file: " + $file.Path)
