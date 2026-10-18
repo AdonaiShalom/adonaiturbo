@@ -5,6 +5,12 @@
   if (root) root.AdonaiTradeSedeMenu = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this, function createMenu() {
   const SYMBOLS = Object.freeze({ CRYPTO: 'BTCUSDT', FOREX: 'EURUSD', B3: 'PETR4', INTERNATIONAL: 'AAPL' });
+  const MARKET_SYMBOLS = Object.freeze({
+    CRYPTO: Object.freeze(['BTCUSDT','ETHUSDT','BNBUSDT','SOLUSDT','XRPUSDT']),
+    FOREX: Object.freeze(['EURUSD','GBPUSD','USDJPY','AUDUSD','USDCAD','USDCHF','NZDUSD']),
+    B3: Object.freeze(['PETR4','VALE3','ITUB4','BBDC4','BBAS3','B3SA3','WEGE3']),
+    INTERNATIONAL: Object.freeze(['AAPL','MSFT','NVDA','AMZN','GOOGL','META','TSLA'])
+  });
   const CHART_SYMBOLS = Object.freeze({ CRYPTO: Object.freeze({symbol:'BINANCE:BTCUSDT',label:'Cripto — BTC/USDT'}), FOREX: Object.freeze({symbol:'OANDA:EURUSD',label:'Forex — EUR/USD'}), B3: Object.freeze({symbol:'BMFBOVESPA:PETR4',label:'B3 — PETR4'}), INTERNATIONAL: Object.freeze({symbol:'NASDAQ:AAPL',label:'Internacional — AAPL'}) });
   const MENU = Object.freeze([
     {id:'overview',label:'Sede 3D',group:'Operação'},
@@ -65,11 +71,14 @@
         panel.append(card('Dados e evidências','Sem inferências','Atividade de equipes e probabilidades só aparecem quando o runtime fornecer evidência verificável.'));
       } else if(['CRYPTO','FOREX','B3','INTERNATIONAL'].includes(id)){
         const d=state&&state.desks.find(x=>x.id===id);
-        const symbols={CRYPTO:'BTCUSDT',FOREX:'EURUSD',B3:'PETR4',INTERNATIONAL:'AAPL'};
-        panel.append(card(symbols[id],d?d.quoteStatus:'runtime indisponível',d?'Provedor: '+d.provider+'. Configurado: '+(d.providerConfigured?'sim':'não')+'. Modo: '+d.dataMode+'.':'Sem estado atual confirmado.'));
+        const symbols=MARKET_SYMBOLS[id]||[SYMBOLS[id]];
+        const selector=node('select');selector.setAttribute('aria-label','Selecionar instrumento de '+id);selector.style.cssText='max-width:100%;padding:8px;background:#102238;color:#e8f1ff;border:1px solid #4a6c8d;border-radius:7px;margin:6px 0';
+        for(const symbol of symbols){const opt=node('option',symbol);opt.value=symbol;selector.appendChild(opt);}
+        panel.append(card('Mesa '+id,d?d.quoteStatus:'runtime indisponível',d?'Provedor: '+d.provider+'. Configurado: '+(d.providerConfigured?'sim':'não')+'. Modo: '+d.dataMode+'.':'Sem estado atual confirmado.'),selector);
         const b=node('button','Consultar cotação');b.type='button';b.addEventListener('click',async()=>{
+          const selectedSymbol=selector.value;
           b.disabled=true;b.textContent='Consultando…';let result;
-          try{const r=await fetch(baseUrl+'/api/v1/markets/quote?desk='+encodeURIComponent(id)+'&symbol='+encodeURIComponent(symbols[id]),{headers:{accept:'application/json'},cache:'no-store'});result={ok:r.ok,data:await r.json(),status:r.status};}
+          try{const r=await fetch(baseUrl+'/api/v1/markets/quote?desk='+encodeURIComponent(id)+'&symbol='+encodeURIComponent(selectedSymbol),{headers:{accept:'application/json'},cache:'no-store'});result={ok:r.ok,data:await r.json(),status:r.status};}
           catch(e){result={ok:false,error:e&&e.message?e.message:'erro de rede'};}
           b.disabled=false;b.textContent='Consultar cotação';const old=panel.querySelector('[data-quote]');if(old)old.remove();const out=node('div',undefined,'card');out.dataset.quote='1';
           if(!result.ok)out.append(node('strong','Cotação indisponível'),node('p',result.error||('HTTP '+result.status)));
@@ -146,5 +155,5 @@
     render('overview');refresh();timer=setInterval(refresh,Number.isFinite(options.pollIntervalMs)&&options.pollIntervalMs>=1000?options.pollIntervalMs:15000);
     return {refresh,destroy(){destroyed=true;if(timer)clearInterval(timer);menu.remove();panel.remove();style.remove();}};
   }
-  return Object.freeze({getMenu,mount,MENU,SYMBOLS,CHART_SYMBOLS});
+  return Object.freeze({getMenu,mount,MENU,SYMBOLS,MARKET_SYMBOLS,CHART_SYMBOLS});
 });
