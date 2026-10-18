@@ -56,6 +56,8 @@ jobs:
         run: node adonai-trade/contracts/v1/test-integration-status.cjs
       - name: Run Supabase audit adapter tests
         run: node adonai-trade/contracts/v1/test-audit-ledger.cjs
+      - name: Verify live audit smoke requires explicit opt-in
+        run: node adonai-trade/contracts/v1/test-live-audit-smoke-guard.cjs
       - name: Run HTTP runtime tests
         run: node adonai-trade/contracts/v1/test-runtime-http.cjs
       - name: Run HTTP body-limit regression tests
