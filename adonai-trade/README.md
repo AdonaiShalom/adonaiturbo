@@ -40,7 +40,7 @@ O comando exige confirmação explícita e imprime somente o status e o identifi
 - B3: Brapi; requer `BRAPI_TOKEN` privado e um timestamp de mercado recente.
 - Internacional: Alpha Vantage; requer `ALPHAVANTAGE_API_KEY`. A resposta Global Quote não fornece timestamp intradiário confiável, então o adaptador a marca `unverified` em vez de fingir que é cotação atual.
 
-Endpoint `GET /api/v1/markets/quote?desk=...&symbol=...` retorna `verified`, `stale`, `unverified` ou `unavailable`. Resposta indisponível usa HTTP 503. Todas as respostas indicam `mode: read_only` e `execution_enabled: false`. Chaves não configuradas, símbolos inválidos, falhas do provedor e timestamps ausentes são tratados explicitamente.
+Endpoint `GET /api/v1/markets/quote?desk=...&symbol=...` retorna `verified`, `stale`, `unverified` ou `unavailable`. Resposta indisponível usa HTTP 503. Todas as respostas indicam `mode: read_only` e `execution_enabled: false`. Chaves não configuradas, símbolos inválidos, falhas do provedor e timestamps ausentes são tratados explicitamente. O adaptador cancela requisições após 5 segundos e limita corpos de resposta a 1 MiB, incluindo validação antes de acumular respostas em streaming.
 
 ## Quatro mesas
 `GET /api/v1/markets` lista Cripto, Forex, B3 e Internacional. A existência de um adaptador não significa que a credencial esteja configurada nem que o provedor tenha sido validado ao vivo. Testes automatizados usam respostas simuladas e não provam conectividade externa.
