@@ -48,3 +48,5 @@ jobs:
         run: node adonai-trade/contracts/v1/test-audit-ledger.cjs
       - name: Run HTTP runtime tests
         run: node adonai-trade/contracts/v1/test-runtime-http.cjs
+      - name: Run HTTP body-limit regression tests
+        run: node adonai-trade/contracts/v1/test-runtime-http-fixed.cjs
