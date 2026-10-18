@@ -101,6 +101,13 @@ Em todas as mesas: respostas `verified / stale / unverified / unavailable`; nunc
 - Commit de alteração da workflow: `46e3a2aa030cc1784c58be73f049a77f8107d291`. Validação concluída: os runs [39146806219](https://github.com/AdonaiShalom/adonaiturbo/actions/runs/39146806219) e [39146806260](https://github.com/AdonaiShalom/adonaiturbo/actions/runs/39146806260) passaram; os passos `Run Fear & Greed source adapter and HTTP endpoint tests` e `Run 3D sede menu contract` tiveram conclusão `success`, assim como `windows-powershell-runtime`. A evidência está registrada no Supabase. Isso valida o código no branch, não a instalação local.
 - O código está na branch de integração; não está instalado no Windows nem incorporado no HTML original. A sede visual, o RH real e a integração da aba Turbo continuam pendentes.
 
+### Atualização de execução — tarefas RH autenticadas e auditoria transacional
+
+- Adicionados os RPCs Supabase `rh_create_task_with_audit` e `rh_update_task_status_with_audit`. Cada operação grava a alteração da tarefa e o evento de auditoria na mesma transação do banco; a decisão usa o contrato permitido `proposal_only` e os detalhes identificam o tipo de evento.
+- Adicionados ao runtime os endpoints `POST /api/v1/rh/tasks` e `PATCH /api/v1/rh/tasks/:id/status`. Escritas exigem `RH_API_TOKEN` com pelo menos 32 caracteres, comparação constante do token, validação do corpo e chamada ao RPC transacional. Se a variável não estiver configurada, a escrita falha fechada; o token nunca vai para o navegador.
+- Testes automatizados cobrem criação/atualização via RPC simulado, entradas inválidas, autenticação obrigatória, endpoint HTTP, ausência de vazamento de chave e modo paper. Os runs [39147955092](https://github.com/AdonaiShalom/adonaiturbo/actions/runs/39147955092) e [39147955670](https://github.com/AdonaiShalom/adonaiturbo/actions/runs/39147955670) passaram em Linux e Windows.
+- Teste no Supabase conectado: a criação e atualização da tarefa `RH-2026-001` foram executadas pela função SQL; o estado foi confirmado como `in_progress`, e os dois eventos correspondentes (`rh_task_created` e `rh_task_status_updated`) apareceram na tabela de auditoria. Isso valida as funções SQL no projeto conectado, mas ainda não comprova que o runtime local esteja configurado com `RH_API_TOKEN` nem que o Turbo faça proxy autenticado.
+
 ### Atualização de execução — RH com dados persistidos
 
 - Criado o esquema Supabase `adonai_trade.rh_roles` e `adonai_trade.rh_tasks`, com RLS ativado, acesso direto negado a `anon` e `authenticated`, e acesso do `service_role` apenas no backend. O catálogo possui sete funções: orquestração/LEVI, risco, pesquisa, dados de mercado, simulação paper, auditoria e supervisão humana.
@@ -117,7 +124,7 @@ Em todas as mesas: respostas `verified / stale / unverified / unavailable`; nunc
 
 ### Percentual oficial nesta atualização
 
-**29% concluído / 71% restante.** Aumentado em 2 pontos porque, além da seleção de gráficos TradingView por quatro mercados, o catálogo RH foi criado no Supabase, o endpoint de leitura de funções/tarefas foi ligado ao painel e os testes Linux/Windows passaram. A validação confirma sete funções cadastradas, mas ainda zero tarefas RH e zero eventos de auditoria no runtime. Não significa que o widget foi testado no navegador, que as cotações ao vivo foram validadas ou que a sede visual foi instalada no HTML original.
+**31% concluído / 69% restante.** Aumentado em 2 pontos porque o RH agora possui catálogo, leitura real, endpoints de escrita protegidos por token e RPCs transacionais que gravam tarefa + auditoria; os testes Linux/Windows passaram e uma criação/atualização real no Supabase foi confirmada com dois eventos. O token do runtime e o proxy autenticado do Turbo ainda não foram validados localmente. Também seguem pendentes a instalação visual do protótipo original, o teste do widget no navegador e a validação dos dados de mercado ao vivo.
 
 ### Documentos de planejamento anteriores
 
