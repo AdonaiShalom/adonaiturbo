@@ -43,7 +43,7 @@ try {
         }
     }
 
-    $matches = @($entries | Where-Object {
+    $relevantFiles = @($entries | Where-Object {
         $_ -match '(?i)(prototipo.*\.html|sede3d\.html|teia3d\.js|(^|/)public/index\.html$|(^|/)server\.js$|(^|/)package\.json$)'
     })
     if (-not ($entries | Where-Object { $_ -match '(?i)sede3d\.html' })) {
@@ -81,7 +81,7 @@ $manifest = [pscustomobject]@{
     extracted_to_staging = $true
     production_files_changed = $false
     prototype_html = $prototypeHtml
-    relevant_files = $matches
+    relevant_files = $relevantFiles
     next_gate = 'Comparar o protótipo extraído com C:\AdonaiTurbo\AdonaiTrade; não copiar para produção automaticamente.'
 }
 $reportPath = Join-Path $stage 'prototype-intake-report.json'
@@ -94,4 +94,4 @@ Write-Host ("Staging: " + $stage)
 Write-Host ("Relatório: " + $reportPath)
 Write-Host 'Nenhum arquivo de produção foi alterado.' -ForegroundColor Yellow
 Write-Host 'Arquivos relevantes:'
-$matches | Sort-Object -Unique | ForEach-Object { Write-Host (" - " + $_) }
+$relevantFiles | Sort-Object -Unique | ForEach-Object { Write-Host (" - " + $_) }
