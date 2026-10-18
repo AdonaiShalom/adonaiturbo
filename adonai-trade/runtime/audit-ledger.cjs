@@ -1,0 +1,66 @@
+'use strict';
+
+const crypto = require('node:crypto');
+
+function createSupabaseAuditLedger(env = process.env, fetchImpl = fetch) {
+  const baseUrl = (env.SUPABASE_URL || '').replace(/\/+$/, '');
+  const key = env.SUPABASE_SERVICE_ROLE_KEY || '';
+  if (!baseUrl || !key) return null;
+  let parsed;
+  try { parsed = new URL(baseUrl); } catch { return null; }
+  if (parsed.protocol !== 'https:' && parsed.hostname !== '127.0.0.1' && parsed.hostname !== 'localhost') return null;
+
+  const endpoint = baseUrl + '/rest/v1/runtime_audit_events';
+  async function request(url, init) {
+    const response = await fetchImpl(url, {
+      ...init,
+      headers: {
+        apikey: key,
+        authorization: 'Bearer ' + key,
+        'content-type': 'application/json',
+        ...init.headers
+      },
+      signal: AbortSignal.timeout(4000)
+    });
+    if (!response.ok) throw new Error('audit_store_http_' + response.status);
+    return response;
+  }
+
+  return {
+    async check() {
+      await request(endpoint + '?select=event_id&limit=1', { method: 'GET' });
+      return true;
+    },
+    async append(input) {
+      const envelope = input && input.envelope;
+      const decision = input && input.decision;
+      if (!decision || !['blocked', 'no_order', 'proposal_only'].includes(decision.decision)) {
+        throw new Error('invalid_audit_decision');
+      }
+      const event = {
+        event_id: crypto.randomUUID(),
+        created_at: new Date().toISOString(),
+        service: 'adonai-trade',
+        service_version: '0.1.0',
+        correlation_id: envelope && envelope.correlation_id || null,
+        task_id: envelope && envelope.task_id || null,
+        market: envelope && envelope.market || null,
+        decision: decision.decision,
+        reason_codes: Array.isArray(decision.reason_codes) ? decision.reason_codes : ['unspecified'],
+        details: {
+          mode: 'paper',
+          execution_performed: false,
+          request_id: input.requestId || null
+        }
+      };
+      await request(endpoint, {
+        method: 'POST',
+        headers: { prefer: 'return=minimal' },
+        body: JSON.stringify(event)
+      });
+      return { persisted: true, event_id: event.event_id };
+    }
+  };
+}
+
+module.exports = { createSupabaseAuditLedger };
