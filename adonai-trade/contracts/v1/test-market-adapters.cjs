@@ -12,7 +12,7 @@ async function main() {
     if (u.hostname === 'api.frankfurter.dev') return { ok: true, status: 200, async json() { return { date: '2026-10-18', rates: { USD: 1.08 } }; } };
     if (u.hostname === 'brapi.dev') {
       assert.equal(options.headers.Authorization, 'Bearer test-token');
-      return { ok: true, status: 200, async json() { return { results: [{ regularMarketPrice: 38.5, regularMarketTime: Math.floor((nowMs - 2000) / 1000) }] }; }
+      return { ok: true, status: 200, async json() { return { results: [{ regularMarketPrice: 38.5, regularMarketTime: Math.floor((nowMs - 2000) / 1000) }] }; } };
     }
     if (u.hostname === 'www.alphavantage.co') return { ok: true, status: 200, async json() { return { 'Global Quote': { '05. price': '123.4', '07. latest trading day': '2026-10-17' } }; } };
     throw new Error('unexpected provider');
