@@ -7,6 +7,7 @@ on:
       - 'adonai-trade/runtime/**'
       - 'adonai-trade/supabase/**'
       - 'adonai-trade/package.json'
+      - 'adonai-trade/public/**'
       - 'adonai-trade/scripts/**'
       - '.github/workflows/adonai-trade-contract.yml'
   push:
@@ -68,6 +69,8 @@ jobs:
         run: node adonai-trade/contracts/v1/test-market-adapters.cjs
       - name: Run original 3D prototype runtime bridge contract
         run: node adonai-trade/contracts/v1/test-runtime-bridge.cjs
+      - name: Run 3D runtime polling client regression
+        run: node adonai-trade/contracts/v1/test-runtime-bridge-client.cjs
 
   windows-powershell-runtime:
     runs-on: windows-latest
