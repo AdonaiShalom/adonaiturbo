@@ -139,7 +139,9 @@
       if(destroyed)return;
       try{const bridge=root.AdonaiTradeRuntimeBridge;if(!bridge||typeof bridge.readState!=='function')throw new Error('runtime_bridge_unavailable');state=await bridge.readState({baseUrl});footer.textContent='Runtime conectado • '+formatTime(state.fetchedAt)+' • modo paper';}
       catch{state=null;footer.textContent='Runtime indisponível • sem dados atuais • modo paper';}
-      if(!destroyed)render(current);
+      // Polling must not destroy a module's active controls or query results every 15 seconds.
+      // The overview is safe to refresh automatically; other modules refresh on explicit navigation/action.
+      if(!destroyed && current==='overview')render(current);
     }
     render('overview');refresh();timer=setInterval(refresh,Number.isFinite(options.pollIntervalMs)&&options.pollIntervalMs>=1000?options.pollIntervalMs:15000);
     return {refresh,destroy(){destroyed=true;if(timer)clearInterval(timer);menu.remove();panel.remove();style.remove();}};
