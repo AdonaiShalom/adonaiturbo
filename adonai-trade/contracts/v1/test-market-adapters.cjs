@@ -49,6 +49,14 @@ async function main() {
   assert.equal(oversizedDeclared.status, 'unavailable'); assert.equal(oversizedDeclared.reason_code, 'provider_response_too_large');
   const oversizedBody = await getQuote({ desk: 'CRYPTO', symbol: 'BTCUSDT', fetchImpl: async () => ({ ok: true, status: 200, async json() { return { payload: 'x'.repeat(MAX_RESPONSE_BYTES + 1) }; } }), nowMs });
   assert.equal(oversizedBody.status, 'unavailable'); assert.equal(oversizedBody.reason_code, 'provider_response_too_large');
+  let oversizedStreamCancelled = false;
+  const oversizedStreaming = await getQuote({ desk: 'CRYPTO', symbol: 'BTCUSDT', fetchImpl: async (_url, options) => {
+    assert.equal(options.redirect, 'error', 'provider redirects must not be followed');
+    assert.ok(options.signal instanceof AbortSignal, 'provider request must have an abort signal');
+    return { ok: true, status: 200, headers: { get: () => null }, body: new ReadableStream({ start(controller) { controller.enqueue(new Uint8Array(MAX_RESPONSE_BYTES + 1)); }, cancel() { oversizedStreamCancelled = true; } }) };
+  }, nowMs });
+  assert.equal(oversizedStreaming.status, 'unavailable'); assert.equal(oversizedStreaming.reason_code, 'provider_response_too_large');
+  assert.equal(oversizedStreamCancelled, true, 'oversized streaming body must be cancelled before buffering');
 
   const server = createServer({ now: () => nowMs, auditLedger: null, env: {}, fetchImpl: fetchMock, quoteRateLimit: 3 });
   await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
