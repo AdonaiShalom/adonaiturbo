@@ -1,5 +1,8 @@
 # Adonai Trade — runbook de integração local com a sede 3D original
 
+> **Hierarquia do planejamento:** o plano canônico único está em [SEDE3D_MENU_FUNCIONAL_E_MATRIZ_DE_INTEGRACAO.md](./SEDE3D_MENU_FUNCIONAL_E_MATRIZ_DE_INTEGRACAO.md). Este arquivo é apenas um procedimento técnico subordinado; checklists anteriores não são objetivos paralelos e devem ser lidos segundo o plano canônico versão 25% → 100%.
+
+
 ## Objetivo
 
 Conectar o protótipo original `PROTOTIPO_Sede3D_abrir_no_navegador.html` à aba Adonai Trade de `C:\\AdonaiTurbo\\frontend\\index.html`, mantendo o runtime independente em `C:\\AdonaiTurbo\\AdonaiTrade` na porta 3100. O Turbo permanece em 3000 e o PSM Grupo Market em 3001.
