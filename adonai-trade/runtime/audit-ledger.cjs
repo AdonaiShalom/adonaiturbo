@@ -8,7 +8,8 @@ function createSupabaseAuditLedger(env = process.env, fetchImpl = fetch) {
   if (!baseUrl || !key) return null;
   let parsed;
   try { parsed = new URL(baseUrl); } catch { return null; }
-  if (parsed.protocol !== 'https:' && parsed.hostname !== '127.0.0.1' && parsed.hostname !== 'localhost') return null;
+  const localHttp = parsed.protocol === 'http:' && (parsed.hostname === '127.0.0.1' || parsed.hostname === 'localhost' || parsed.hostname === '[::1]');
+  if ((parsed.protocol !== 'https:' && !localHttp) || parsed.username || parsed.password || parsed.search || parsed.hash) return null;
 
   const endpoint = baseUrl + '/rest/v1/runtime_audit_events';
   async function request(url, init) {
