@@ -31,7 +31,7 @@ function validateEnvelope(envelope) {
 
   const required = [
     'schema_version', 'correlation_id', 'task_id', 'requested_by',
-    'market', 'task_type', 'mode', 'created_at', 'payload'
+    'market', 'task_type', 'mode', 'created_at', 'expires_at', 'payload'
   ];
   for (const key of required) {
     if (!Object.hasOwn(envelope, key)) errors.push('missing_field:' + key);
@@ -45,7 +45,7 @@ function validateEnvelope(envelope) {
   if (!TASK_TYPES.has(envelope.task_type)) errors.push('unsupported_task_type');
   if (envelope.mode !== 'paper') errors.push('paper_mode_required');
   if (typeof envelope.created_at !== 'string' || !Number.isFinite(Date.parse(envelope.created_at))) errors.push('invalid_created_at');
-  if (envelope.expires_at !== undefined && (typeof envelope.expires_at !== 'string' || !Number.isFinite(Date.parse(envelope.expires_at)))) errors.push('invalid_expires_at');
+  if (typeof envelope.expires_at !== 'string' || !Number.isFinite(Date.parse(envelope.expires_at))) errors.push('invalid_expires_at');
   if (!isRecord(envelope.payload)) errors.push('payload_must_be_object');
 
   if (envelope.data_context !== undefined) {
@@ -88,12 +88,15 @@ function evaluatePolicy(input, options = {}) {
   }
 
   const envelope = input.envelope;
-  if (envelope.expires_at && Date.parse(envelope.expires_at) <= nowMs) {
+  if (Date.parse(envelope.created_at) > nowMs) {
+    return { status: 'blocked', decision: 'blocked', reason_codes: ['task_created_in_future'] };
+  }
+  if (Date.parse(envelope.expires_at) <= nowMs) {
     return { status: 'blocked', decision: 'blocked', reason_codes: ['task_expired'] };
   }
 
   const context = envelope.data_context;
-  if (!context || context.data_quality !== 'verified' || !context.observed_at) {
+  if (!context || context.data_quality !== 'verified' || !context.observed_at || typeof context.provider !== 'string' || !context.provider.trim()) {
     return { status: 'blocked', decision: 'blocked', reason_codes: ['data_provenance_not_verified'] };
   }
   const ageMs = nowMs - Date.parse(context.observed_at);
