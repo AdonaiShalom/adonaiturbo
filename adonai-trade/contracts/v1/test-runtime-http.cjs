@@ -56,6 +56,25 @@ async function main() {
     await new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
   }
 
+  const configuredMarkets = createServer({
+    now: () => nowMs,
+    auditLedger,
+    env: { BRAPI_TOKEN: 'test-brapi-token', ALPHAVANTAGE_API_KEY: 'test-alpha-key' }
+  });
+  await new Promise((resolve) => configuredMarkets.listen(0, '127.0.0.1', resolve));
+  try {
+    const response = await fetch('http://127.0.0.1:' + configuredMarkets.address().port + '/api/v1/markets');
+    assert.equal(response.status, 200);
+    const body = await response.json();
+    assert.equal(body.data_status, 'providers_configured');
+    assert.ok(body.desks.every((desk) => desk.provider_configured === true));
+    assert.ok(body.desks.every((desk) => desk.quote_status === 'not_checked'));
+    assert.equal(body.execution_enabled, false);
+    console.log('PASS: runtime market status reflects server environment without claiming live quotes');
+  } finally {
+    await new Promise((resolve, reject) => configuredMarkets.close((error) => error ? reject(error) : resolve()));
+  }
+
   const unconfigured = createServer({ now: () => nowMs, auditLedger: null });
   await new Promise((resolve) => unconfigured.listen(0, '127.0.0.1', resolve));
   const unconfiguredBase = 'http://127.0.0.1:' + unconfigured.address().port;
