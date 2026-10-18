@@ -31,6 +31,12 @@ async function main() {
     });
     assert.equal(badJson.status, 400);
 
+    const unsupportedType = await fetch(base + '/api/v1/policy/evaluate', {
+      method: 'POST', headers: { 'content-type': 'text/plain' }, body: '{}'
+    });
+    assert.equal(unsupportedType.status, 415);
+    assert.equal((await unsupportedType.json()).execution_performed, false);
+
     const oversized = await fetch(base + '/api/v1/policy/evaluate', {
       method: 'POST', headers: { 'content-type': 'application/json' }, body: 'x'.repeat(70 * 1024)
     });
@@ -69,6 +75,23 @@ async function main() {
     console.log('PASS: runtime blocks readiness and evaluation without audit ledger');
   } finally {
     await close(unconfigured);
+  }
+
+  const rateLimited = createServer({ now: () => nowMs, auditLedger, policyRateLimit: 1 });
+  const rateBase = await listen(rateLimited);
+  try {
+    const request = () => fetch(rateBase + '/api/v1/policy/evaluate', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ envelope: { mode: 'live' } })
+    });
+    assert.equal((await request()).status, 422);
+    const limited = await request();
+    assert.equal(limited.status, 429);
+    assert.equal((await limited.json()).execution_performed, false);
+    assert.ok(Number(limited.headers.get('retry-after')) >= 1);
+    console.log('PASS: unsupported content type is rejected and policy rate limit blocks excess requests');
+  } finally {
+    await close(rateLimited);
   }
 
   const failing = createServer({
