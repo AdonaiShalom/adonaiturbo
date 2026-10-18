@@ -20,7 +20,7 @@ assert.match(menuSource,/MARKET_SYMBOLS/,'each market must expose an instrument 
 assert.match(menuSource,/Selecionar instrumento de /,'market panel must allow instrument selection');
 assert.match(menuSource,/encodeURIComponent\(selectedSymbol\)/,'quote query must use the selected instrument');
 assert.deepEqual(MARKET_SYMBOLS.CRYPTO,['BTCUSDT','ETHUSDT','BNBUSDT','SOLUSDT','XRPUSDT']);
-assert.deepEqual(menu.MARKET_SYMBOLS.FOREX,['EURUSD','GBPUSD','USDJPY','AUDUSD','USDCAD','USDCHF','NZDUSD']);
-assert.ok(menu.MARKET_SYMBOLS.B3.includes('PETR4') && menu.MARKET_SYMBOLS.B3.includes('VALE3'));
-assert.ok(menu.MARKET_SYMBOLS.INTERNATIONAL.includes('AAPL') && menu.MARKET_SYMBOLS.INTERNATIONAL.includes('NVDA'));
+assert.deepEqual(MARKET_SYMBOLS.FOREX,['EURUSD','GBPUSD','USDJPY','AUDUSD','USDCAD','USDCHF','NZDUSD']);
+assert.ok(MARKET_SYMBOLS.B3.includes('PETR4') && MARKET_SYMBOLS.B3.includes('VALE3'));
+assert.ok(MARKET_SYMBOLS.INTERNATIONAL.includes('AAPL') && MARKET_SYMBOLS.INTERNATIONAL.includes('NVDA'));
 console.log('3D sede menu: PASS (13 modules, four market desks, external sources, LEVI/EU SOU, fail-closed browser requirement)');
