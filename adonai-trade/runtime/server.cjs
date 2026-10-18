@@ -57,7 +57,7 @@ function createServer(options = {}) {
     const timestamp = new Date(now()).toISOString();
     if (req.method === 'GET' && url.pathname === '/health') return send(res, 200, { service: SERVICE, version: VERSION, timestamp, mode: 'paper', status: 'alive' });
     if (req.method === 'GET' && url.pathname === '/api/v1/integrations') return send(res, 200, { service: SERVICE, version: VERSION, timestamp, ...listIntegrationStatus(env) });
-    if (req.method === 'GET' && url.pathname === '/api/v1/markets') return send(res, 200, { service: SERVICE, version: VERSION, timestamp, ...listMarketDesks() });
+    if (req.method === 'GET' && url.pathname === '/api/v1/markets') return send(res, 200, { service: SERVICE, version: VERSION, timestamp, ...listMarketDesks(env) });
     if (req.method === 'GET' && url.pathname === '/api/v1/markets/quote') {
       const rate = quoteRateLimit(req.socket && req.socket.remoteAddress || 'unknown');
       res.setHeader('ratelimit-limit', String(rate.limit));
