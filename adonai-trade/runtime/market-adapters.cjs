@@ -79,7 +79,9 @@ async function getQuote({ desk, symbol, env = process.env, fetchImpl = globalThi
       const data = await getJson(fetchImpl, 'https://api.frankfurter.dev/v1/latest?base=' + base + '&symbols=' + target);
       const referenceDate = /^\d{4}-\d{2}-\d{2}$/.test(String(data.date || '')) ? data.date : null;
       const referencePrice = Number(data.rates && data.rates[target]);
-      if (!referenceDate || !Number.isFinite(Date.parse(referenceDate + 'T00:00:00Z')) || !Number.isFinite(referencePrice) || referencePrice <= 0) {
+      const parsedReferenceDate = referenceDate ? new Date(referenceDate + 'T00:00:00Z') : null;
+      const validCalendarDate = Boolean(parsedReferenceDate && Number.isFinite(parsedReferenceDate.getTime()) && parsedReferenceDate.toISOString().slice(0, 10) === referenceDate);
+      if (!validCalendarDate || !Number.isFinite(referencePrice) || referencePrice <= 0) {
         return quote('unverified', { desk: id, symbol: base + '/' + target, source: 'frankfurter_ecb_reference', reason_code: 'invalid_daily_reference_data' });
       }
       // Frankfurter/BCE provides daily reference rates, not an intraday market quote.
