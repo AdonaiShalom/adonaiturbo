@@ -15,7 +15,7 @@ function listMarketDesks(env = process.env) {
       (desk.id === 'B3' && Boolean(env.BRAPI_TOKEN)) ||
       (desk.id === 'INTERNATIONAL' && Boolean(env.ALPHAVANTAGE_API_KEY));
     const dataMode = desk.id === 'FOREX' ? (env.ALPHAVANTAGE_API_KEY ? 'intraday_1min_timestamp_checked' : 'daily_reference_not_intraday') :
-      desk.id === 'INTERNATIONAL' ? 'intraday_1min_timestamp_checked' :
+      desk.id === 'INTERNATIONAL' ? (env.ALPHAVANTAGE_API_KEY ? 'intraday_1min_timestamp_checked' : 'intraday_1min_provider_key_required') :
       'read_only_quote_adapter';
     return {
       ...desk,
