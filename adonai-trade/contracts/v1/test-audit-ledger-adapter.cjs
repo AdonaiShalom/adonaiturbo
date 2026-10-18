@@ -50,6 +50,15 @@ async function main() {
 
   const failing = createSupabaseAuditLedger(env, async () => ({ ok: false, status: 403 }));
   await assert.rejects(failing.check(), /audit_store_http_403/);
+  const failingAppend = createSupabaseAuditLedger(env, async () => ({ ok: false, status: 503 }));
+  await assert.rejects(
+    failingAppend.append({
+      envelope: { correlation_id: '11111111-1111-4111-8111-111111111111', task_id: '22222222-2222-4222-8222-222222222222', market: 'CRYPTO' },
+      decision: { decision: 'no_order', reason_codes: ['analysis_only'] },
+      requestId: 'request-fail'
+    }),
+    /audit_store_http_503/
+  );
   const missing = createSupabaseAuditLedger({}, fakeFetch);
   assert.equal(missing, null, 'missing configuration fails closed');
   const insecure = createSupabaseAuditLedger({ SUPABASE_URL: 'http://example.com', SUPABASE_SERVICE_ROLE_KEY: 'x' }, fakeFetch);
