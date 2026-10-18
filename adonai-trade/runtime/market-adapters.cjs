@@ -147,7 +147,7 @@ async function getQuote({ desk, symbol, env = process.env, fetchImpl = globalThi
     if (!row || !observedAt) return quote('unverified', { desk: id, symbol: normalizedSymbol, source: 'alphavantage_intraday_1min', reason_code: 'invalid_provider_timestamp_or_timezone' });
     return freshQuote({ desk: id, symbol: normalizedSymbol, price: row['4. close'], currency: 'USD', source: 'alphavantage_intraday_1min', observedAt, nowMs });
   } catch (error) {
-    const reason = error && error.code === 'PROVIDER_RESPONSE_TOO_LARGE' ? 'provider_response_too_large' : error && error.name === 'AbortError' ? 'provider_timeout' : error && /^provider_http_\\d{3}$/.test(error.message) ? error.message : 'provider_request_failed';
+    const reason = error && error.code === 'PROVIDER_RESPONSE_TOO_LARGE' ? 'provider_response_too_large' : error && error.name === 'AbortError' ? 'provider_timeout' : error && /^provider_http_[0-9]{3}$/.test(error.message) ? error.message : 'provider_request_failed';
     return quote('unavailable', { desk: id, symbol: normalizedSymbol, reason_code: reason });
   }
 }
