@@ -27,3 +27,8 @@ Requer Node.js 22+. A partir desta pasta, execute `npm test` e depois `npm start
 O ledger usa o schema PostgREST `adonai_trade`. As configurações de conexão devem existir apenas no ambiente privado do servidor. A migration `supabase/migrations/20261018100000_runtime_audit_events.sql` ainda não foi aplicada ao projeto conectado. Não considerar a integração operacional até testar /ready e confirmar uma gravação real no ambiente alvo.
 
 Sem ledger disponível, `/ready` permanece em HTTP 503 e a avaliação falha fechada em HTTP 503. Nenhuma ordem é executada.
+
+
+### Descoberta das quatro mesas
+
+`GET /api/v1/markets` lista Cripto, Forex, B3 e Internacional. Até que provedores sejam configurados e testados, cada mesa informa `quote_status: unavailable`, `provider_configured: false` e `execution_enabled: false`. Isso é um catálogo de capacidades, não um feed de cotações.
