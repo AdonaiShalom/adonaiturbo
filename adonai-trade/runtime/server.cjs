@@ -78,6 +78,8 @@ function createServer(options = {}) {
         res.setHeader('retry-after', String(rate.retryAfterSeconds));
         return send(res, 429, { service: SERVICE, version: VERSION, timestamp, status: 'rate_limited', reason_codes: ['policy_rate_limit_exceeded'], retry_after_seconds: rate.retryAfterSeconds, execution_performed: false, audit_persisted: false });
       }
+      const contentType = String(req.headers['content-type'] || '').split(';', 1)[0].trim().toLowerCase();
+      if (contentType !== 'application/json') return send(res, 415, { service: SERVICE, version: VERSION, timestamp, status: 'blocked', reason_codes: ['unsupported_media_type'], execution_performed: false, audit_persisted: false });
       let input;
       try { input = await readJson(req); }
       catch (error) {
