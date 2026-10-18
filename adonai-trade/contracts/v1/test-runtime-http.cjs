@@ -38,6 +38,22 @@ async function main() {
     assert.deepEqual(marketBody.desks.map((desk) => desk.id), ['CRYPTO', 'FOREX', 'B3', 'INTERNATIONAL']);
     assert.equal(marketBody.data_status, 'partially_configured');
     assert.equal(marketBody.execution_enabled, false);
+    const turboRead = await fetch(base + '/api/v1/markets', { headers: { origin: 'http://127.0.0.1:3000' } });
+    assert.equal(turboRead.headers.get('access-control-allow-origin'), 'http://127.0.0.1:3000');
+    const deniedOrigin = await fetch(base + '/api/v1/markets', { headers: { origin: 'https://untrusted.example' } });
+    assert.equal(deniedOrigin.headers.get('access-control-allow-origin'), null);
+    const preflight = await fetch(base + '/api/v1/markets', {
+      method: 'OPTIONS',
+      headers: { origin: 'http://127.0.0.1:3000', 'access-control-request-method': 'GET' }
+    });
+    assert.equal(preflight.status, 204);
+    assert.equal(preflight.headers.get('access-control-allow-origin'), 'http://127.0.0.1:3000');
+    const deniedPreflight = await fetch(base + '/api/v1/markets', {
+      method: 'OPTIONS',
+      headers: { origin: 'https://untrusted.example', 'access-control-request-method': 'GET' }
+    });
+    assert.equal(deniedPreflight.status, 403);
+    assert.equal((await deniedPreflight.json()).reason_codes[0], 'origin_not_allowed');
     assert.equal((await fetch(base + '/does-not-exist')).status, 404);
     const unsupportedType = await fetch(base + '/api/v1/policy/evaluate', { method: 'POST', headers: { 'content-type': 'text/plain' }, body: '{"envelope":{"mode":"live"}}' });
     assert.equal(unsupportedType.status, 415);
