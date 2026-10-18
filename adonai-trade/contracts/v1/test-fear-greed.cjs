@@ -1,6 +1,6 @@
 'use strict';
 const assert = require('node:assert/strict');
-const { getFearGreed, SOURCE_URL, MAX_AGE_MS } = require('../../runtime/fear-greed.cjs');
+const { getFearGreed, SOURCE_URL, MAX_AGE_MS, MAX_RESPONSE_BYTES } = require('../../runtime/fear-greed.cjs');
 const { createServer } = require('../../runtime/server.cjs');
 
 async function main() {
@@ -27,6 +27,18 @@ async function main() {
 
   const future = await getFearGreed({ nowMs, fetchImpl: async () => ({ ok: true, async json() { return { data: [{ value: '44', timestamp: String(Math.floor((nowMs + 60000) / 1000)) }] }; } }) });
   assert.equal(future.reason_code, 'provider_timestamp_in_future');
+
+  const oversized = await getFearGreed({ nowMs, fetchImpl: async (_url, options) => {
+    assert.equal(options.redirect, 'error');
+    assert.ok(options.signal instanceof AbortSignal);
+    return { ok: true, headers: { get: (name) => name === 'content-length' ? String(MAX_RESPONSE_BYTES + 1) : null }, async json() { throw new Error('must not parse oversized body'); } };
+  } });
+  assert.equal(oversized.status, 'unavailable');
+  assert.equal(oversized.reason_code, 'provider_response_too_large');
+
+  const oversizedBody = await getFearGreed({ nowMs, fetchImpl: async () => ({ ok: true, async json() { return { data: [{ value: '63', timestamp: String(Math.floor(nowMs / 1000)) }], payload: 'x'.repeat(MAX_RESPONSE_BYTES + 1) }; } }) });
+  assert.equal(oversizedBody.status, 'unavailable');
+  assert.equal(oversizedBody.reason_code, 'provider_response_too_large');
 
   const unavailable = await getFearGreed({ nowMs, fetchImpl: async () => { throw new Error('offline'); } });
   assert.equal(unavailable.status, 'unavailable');
