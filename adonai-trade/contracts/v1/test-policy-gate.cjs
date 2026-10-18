@@ -77,4 +77,20 @@ const malformed = evaluatePolicy({ envelope: { ...envelope, market: 'UNKNOWN' },
 assert.equal(malformed.decision, 'blocked');
 assert.ok(malformed.reason_codes.includes('unsupported_market'));
 
-console.log('PASS: deterministic policy gate — approved proposal, live-mode rejection, stale/missing data, risk veto, non-independent risk, expiry, analysis-only and invalid market');
+
+const futureCreated = evaluatePolicy({
+  envelope: { ...envelope, created_at: '2026-10-17T12:00:01.000Z' }, proposal, risk: approvedRisk
+}, { nowMs });
+assert.equal(futureCreated.decision, 'blocked');
+assert.ok(futureCreated.reason_codes.includes('task_created_in_future'));
+
+const missingExpiry = { ...envelope };
+delete missingExpiry.expires_at;
+assert.ok(validateEnvelope(missingExpiry).includes('missing_field:expires_at'));
+
+const missingProvider = { ...envelope, data_context: { ...envelope.data_context, provider: '   ' } };
+const noProvider = evaluatePolicy({ envelope: missingProvider, proposal, risk: approvedRisk }, { nowMs });
+assert.equal(noProvider.decision, 'blocked');
+assert.ok(noProvider.reason_codes.includes('data_provenance_not_verified'));
+
+console.log('PASS: deterministic policy gate — approved proposal, live-mode rejection, stale/missing data, risk veto, non-independent risk, expiry/future timestamps, analysis-only and invalid market');
