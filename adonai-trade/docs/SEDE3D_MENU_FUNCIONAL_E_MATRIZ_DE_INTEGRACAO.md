@@ -87,6 +87,28 @@ Em todas as mesas: respostas `verified / stale / unverified / unavailable`; nunc
 6. Estados de erro devem falhar fechados e apagar indicadores que possam parecer atuais; execução real continua desabilitada.
 7. PSM não é importado, reconfigurado nem utilizado como backend.
 
+## Registro de execução vigente — 2026-10-18
+
+**Este documento é o plano mestre canônico único.** Os documentos antigos de planejamento devem ser tratados como material histórico/técnico subordinado; não criar metas paralelas nem contar documentação repetida como avanço funcional. A trilha de auditoria e os relatórios técnicos são preservados para não apagar evidência.
+
+### Trabalho implementado nesta sessão (ainda sujeito ao CI)
+
+- Criado o adaptador `runtime/fear-greed.cjs` para a API pública de sentimento da Alternative.me: valida valor inteiro 0–100, timestamp numérico, timestamp futuro, idade de até 24 horas e estados `verified`, `stale` ou `unavailable`.
+- Adicionado endpoint read-only `GET /api/v1/sentiment/fear-greed` com rate limit e execução desabilitada.
+- Conectado o painel Fear & Greed do menu da sede ao endpoint, exibindo valor, classificação, horário, idade, origem e aviso de que sentimento não é probabilidade de lucro.
+- Criados testes de payload válido, dado antigo, valor fora da escala, timestamp futuro, falha de rede e endpoint HTTP.
+- Incluídos os testes do menu e do adaptador na workflow do GitHub Actions.
+- Commit de alteração da workflow: `46e3a2aa030cc1784c58be73f049a77f8107d291`. Os testes desta nova função ainda não devem ser declarados aprovados até existir execução do CI que inclua os novos passos.
+- O código está na branch de integração; não está instalado no Windows nem incorporado no HTML original. A sede visual, o RH real e a integração da aba Turbo continuam pendentes.
+
+### Percentual oficial nesta atualização
+
+**25% concluído / 75% restante.** Mantido sem aumento porque os novos arquivos de código ainda não tiveram uma execução de CI comprovada após a inclusão dos testes, e não existe evidência de instalação visual no protótipo original. Quando o CI validar a nova função, atualizar apenas a parcela correspondente a essa entrega; a integração visual só conta após teste no Turbo.
+
+### Documentos de planejamento anteriores
+
+Os antigos documentos de planejamento não constituem planos ativos independentes. A ordem de prioridade é: (1) este plano mestre; (2) runbook técnico como procedimento subordinado; (3) relatórios de auditoria/testes como evidências históricas. Não excluir logs, testes ou evidências de auditoria que sustentem segurança e reversibilidade.
+
 ## Ordem de execução e gates de aceite
 
 - [ ] G0 — revalidar o ZIP real por SHA-256 na máquina de origem e gerar relatório de diferenças atual.
