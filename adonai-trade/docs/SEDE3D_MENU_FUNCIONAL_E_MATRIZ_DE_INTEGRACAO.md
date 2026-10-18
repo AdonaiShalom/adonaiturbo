@@ -98,7 +98,7 @@ Em todas as mesas: respostas `verified / stale / unverified / unavailable`; nunc
 - Conectado o painel Fear & Greed do menu da sede ao endpoint, exibindo valor, classificação, horário, idade, origem e aviso de que sentimento não é probabilidade de lucro.
 - Criados testes de payload válido, dado antigo, valor fora da escala, timestamp futuro, falha de rede e endpoint HTTP.
 - Incluídos os testes do menu e do adaptador na workflow do GitHub Actions.
-- Commit de alteração da workflow: `46e3a2aa030cc1784c58be73f049a77f8107d291`. Os testes desta nova função ainda não devem ser declarados aprovados até existir execução do CI que inclua os novos passos.
+- Commit de alteração da workflow: `46e3a2aa030cc1784c58be73f049a77f8107d291`. Validação concluída: os runs [39146806219](https://github.com/AdonaiShalom/adonaiturbo/actions/runs/39146806219) e [39146806260](https://github.com/AdonaiShalom/adonaiturbo/actions/runs/39146806260) passaram; os passos `Run Fear & Greed source adapter and HTTP endpoint tests` e `Run 3D sede menu contract` tiveram conclusão `success`, assim como `windows-powershell-runtime`. A evidência está registrada no Supabase. Isso valida o código no branch, não a instalação local.
 - O código está na branch de integração; não está instalado no Windows nem incorporado no HTML original. A sede visual, o RH real e a integração da aba Turbo continuam pendentes.
 
 ### Percentual oficial nesta atualização
