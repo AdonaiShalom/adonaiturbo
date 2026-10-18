@@ -3,7 +3,7 @@ param()
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
-$scriptPath = Join-Path $PSScriptRoot '..\scripts\compare-prototype-staging.ps1'
+$scriptPath = Join-Path $PSScriptRoot '..\..\scripts\compare-prototype-staging.ps1'
 $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ('adonai-trade-prototype-diff-test-' + [guid]::NewGuid().ToString('N'))
 $stage = Join-Path $tempRoot 'stage'
 $local = Join-Path $tempRoot 'local'
