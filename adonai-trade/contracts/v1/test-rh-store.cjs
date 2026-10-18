@@ -28,7 +28,7 @@ async function main() {
   assert.equal(createdTask.status,'queued');
   const updatedTask=await updateRhTaskStatus({env,fetchImpl:fakeFetch,taskId:'11111111-1111-4111-8111-111111111111',status:'completed',evidence:{verified:true}});
   assert.equal(updatedTask.status,'completed');
-  await assert.rejects(createRhTask({env,fetchImpl:fakeFetch,taskKey:'bad',title:'ok',roleKey:'risk'}),/invalid_task_key/);
+  await assert.rejects(createRhTask({env,fetchImpl:fakeFetch,taskKey:'bad',title:'Valid title',roleKey:'risk'}),/invalid_task_key/);
   await assert.rejects(updateRhTaskStatus({env,fetchImpl:fakeFetch,taskId:'bad',status:'completed'}),/invalid_task_id/);
   const unavailable=await getRhSnapshot({env:{},fetchImpl:fakeFetch});
   assert.equal(unavailable.status,'unavailable');
