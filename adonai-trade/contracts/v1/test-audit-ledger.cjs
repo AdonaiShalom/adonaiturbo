@@ -29,8 +29,10 @@ async function main() {
   assert.equal(result.persisted, true);
   assert.equal(calls.length, 2);
   assert.match(calls[0].url, /select=event_id&limit=1$/);
+  assert.equal(calls[0].init.headers['accept-profile'], 'adonai_trade');
   assert.equal(calls[1].init.method, 'POST');
   assert.equal(calls[1].init.headers.prefer, 'return=minimal');
+  assert.equal(calls[1].init.headers['content-profile'], 'adonai_trade');
   const event = JSON.parse(calls[1].init.body);
   assert.equal(event.decision, 'blocked');
   assert.deepEqual(event.reason_codes, ['paper_mode_required']);
