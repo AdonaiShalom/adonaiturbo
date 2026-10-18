@@ -29,6 +29,10 @@ async function main() {
   assert.equal(b3.status, 'verified'); assert.equal(b3.currency, 'BRL');
   const international = await getQuote({ desk: 'INTERNATIONAL', symbol: 'IBM', env: { ALPHAVANTAGE_API_KEY: 'test-key' }, fetchImpl: fetchMock, nowMs });
   assert.equal(international.status, 'unverified'); assert.equal(international.reason_code, 'provider_intraday_timestamp_unavailable');
+  const badInternationalPrice = await getQuote({ desk: 'INTERNATIONAL', symbol: 'IBM', env: { ALPHAVANTAGE_API_KEY: 'test-key' }, fetchImpl: async () => ({ ok: true, status: 200, async json() { return { 'Global Quote': { '05. price': '-1', '07. latest trading day': '2026-10-17' } }; } }), nowMs });
+  assert.equal(badInternationalPrice.status, 'unverified'); assert.equal(badInternationalPrice.reason_code, 'invalid_provider_quote_data');
+  const badInternationalDate = await getQuote({ desk: 'INTERNATIONAL', symbol: 'IBM', env: { ALPHAVANTAGE_API_KEY: 'test-key' }, fetchImpl: async () => ({ ok: true, status: 200, async json() { return { 'Global Quote': { '05. price': '123.4', '07. latest trading day': '2026-02-31' } }; } }), nowMs });
+  assert.equal(badInternationalDate.status, 'unverified'); assert.equal(badInternationalDate.reason_code, 'invalid_provider_quote_data');
   const missing = await getQuote({ desk: 'B3', symbol: 'PETR4', env: {}, fetchImpl: fetchMock, nowMs });
   assert.equal(missing.status, 'unavailable'); assert.equal(missing.reason_code, 'brapi_token_not_configured');
   const invalid = await getQuote({ desk: 'CRYPTO', symbol: 'BTC_USDT', fetchImpl: fetchMock, nowMs });
