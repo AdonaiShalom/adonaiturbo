@@ -61,9 +61,9 @@ begin
   values(trim(p_task_key),trim(p_title),p_role_key,p_market,'queued',coalesce(p_evidence,'{}'::jsonb))
   returning * into v_task;
   insert into adonai_trade.runtime_audit_events(event_id,created_at,service,service_version,task_id,market,decision,reason_codes,details)
-  values(gen_random_uuid(),now(),'adonai-trade','0.1.0',v_task.task_id,v_task.market,'rh_task_created',
-    jsonb_build_array('task_persisted','paper_only'),
-    jsonb_build_object('task_key',v_task.task_key,'role_key',v_task.role_key,'status',v_task.status,'execution_performed',false));
+  values(gen_random_uuid(),now(),'adonai-trade','0.1.0',v_task.task_id,v_task.market,'proposal_only',
+    jsonb_build_array('rh_task_created','task_persisted','paper_only'),
+    jsonb_build_object('event_type','rh_task_created','task_key',v_task.task_key,'role_key',v_task.role_key,'status',v_task.status,'execution_performed',false));
   return to_jsonb(v_task);
 end;
 $;
@@ -86,9 +86,9 @@ begin
     returning * into v_task;
   if not found then raise exception 'task_not_found'; end if;
   insert into adonai_trade.runtime_audit_events(event_id,created_at,service,service_version,task_id,market,decision,reason_codes,details)
-  values(gen_random_uuid(),now(),'adonai-trade','0.1.0',v_task.task_id,v_task.market,'rh_task_status_updated',
-    jsonb_build_array('task_status_persisted','paper_only'),
-    jsonb_build_object('task_key',v_task.task_key,'role_key',v_task.role_key,'status',v_task.status,'execution_performed',false));
+  values(gen_random_uuid(),now(),'adonai-trade','0.1.0',v_task.task_id,v_task.market,'proposal_only',
+    jsonb_build_array('rh_task_status_updated','task_status_persisted','paper_only'),
+    jsonb_build_object('event_type','rh_task_status_updated','task_key',v_task.task_key,'role_key',v_task.role_key,'status',v_task.status,'execution_performed',false));
   return to_jsonb(v_task);
 end;
 $;
