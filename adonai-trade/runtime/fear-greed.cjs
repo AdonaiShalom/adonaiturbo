@@ -12,8 +12,11 @@ async function getFearGreed(options = {}) {
   if (typeof fetchImpl !== 'function') {
     return unavailable('fetch_unavailable');
   }
+  const timeoutMs = options.timeoutMs === undefined ? TIMEOUT_MS : Number(options.timeoutMs);
+  if (!Number.isFinite(timeoutMs) || timeoutMs < 100 || timeoutMs > 30000) return unavailable('invalid_timeout_configuration');
   const controller = typeof AbortController === 'function' ? new AbortController() : null;
-  const timer = setTimeout(() => { if (controller) controller.abort(); }, TIMEOUT_MS);
+  if (!controller) return unavailable('abort_controller_unavailable');
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const init = { method: 'GET', headers: { accept: 'application/json' }, redirect: 'error' };
     if (controller) init.signal = controller.signal;
