@@ -3,6 +3,7 @@ const http = require('node:http');
 const { evaluatePolicy } = require('./policy-gate.cjs');
 const { createSupabaseAuditLedger } = require('./audit-ledger.cjs');
 const { listMarketDesks } = require('./market-desks.cjs');
+const { listIntegrationStatus } = require('./integration-status.cjs');
 const MAX_BODY_BYTES = 64 * 1024;
 const SERVICE = 'adonai-trade';
 const VERSION = '0.1.0';
@@ -46,6 +47,9 @@ function createServer(options = {}) {
     if (req.method === 'GET' && url.pathname === '/health') {
       return send(res, 200, { service: SERVICE, version: VERSION, timestamp, mode: 'paper', status: 'alive' });
     }
+    if (req.method === 'GET' && url.pathname === '/api/v1/integrations') {
+      return send(res, 200, { service: SERVICE, version: VERSION, timestamp, ...listIntegrationStatus(options.env || process.env) });
+    }
     if (req.method === 'GET' && url.pathname === '/api/v1/markets') {
       return send(res, 200, { service: SERVICE, version: VERSION, timestamp, ...listMarketDesks() });
     }
@@ -86,7 +90,7 @@ function createServer(options = {}) {
     if (req.method === 'GET' && url.pathname === '/') {
       return send(res, 200, {
         service: SERVICE, version: VERSION, mode: 'paper',
-        endpoints: ['/health', '/ready', '/api/v1/markets', '/api/v1/policy/evaluate'],
+        endpoints: ['/health', '/ready', '/api/v1/integrations', '/api/v1/markets', '/api/v1/policy/evaluate'],
         limitations: ['no_market_adapters', 'no_order_execution']
       });
     }
