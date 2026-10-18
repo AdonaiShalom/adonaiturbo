@@ -99,6 +99,11 @@ jobs:
             }
           }
           Write-Host 'Prototype intake and read-only comparison scripts passed PowerShell syntax and safety-marker checks.'
+      - name: Test prototype ZIP intake in isolated staging on Windows PowerShell 5.1
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          & 'adonai-trade/contracts/v1/test-prototype-intake.ps1'
       - name: Test read-only prototype comparison on Windows PowerShell 5.1
         shell: powershell
         run: |
