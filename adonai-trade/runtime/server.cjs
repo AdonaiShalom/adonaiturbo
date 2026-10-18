@@ -6,6 +6,7 @@ const { listMarketDesks } = require('./market-desks.cjs');
 const { getQuote } = require('./market-adapters.cjs');
 const { listIntegrationStatus } = require('./integration-status.cjs');
 const { createRateLimiter } = require('./rate-limit.cjs');
+const { getFearGreed } = require('./fear-greed.cjs');
 const MAX_BODY_BYTES = 64 * 1024;
 const SERVICE = 'adonai-trade';
 const VERSION = '0.1.0';
@@ -52,6 +53,7 @@ function createServer(options = {}) {
   const fetchImpl = options.fetchImpl || globalThis.fetch;
   const quoteRateLimit = createRateLimiter({ limit: options.quoteRateLimit || 30, windowMs: 60000, maxKeys: 1000, now });
   const policyRateLimit = createRateLimiter({ limit: options.policyRateLimit || 20, windowMs: 60000, maxKeys: 1000, now });
+  const sentimentRateLimit = createRateLimiter({ limit: options.sentimentRateLimit || 20, windowMs: 60000, maxKeys: 1000, now });
   return http.createServer(async (req, res) => {
     const url = new URL(req.url || '/', 'http://127.0.0.1');
     const timestamp = new Date(now()).toISOString();
@@ -77,6 +79,17 @@ function createServer(options = {}) {
     if (req.method === 'GET' && url.pathname === '/health') return send(res, 200, { service: SERVICE, version: VERSION, timestamp, mode: 'paper', status: 'alive' });
     if (req.method === 'GET' && url.pathname === '/api/v1/integrations') return send(res, 200, { service: SERVICE, version: VERSION, timestamp, ...listIntegrationStatus(env) });
     if (req.method === 'GET' && url.pathname === '/api/v1/markets') return send(res, 200, { service: SERVICE, version: VERSION, timestamp, ...listMarketDesks(env) });
+    if (req.method === 'GET' && url.pathname === '/api/v1/sentiment/fear-greed') {
+      const rate = sentimentRateLimit(req.socket && req.socket.remoteAddress || 'unknown');
+      res.setHeader('ratelimit-limit', String(rate.limit));
+      res.setHeader('ratelimit-remaining', String(rate.remaining));
+      if (!rate.allowed) {
+        res.setHeader('retry-after', String(rate.retryAfterSeconds));
+        return send(res, 429, { service: SERVICE, version: VERSION, timestamp, status: 'rate_limited', reason_codes: ['sentiment_rate_limit_exceeded'], retry_after_seconds: rate.retryAfterSeconds, execution_enabled: false });
+      }
+      const result = await getFearGreed({ fetchImpl, nowMs: now() });
+      return send(res, result.status === 'unavailable' ? 503 : 200, { service: SERVICE, version: VERSION, timestamp, ...result });
+    }
     if (req.method === 'GET' && url.pathname === '/api/v1/markets/quote') {
       const rate = quoteRateLimit(req.socket && req.socket.remoteAddress || 'unknown');
       res.setHeader('ratelimit-limit', String(rate.limit));
@@ -117,7 +130,7 @@ function createServer(options = {}) {
         return send(res, decision.decision === 'blocked' ? 422 : 200, { service: SERVICE, version: VERSION, timestamp, mode: 'paper', audit_persisted: true, audit_event_id: audit.event_id, execution_performed: false, decision });
       } catch { return send(res, 503, { service: SERVICE, version: VERSION, timestamp, mode: 'paper', status: 'blocked', audit_persisted: false, execution_performed: false, reason_codes: ['audit_persistence_failed'], decision }); }
     }
-    if (req.method === 'GET' && url.pathname === '/') return send(res, 200, { service: SERVICE, version: VERSION, mode: 'paper', endpoints: ['/health', '/ready', '/api/v1/integrations', '/api/v1/markets', '/api/v1/markets/quote?desk=CRYPTO&symbol=BTCUSDT', '/api/v1/policy/evaluate'], limitations: ['read_only_market_adapters', 'no_order_execution'] });
+    if (req.method === 'GET' && url.pathname === '/') return send(res, 200, { service: SERVICE, version: VERSION, mode: 'paper', endpoints: ['/health', '/ready', '/api/v1/integrations', '/api/v1/markets', '/api/v1/markets/quote?desk=CRYPTO&symbol=BTCUSDT', '/api/v1/sentiment/fear-greed', '/api/v1/policy/evaluate'], limitations: ['read_only_market_adapters', 'no_order_execution'] });
     return send(res, 404, { status: 'not_found', reason_codes: ['route_not_found'] });
   });
 }
