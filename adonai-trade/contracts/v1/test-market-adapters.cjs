@@ -27,7 +27,7 @@ async function main() {
   assert.equal(international.status, 'unverified'); assert.equal(international.reason_code, 'provider_intraday_timestamp_unavailable');
   const missing = await getQuote({ desk: 'B3', symbol: 'PETR4', env: {}, fetchImpl: fetchMock, nowMs });
   assert.equal(missing.status, 'unavailable'); assert.equal(missing.reason_code, 'brapi_token_not_configured');
-  const invalid = await getQuote({ desk: 'CRYPTO', symbol: '../BTC', fetchImpl: fetchMock, nowMs });
+  const invalid = await getQuote({ desk: 'CRYPTO', symbol: 'BTC_USDT', fetchImpl: fetchMock, nowMs });
   assert.equal(invalid.status, 'unavailable'); assert.equal(invalid.reason_code, 'invalid_crypto_symbol');
   const badPrice = await getQuote({ desk: 'CRYPTO', symbol: 'BTCUSDT', fetchImpl: async () => ({ ok: true, async json() { return { lastPrice: 'NaN', closeTime: nowMs }; } }), nowMs });
   assert.equal(badPrice.status, 'unverified'); assert.equal(badPrice.reason_code, 'invalid_provider_price');
