@@ -77,6 +77,9 @@ function createServer(options = {}) {
       }
       try {
         const audit = await auditLedger.append({ envelope: input && input.envelope, decision, requestId: req.headers['x-request-id'] || null });
+        if (!audit || audit.persisted !== true || typeof audit.event_id !== 'string' || !audit.event_id) {
+          return send(res, 503, { service: SERVICE, version: VERSION, timestamp, mode: 'paper', status: 'blocked', audit_persisted: false, execution_performed: false, reason_codes: ['audit_persistence_unconfirmed'], decision });
+        }
         return send(res, decision.decision === 'blocked' ? 422 : 200, {
           service: SERVICE, version: VERSION, timestamp, mode: 'paper',
           audit_persisted: audit && audit.persisted === true,
