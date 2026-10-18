@@ -42,7 +42,7 @@ async function main() {
   const oversizedBody = await getQuote({ desk: 'CRYPTO', symbol: 'BTCUSDT', fetchImpl: async () => ({ ok: true, status: 200, async json() { return { payload: 'x'.repeat(MAX_RESPONSE_BYTES + 1) }; } }), nowMs });
   assert.equal(oversizedBody.status, 'unavailable'); assert.equal(oversizedBody.reason_code, 'provider_response_too_large');
 
-  const server = createServer({ now: () => nowMs, auditLedger: null, env: {}, fetchImpl: fetchMock });
+  const server = createServer({ now: () => nowMs, auditLedger: null, env: {}, fetchImpl: fetchMock, quoteRateLimit: 3 });
   await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
   try {
     const base = 'http://127.0.0.1:' + server.address().port;
@@ -57,7 +57,11 @@ async function main() {
     const unknown = await fetch(base + '/api/v1/markets/quote?desk=MARS&symbol=BTCUSDT');
     assert.equal(unknown.status, 503);
     assert.equal((await unknown.json()).reason_code, 'unknown_market_desk');
-    console.log('PASS: quote freshness, invalid responses, provider size limits, credential gating, and read-only HTTP endpoint');
+    const limited = await fetch(base + '/api/v1/markets/quote?desk=CRYPTO&symbol=BTCUSDT');
+    assert.equal(limited.status, 429);
+    assert.equal((await limited.json()).reason_codes[0], 'quote_rate_limit_exceeded');
+    assert.equal(limited.headers.get('retry-after'), '60');
+    console.log('PASS: quote freshness, invalid responses, provider size limits, rate limiting, credential gating, and read-only HTTP endpoint');
   } finally {
     await new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
   }
