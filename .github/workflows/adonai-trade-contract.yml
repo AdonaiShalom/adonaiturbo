@@ -40,7 +40,7 @@ jobs:
         shell: bash
         run: |
           test -s adonai-trade/scripts/verify-runtime-local.ps1
-          grep -Fq "127.0.0.1:$Port" adonai-trade/scripts/verify-runtime-local.ps1
+          grep -Fq '127.0.0.1:$Port' adonai-trade/scripts/verify-runtime-local.ps1
           grep -Fq "PowerShell 5.1 throws on HTTP 4xx/5xx" adonai-trade/scripts/verify-runtime-local.ps1
           grep -Fq "nenhuma ordem foi executada" adonai-trade/scripts/verify-runtime-local.ps1 || grep -Fq "Nenhuma ordem foi executada" adonai-trade/scripts/verify-runtime-local.ps1
           echo 'PowerShell harness markers verified; this does not replace running it on Windows.'
