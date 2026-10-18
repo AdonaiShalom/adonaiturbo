@@ -52,6 +52,22 @@ async function main() {
     await new Promise((resolve, reject) => unconfigured.close((error) => error ? reject(error) : resolve()));
   }
 
+  const unconfigured = createServer({ now: () => nowMs, auditLedger: null });
+  await new Promise((resolve) => unconfigured.listen(0, '127.0.0.1', resolve));
+  const unconfiguredBase = 'http://127.0.0.1:' + unconfigured.address().port;
+  try {
+    assert.equal((await fetch(unconfiguredBase + '/ready')).status, 503);
+    const response = await fetch(unconfiguredBase + '/api/v1/policy/evaluate', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ envelope: { mode: 'live' } }) });
+    assert.equal(response.status, 503);
+    const body = await response.json();
+    assert.equal(body.audit_persisted, false);
+    assert.equal(body.execution_performed, false);
+    assert.ok(body.reason_codes.includes('audit_persistence_not_configured'));
+    console.log('PASS: runtime blocks readiness and evaluation without a configured audit ledger');
+  } finally {
+    await new Promise((resolve, reject) => unconfigured.close((error) => error ? reject(error) : resolve()));
+  }
+
   const failing = createServer({ now: () => nowMs, auditLedger: { async check() { throw new Error('offline'); }, async append() { throw new Error('offline'); } } });
   await new Promise((resolve) => failing.listen(0, '127.0.0.1', resolve));
   const failedBase = 'http://127.0.0.1:' + failing.address().port;
