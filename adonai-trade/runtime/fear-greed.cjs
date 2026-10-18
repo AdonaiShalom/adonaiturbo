@@ -3,6 +3,8 @@
 const SOURCE_URL = 'https://api.alternative.me/fng/?limit=1&format=json';
 const SOURCE_PAGE = 'https://alternative.me/crypto/fear-and-greed-index/';
 const MAX_AGE_MS = 24 * 60 * 60 * 1000;
+const TIMEOUT_MS = 5000;
+const MAX_RESPONSE_BYTES = 64 * 1024;
 
 async function getFearGreed(options = {}) {
   const fetchImpl = options.fetchImpl || globalThis.fetch;
@@ -10,13 +12,40 @@ async function getFearGreed(options = {}) {
   if (typeof fetchImpl !== 'function') {
     return unavailable('fetch_unavailable');
   }
+  const controller = typeof AbortController === 'function' ? new AbortController() : null;
+  const timer = setTimeout(() => { if (controller) controller.abort(); }, TIMEOUT_MS);
   try {
-    const response = await fetchImpl(SOURCE_URL, {
-      method: 'GET',
-      headers: { accept: 'application/json' }
-    });
+    const init = { method: 'GET', headers: { accept: 'application/json' }, redirect: 'error' };
+    if (controller) init.signal = controller.signal;
+    const response = await fetchImpl(SOURCE_URL, init);
     if (!response || response.ok !== true) return unavailable('provider_http_error');
-    const payload = await response.json();
+    const declaredLength = Number(response.headers && response.headers.get && response.headers.get('content-length'));
+    if (Number.isFinite(declaredLength) && declaredLength > MAX_RESPONSE_BYTES) return unavailable('provider_response_too_large');
+    let payload;
+    if (response.body && typeof response.body.getReader === 'function') {
+      const reader = response.body.getReader();
+      const chunks = [];
+      let size = 0;
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          size += value.byteLength;
+          if (size > MAX_RESPONSE_BYTES) {
+            await reader.cancel().catch(() => {});
+            return unavailable('provider_response_too_large');
+          }
+          chunks.push(value);
+        }
+      } finally { try { reader.releaseLock(); } catch {} }
+      const merged = new Uint8Array(size);
+      let offset = 0;
+      for (const chunk of chunks) { merged.set(chunk, offset); offset += chunk.byteLength; }
+      payload = JSON.parse(new TextDecoder().decode(merged));
+    } else {
+      payload = await response.json();
+      if (Buffer.byteLength(JSON.stringify(payload), 'utf8') > MAX_RESPONSE_BYTES) return unavailable('provider_response_too_large');
+    }
     const row = payload && Array.isArray(payload.data) ? payload.data[0] : null;
     const value = row && Number(row.value);
     const observedMs = row && /^\d{9,12}$/.test(String(row.timestamp || ''))
@@ -42,8 +71,10 @@ async function getFearGreed(options = {}) {
       mode: 'paper',
       execution_enabled: false
     });
-  } catch {
-    return unavailable('provider_unreachable');
+  } catch (error) {
+    return unavailable(controller && controller.signal.aborted ? 'provider_timeout' : 'provider_unreachable');
+  } finally {
+    clearTimeout(timer);
   }
 }
 
@@ -65,4 +96,4 @@ function unavailable(reason) {
   });
 }
 
-module.exports = { getFearGreed, SOURCE_URL, SOURCE_PAGE, MAX_AGE_MS };
+module.exports = { getFearGreed, SOURCE_URL, SOURCE_PAGE, MAX_AGE_MS, TIMEOUT_MS, MAX_RESPONSE_BYTES };
