@@ -151,9 +151,16 @@ Em todas as mesas: respostas `verified / stale / unverified / unavailable`; nunc
 - Incluído no `npm test`. O contrato do instalador passou no job `contract-tests` e a verificação completa Windows PowerShell 5.1 também passou no run [39150646803](https://github.com/AdonaiShalom/adonaiturbo/actions/runs/39150646803), após corrigir o caminho do módulo no teste.
 - Para executar no computador que contém os assets e o HTML original, primeiro copiar os três assets para a mesma pasta do protótipo e rodar sem `--write`; só depois da revisão do dry-run usar `--write`. **Não foi executado no HTML original**, porque ele não está disponível no ambiente do GitHub conectado. A instalação visual segue pendente.
 
+### Ponte do runtime — timeout explícito e fail-closed
+
+- A ponte de leitura da sede agora tem timeout configurável de 5 segundos por endpoint (limites aceitos: 100–30.000 ms). Erros HTTP, JSON inválido, tempo excedido e indisponibilidade resultam em erro explícito, sem transformar estado antigo em dado atual.
+- O contrato cobre timeout, configuração inválida, HTTP 503 e contrato de resposta incompatível.
+- CI verde: [39151072452](https://github.com/AdonaiShalom/adonaiturbo/actions/runs/39151072452), incluindo contrato da ponte e runtime Windows PowerShell 5.1.
+- Isso melhora a robustez da conexão, mas não comprova que o HTML original tenha sido instalado no Turbo nem que a porta 3100 esteja ativa na máquina local.
+
 ### Percentual oficial nesta atualização
 
-**34% concluído / 66% restante.** Avanço de 1 ponto pela entrega de um instalador reversível e idempotente para anexar o menu ao HTML original sem substituir a cena 3D, com dry-run, backup e teste automatizado de restauração; o teste do instalador passou nos jobs de contratos e runtime Windows do CI. Isso é ferramenta de integração, não instalação concluída. O HTML original ainda não foi modificado, os dados live com credenciais válidas não foram comprovados, e o proxy autenticado do Turbo e as integrações LEVI/EU SOU ponta a ponta seguem pendentes.
+**35% concluído / 65% restante.** Avanço de 1 ponto pela conclusão e teste da proteção de timeout na ponte da sede 3D, incluindo falha segura para HTTP indisponível e contratos inválidos, com CI de contratos e Windows PowerShell 5.1 aprovado. Somado ao instalador reversível já testado, isso fortalece a preparação da integração; não equivale à instalação visual. O HTML original ainda não foi modificado, as cotações live com credenciais válidas não foram comprovadas, e o proxy autenticado do Turbo e as integrações LEVI/EU SOU ponta a ponta seguem pendentes.
 
 ### Documentos de planejamento anteriores
 
@@ -178,4 +185,4 @@ Os antigos documentos de planejamento não constituem planos ativos independente
 
 Não considerar documentação ou CI de contratos como instalação visual concluída. A medição deve ponderar: protótipo original e aba Turbo 25%; menu/RH/funções 15%; quatro mercados com dados comprovados 20%; TradingView/Investing.com/GREED 10%; Supabase/auditoria/segurança 10%; LEVI + EU SOU 10%; testes de regressão, rollback e release 10%.
 
-Estado oficial atual desta revisão: **33% concluído / 67% restante (estimativa ponderada por evidências, não telemetria automática)**. O valor reconhece os contratos de runtime e adaptadores testados, o menu de módulos implementado no branch e as funções RH/auditoria transacionais testadas no Supabase. Não contabiliza como concluídos os gates visuais, a instalação do protótipo original na aba real, as cotações live com credenciais, o proxy autenticado local, nem os testes de LEVI/EU SOU ponta a ponta. Atualizar a porcentagem somente com evidências reproduzíveis anexadas a cada gate.
+Estado oficial atual desta revisão: **35% concluído / 65% restante (estimativa ponderada por evidências, não telemetria automática)**. O valor reconhece os contratos de runtime e adaptadores testados, o menu de módulos implementado no branch e as funções RH/auditoria transacionais testadas no Supabase. Não contabiliza como concluídos os gates visuais, a instalação do protótipo original na aba real, as cotações live com credenciais, o proxy autenticado local, nem os testes de LEVI/EU SOU ponta a ponta. Atualizar a porcentagem somente com evidências reproduzíveis anexadas a cada gate.
