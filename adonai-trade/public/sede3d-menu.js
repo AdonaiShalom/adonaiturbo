@@ -30,7 +30,7 @@
     const rootElement = options.root || document.body;
     if (!rootElement || typeof rootElement.appendChild !== 'function') throw new Error('menu_root_required');
     if (document.getElementById('adonai-trade-sede-menu')) return {destroy(){}};
-    const baseUrl = String(options.runtimeBaseUrl || '').replace(/\/$/,'');
+    const baseUrl = String(options.runtimeBaseUrl || 'http://127.0.0.1:3100').replace(/\/$/,'');
     const style = document.createElement('style');
     style.id = 'adonai-trade-sede-menu-style';
     style.textContent = [
