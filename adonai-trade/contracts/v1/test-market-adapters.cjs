@@ -61,6 +61,8 @@ async function main() {
     assert.equal(limited.status, 429);
     assert.equal((await limited.json()).reason_codes[0], 'quote_rate_limit_exceeded');
     assert.equal(limited.headers.get('retry-after'), '60');
+    assert.equal(limited.headers.get('ratelimit-limit'), '3');
+    assert.equal(limited.headers.get('ratelimit-remaining'), '0');
     console.log('PASS: quote freshness, invalid responses, provider size limits, rate limiting, credential gating, and read-only HTTP endpoint');
   } finally {
     await new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
