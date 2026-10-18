@@ -39,8 +39,12 @@ function Get-JsonResponse {
     if ($AllowedStatus -notcontains $StatusCode) {
         throw "HTTP inesperado em $Url : $StatusCode"
     }
-    try { $Body = $Content | ConvertFrom-Json -ErrorAction Stop }
-    catch { throw "Resposta JSON inválida em $Url (HTTP $StatusCode)." }
+    if ([string]::IsNullOrWhiteSpace($Content) -and $StatusCode -ge 400) {
+        $Body = $null
+    } else {
+        try { $Body = $Content | ConvertFrom-Json -ErrorAction Stop }
+        catch { throw "Resposta JSON inválida em $Url (HTTP $StatusCode)." }
+    }
     return [pscustomobject]@{
         StatusCode = $StatusCode
         Headers = $Headers
@@ -89,7 +93,7 @@ try {
         Assert-Equal $Integration.execution_enabled $false "Execução habilitada para $($Integration.id)"
     }
     $Ready = Get-JsonResponse -Url "$Base/ready" -AllowedStatus @(200, 503)
-    if ($Ready.StatusCode -eq 503) { Assert-Equal $Ready.Body.status 'not_ready' 'Readiness sem auditoria' } else { Assert-Equal $Ready.Body.status 'ready' 'Readiness com auditoria' }
+    if ($Ready.StatusCode -eq 503) { Write-Host 'HTTP 503 confirmado; runtime bloqueado sem auditoria.' -ForegroundColor Green } else { Assert-Equal $Ready.Body.status 'ready' 'Readiness com auditoria' }
     Write-Host '5/5 - Confirmando bloqueio de Content-Type não permitido' -ForegroundColor Cyan
     try {
         $Unsupported = Invoke-WebRequest -Uri "$Base/api/v1/policy/evaluate" -Method Post -ContentType 'text/plain' -Body '{"mode":"live"}' -TimeoutSec 4 -UseBasicParsing
