@@ -77,7 +77,27 @@
           panel.appendChild(out);
         });panel.append(b,node('p','Consulta somente leitura. Nenhuma ordem é enviada.'));
       } else if(id==='rh'){
-        panel.append(card('RH e equipes','Atividade não reportada','O runtime não expõe ainda um contrato de RH com tarefas e eventos reais. Não serão inventados agentes ativos ou produtividade.'),card('Requisito','Contrato + auditoria','Cada agente precisa de ID, função, tarefa, estado, timestamp e evidência persistida.'));
+        panel.append(card('RH e equipes','Lendo estado persistido','Papéis e tarefas vêm do Supabase; o catálogo de papéis não significa que um agente esteja ativo.'));
+        const load=node('button','Atualizar RH');load.type='button';
+        load.addEventListener('click',async()=>{
+          load.disabled=true;load.textContent='Consultando Supabase…';let result;
+          try{const r=await fetch(baseUrl+'/api/v1/rh',{headers:{accept:'application/json'},cache:'no-store'});result={ok:r.ok,data:await r.json(),status:r.status};}
+          catch(e){result={ok:false,error:e&&e.message?e.message:'erro de rede'};}
+          load.disabled=false;load.textContent='Atualizar RH';
+          const old=panel.querySelector('[data-rh-result]');if(old)old.remove();
+          const out=node('div',undefined,'card');out.dataset.rhResult='1';
+          if(!result.ok){out.append(node('strong','RH indisponível'),node('p',result.error||('HTTP '+result.status)),node('p','Não foi possível confirmar o estado persistido.'));}
+          else{
+            const d=result.data;
+            out.append(node('strong','Estado: '+String(d.status||'não verificado')),node('p','Atualizado: '+formatTime(d.fetched_at)),node('p','Funções cadastradas: '+(Array.isArray(d.roles)?d.roles.length:0)),node('p','Tarefas persistidas: '+(Array.isArray(d.tasks)?d.tasks.length:0)));
+            for(const role of (Array.isArray(d.roles)?d.roles:[]))out.append(node('p',String(role.label||role.role_key)+' — '+String(role.activity_status||'not_reported')));
+            if(Array.isArray(d.tasks)&&d.tasks.length){for(const task of d.tasks.slice(0,20))out.append(node('p','#'+String(task.task_key)+' — '+String(task.title)+' ['+String(task.status)+']'));}
+            else out.append(node('p','Nenhuma tarefa RH registrada. Não há atividade operacional comprovada.'));
+            out.append(node('p','Execução habilitada: não'));
+          }
+          panel.appendChild(out);
+        });
+        panel.append(load,node('p','Leitura somente; criação e mudança de tarefas precisam passar por LEVI/backend autenticado e gerar auditoria.'));
       } else if(id==='charts'){
         panel.append(node('p','TradingView — gráfico de visualização. Não é, por si só, uma fonte autorizada para execução.'));
         const selector=node('select');selector.setAttribute('aria-label','Selecionar mercado do gráfico');selector.style.cssText='max-width:100%;padding:8px;background:#102238;color:#e8f1ff;border:1px solid #4a6c8d;border-radius:7px;margin:6px 0';
