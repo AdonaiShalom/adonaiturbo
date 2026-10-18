@@ -20,7 +20,9 @@ async function main() {
   const crypto = await getQuote({ desk: 'CRYPTO', symbol: 'BTCUSDT', fetchImpl: fetchMock, nowMs });
   assert.equal(crypto.status, 'verified'); assert.equal(crypto.price, 67123.45); assert.equal(crypto.execution_enabled, false);
   const forex = await getQuote({ desk: 'FOREX', symbol: 'EURUSD', fetchImpl: fetchMock, nowMs });
-  assert.equal(forex.status, 'stale'); assert.equal(forex.reason_code, 'quote_stale', 'daily reference rates must not be mislabeled as live quotes');
+  assert.equal(forex.status, 'unverified'); assert.equal(forex.reason_code, 'daily_reference_not_intraday', 'daily reference rates must not be mislabeled as live quotes');
+  const invalidDailyForex = await getQuote({ desk: 'FOREX', symbol: 'EURUSD', fetchImpl: async () => ({ ok: true, status: 200, async json() { return { date: 'not-a-date', rates: { USD: -1 } }; } }), nowMs });
+  assert.equal(invalidDailyForex.status, 'unverified'); assert.equal(invalidDailyForex.reason_code, 'invalid_daily_reference_data');
   const b3 = await getQuote({ desk: 'B3', symbol: 'PETR4', env: { BRAPI_TOKEN: 'test-token' }, fetchImpl: fetchMock, nowMs });
   assert.equal(b3.status, 'verified'); assert.equal(b3.currency, 'BRL');
   const international = await getQuote({ desk: 'INTERNATIONAL', symbol: 'IBM', env: { ALPHAVANTAGE_API_KEY: 'test-key' }, fetchImpl: fetchMock, nowMs });
