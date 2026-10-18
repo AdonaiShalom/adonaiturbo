@@ -77,7 +77,13 @@ async function getQuote({ desk, symbol, env = process.env, fetchImpl = globalThi
       if (!match) return quote('unavailable', { reason_code: 'invalid_forex_pair' });
       const [, base, target] = match;
       const data = await getJson(fetchImpl, 'https://api.frankfurter.dev/v1/latest?base=' + base + '&symbols=' + target);
-      return freshQuote({ desk: id, symbol: base + '/' + target, price: data.rates && data.rates[target], currency: target, source: 'frankfurter_ecb_reference', observedAt: data.date, nowMs });
+      const referenceDate = /^\\d{4}-\\d{2}-\\d{2}$/.test(String(data.date || '')) ? data.date : null;
+      const referencePrice = Number(data.rates && data.rates[target]);
+      if (!referenceDate || !Number.isFinite(Date.parse(referenceDate + 'T00:00:00Z')) || !Number.isFinite(referencePrice) || referencePrice <= 0) {
+        return quote('unverified', { desk: id, symbol: base + '/' + target, source: 'frankfurter_ecb_reference', reason_code: 'invalid_daily_reference_data' });
+      }
+      // Frankfurter/BCE provides daily reference rates, not an intraday market quote.
+      return quote('unverified', { desk: id, symbol: base + '/' + target, price: referencePrice, currency: target, source: 'frankfurter_ecb_reference', provider_trading_day: referenceDate, reason_code: 'daily_reference_not_intraday' });
     }
     if (id === 'B3') {
       if (!env.BRAPI_TOKEN) return quote('unavailable', { desk: id, symbol: normalizedSymbol, reason_code: 'brapi_token_not_configured' });
