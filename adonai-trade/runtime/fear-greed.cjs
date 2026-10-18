@@ -19,7 +19,7 @@ async function getFearGreed(options = {}) {
     const payload = await response.json();
     const row = payload && Array.isArray(payload.data) ? payload.data[0] : null;
     const value = row && Number(row.value);
-    const observedMs = row && /^\\d{9,12}$/.test(String(row.timestamp || ''))
+    const observedMs = row && /^\d{9,12}$/.test(String(row.timestamp || ''))
       ? Number(row.timestamp) * 1000 : NaN;
     if (!Number.isInteger(value) || value < 0 || value > 100 ||
         !Number.isFinite(observedMs) || observedMs <= 0) {
