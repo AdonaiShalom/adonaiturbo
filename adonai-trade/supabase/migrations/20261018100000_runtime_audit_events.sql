@@ -13,7 +13,7 @@ create table if not exists adonai_trade.runtime_audit_events (
 );
 
 alter table adonai_trade.runtime_audit_events enable row level security;
-revoke all on table adonai_trade.runtime_audit_events from public, anon, authenticated;
+revoke all on table adonai_trade.runtime_audit_events from public, anon, authenticated, service_role;
 grant select, insert on table adonai_trade.runtime_audit_events to service_role;
 
 create or replace function adonai_trade.reject_runtime_audit_mutation()
