@@ -36,7 +36,7 @@ async function main() {
     assert.equal(markets.status, 200);
     const marketBody = await markets.json();
     assert.deepEqual(marketBody.desks.map((desk) => desk.id), ['CRYPTO', 'FOREX', 'B3', 'INTERNATIONAL']);
-    assert.equal(marketBody.data_status, 'unavailable');
+    assert.equal(marketBody.data_status, 'partially_configured');
     assert.equal(marketBody.execution_enabled, false);
     assert.equal((await fetch(base + '/does-not-exist')).status, 404);
     const unsupportedType = await fetch(base + '/api/v1/policy/evaluate', { method: 'POST', headers: { 'content-type': 'text/plain' }, body: '{"envelope":{"mode":"live"}}' });
