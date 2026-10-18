@@ -100,7 +100,7 @@ async function getQuote({ desk, symbol, env = process.env, fetchImpl = globalThi
     if (!item || !item['05. price'] || !item['07. latest trading day']) return quote('unavailable', { desk: id, symbol: normalizedSymbol, source: 'alphavantage', reason_code: 'provider_quote_missing' });
     const internationalPrice = Number(item['05. price']);
     const tradingDay = String(item['07. latest trading day']);
-    const parsedTradingDay = /^\\d{4}-\\d{2}-\\d{2}$/.test(tradingDay) ? new Date(tradingDay + 'T00:00:00Z') : null;
+    const parsedTradingDay = /^\d{4}-\d{2}-\d{2}$/.test(tradingDay) ? new Date(tradingDay + 'T00:00:00Z') : null;
     const validTradingDay = Boolean(parsedTradingDay && Number.isFinite(parsedTradingDay.getTime()) && parsedTradingDay.toISOString().slice(0, 10) === tradingDay);
     if (!Number.isFinite(internationalPrice) || internationalPrice <= 0 || !validTradingDay) return quote('unverified', { desk: id, symbol: normalizedSymbol, source: 'alphavantage_global_quote', reason_code: 'invalid_provider_quote_data' });
     return quote('unverified', { desk: id, symbol: normalizedSymbol, source: 'alphavantage_global_quote', price: internationalPrice, provider_trading_day: tradingDay, reason_code: 'provider_intraday_timestamp_unavailable' });
