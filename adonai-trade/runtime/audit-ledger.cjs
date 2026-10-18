@@ -28,7 +28,7 @@ function createSupabaseAuditLedger(env = process.env, fetchImpl = fetch) {
 
   return {
     async check() {
-      await request(endpoint + '?select=event_id&limit=1', { method: 'GET' });
+      await request(endpoint + '?select=event_id&limit=1', { method: 'GET', headers: { 'accept-profile': 'adonai_trade' } });
       return true;
     },
     async append(input) {
@@ -55,7 +55,7 @@ function createSupabaseAuditLedger(env = process.env, fetchImpl = fetch) {
       };
       await request(endpoint, {
         method: 'POST',
-        headers: { prefer: 'return=minimal' },
+        headers: { prefer: 'return=minimal', 'content-profile': 'adonai_trade' },
         body: JSON.stringify(event)
       });
       return { persisted: true, event_id: event.event_id };
