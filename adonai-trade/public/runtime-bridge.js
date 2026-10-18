@@ -10,15 +10,34 @@
   if (typeof module === 'object' && module.exports) module.exports = api;
   if (root) root.AdonaiTradeRuntimeBridge = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this, function createBridge() {
-  async function readJson(fetchImpl, url) {
-    const response = await fetchImpl(url, { method: 'GET', headers: { accept: 'application/json' } });
-    if (!response || !response.ok) {
-      const status = response && Number.isFinite(response.status) ? response.status : 0;
-      throw new Error('runtime_http_' + status);
+  async function readJson(fetchImpl, url, timeoutMs) {
+    const controller = typeof AbortController === 'function' ? new AbortController() : null;
+    const timer = setTimeout(() => { if (controller) controller.abort(); }, timeoutMs);
+    try {
+      const init = { method: 'GET', headers: { accept: 'application/json' } };
+      if (controller) init.signal = controller.signal;
+      let response;
+      try {
+        response = await fetchImpl(url, init);
+      } catch (error) {
+        if (controller && controller.signal.aborted) throw new Error('runtime_timeout');
+        throw error;
+      }
+      if (!response || !response.ok) {
+        const status = response && Number.isFinite(response.status) ? response.status : 0;
+        throw new Error('runtime_http_' + status);
+      }
+      let data;
+      try { data = await response.json(); }
+      catch (error) {
+        if (controller && controller.signal.aborted) throw new Error('runtime_timeout');
+        throw new Error('runtime_invalid_json');
+      }
+      if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('runtime_invalid_json');
+      return data;
+    } finally {
+      clearTimeout(timer);
     }
-    const data = await response.json();
-    if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('runtime_invalid_json');
-    return data;
   }
 
   function normalize(markets, integrations) {
@@ -65,9 +84,11 @@
     const baseUrl = String(options.baseUrl || '').replace(/\/$/, '');
     const fetchImpl = options.fetchImpl || globalThis.fetch;
     if (typeof fetchImpl !== 'function') throw new Error('fetch_unavailable');
+    const timeoutMs = Number(options.timeoutMs === undefined ? 5000 : options.timeoutMs);
+    if (!Number.isFinite(timeoutMs) || timeoutMs < 100 || timeoutMs > 30000) throw new Error('invalid_runtime_timeout');
     const [markets, integrations] = await Promise.all([
-      readJson(fetchImpl, baseUrl + '/api/v1/markets'),
-      readJson(fetchImpl, baseUrl + '/api/v1/integrations')
+      readJson(fetchImpl, baseUrl + '/api/v1/markets', timeoutMs),
+      readJson(fetchImpl, baseUrl + '/api/v1/integrations', timeoutMs)
     ]);
     return normalize(markets, integrations);
   }
