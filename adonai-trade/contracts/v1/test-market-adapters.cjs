@@ -14,7 +14,7 @@ async function main() {
       assert.equal(options.headers.Authorization, 'Bearer test-token');
       return { ok: true, status: 200, async json() { return { results: [{ regularMarketPrice: 38.5, regularMarketTime: Math.floor((nowMs - 2000) / 1000) }] }; } };
     }
-    if (u.hostname === 'www.alphavantage.co') return { ok: true, status: 200, async json() { return { 'Global Quote': { '05. price': '123.4', '07. latest trading day': '2026-10-17' } }; } };
+    if (u.hostname === 'www.alphavantage.co') { assert.equal(u.searchParams.get('function'),'TIME_SERIES_INTRADAY'); assert.equal(u.searchParams.get('interval'),'1min'); return { ok: true, status: 200, async json() { return { 'Meta Data': {'6. Time Zone':'US/Eastern'}, 'Time Series (1min)': {'2026-10-18 07:59:00': {'4. close':'123.4'}} }; } }; }
     throw new Error('unexpected provider');
   };
   const crypto = await getQuote({ desk: 'CRYPTO', symbol: 'BTCUSDT', fetchImpl: fetchMock, nowMs });
@@ -28,11 +28,13 @@ async function main() {
   const b3 = await getQuote({ desk: 'B3', symbol: 'PETR4', env: { BRAPI_TOKEN: 'test-token' }, fetchImpl: fetchMock, nowMs });
   assert.equal(b3.status, 'verified'); assert.equal(b3.currency, 'BRL');
   const international = await getQuote({ desk: 'INTERNATIONAL', symbol: 'IBM', env: { ALPHAVANTAGE_API_KEY: 'test-key' }, fetchImpl: fetchMock, nowMs });
-  assert.equal(international.status, 'unverified'); assert.equal(international.reason_code, 'provider_intraday_timestamp_unavailable');
-  const badInternationalPrice = await getQuote({ desk: 'INTERNATIONAL', symbol: 'IBM', env: { ALPHAVANTAGE_API_KEY: 'test-key' }, fetchImpl: async () => ({ ok: true, status: 200, async json() { return { 'Global Quote': { '05. price': '-1', '07. latest trading day': '2026-10-17' } }; } }), nowMs });
-  assert.equal(badInternationalPrice.status, 'unverified'); assert.equal(badInternationalPrice.reason_code, 'invalid_provider_quote_data');
-  const badInternationalDate = await getQuote({ desk: 'INTERNATIONAL', symbol: 'IBM', env: { ALPHAVANTAGE_API_KEY: 'test-key' }, fetchImpl: async () => ({ ok: true, status: 200, async json() { return { 'Global Quote': { '05. price': '123.4', '07. latest trading day': '2026-02-31' } }; } }), nowMs });
-  assert.equal(badInternationalDate.status, 'unverified'); assert.equal(badInternationalDate.reason_code, 'invalid_provider_quote_data');
+  assert.equal(international.status, 'verified'); assert.equal(international.price, 123.4); assert.equal(international.source, 'alphavantage_intraday_1min'); assert.equal(international.observed_at, '2026-10-18T11:59:00.000Z'); assert.equal(international.execution_enabled, false);
+  const badInternationalPrice = await getQuote({ desk: 'INTERNATIONAL', symbol: 'IBM', env: { ALPHAVANTAGE_API_KEY: 'test-key' }, fetchImpl: async () => ({ ok: true, status: 200, async json() { return { 'Meta Data': {'6. Time Zone':'US/Eastern'}, 'Time Series (1min)': {'2026-10-18 07:59:00': {'4. close':'-1'}} }; } }), nowMs });
+  assert.equal(badInternationalPrice.status, 'unverified'); assert.equal(badInternationalPrice.reason_code, 'invalid_provider_price');
+  const badInternationalDate = await getQuote({ desk: 'INTERNATIONAL', symbol: 'IBM', env: { ALPHAVANTAGE_API_KEY: 'test-key' }, fetchImpl: async () => ({ ok: true, status: 200, async json() { return { 'Meta Data': {'6. Time Zone':'US/Eastern'}, 'Time Series (1min)': {'2026-02-31 07:59:00': {'4. close':'123.4'}} }; } }), nowMs });
+  assert.equal(badInternationalDate.status, 'unverified'); assert.equal(badInternationalDate.reason_code, 'invalid_provider_timestamp_or_timezone');
+  const staleInternational = await getQuote({ desk: 'INTERNATIONAL', symbol: 'IBM', env: { ALPHAVANTAGE_API_KEY: 'test-key' }, fetchImpl: async () => ({ ok: true, status: 200, async json() { return { 'Meta Data': {'6. Time Zone':'US/Eastern'}, 'Time Series (1min)': {'2026-10-18 07:56:00': {'4. close':'123.4'}} }; } }), nowMs });
+  assert.equal(staleInternational.status, 'stale'); assert.equal(staleInternational.reason_code, 'quote_stale');
   const missing = await getQuote({ desk: 'B3', symbol: 'PETR4', env: {}, fetchImpl: fetchMock, nowMs });
   assert.equal(missing.status, 'unavailable'); assert.equal(missing.reason_code, 'brapi_token_not_configured');
   const invalid = await getQuote({ desk: 'CRYPTO', symbol: 'BTC_USDT', fetchImpl: fetchMock, nowMs });
