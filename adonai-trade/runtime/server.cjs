@@ -11,7 +11,11 @@ const SERVICE = 'adonai-trade';
 const VERSION = '0.1.0';
 function send(res, status, payload) {
   const body = JSON.stringify(payload);
-  res.writeHead(status, { 'content-type': 'application/json; charset=utf-8', 'content-length': Buffer.byteLength(body), 'cache-control': 'no-store', 'x-content-type-options': 'nosniff' });
+  res.statusCode = status;
+  res.setHeader('content-type', 'application/json; charset=utf-8');
+  res.setHeader('content-length', String(Buffer.byteLength(body)));
+  res.setHeader('cache-control', 'no-store');
+  res.setHeader('x-content-type-options', 'nosniff');
   res.end(body);
 }
 function readJson(req) {
