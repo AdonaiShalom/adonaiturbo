@@ -16,6 +16,10 @@ function send(res, status, payload) {
   res.setHeader('content-length', String(Buffer.byteLength(body)));
   res.setHeader('cache-control', 'no-store');
   res.setHeader('x-content-type-options', 'nosniff');
+  res.setHeader('x-frame-options', 'DENY');
+  res.setHeader('content-security-policy', "default-src 'none'; frame-ancestors 'none'; base-uri 'none'");
+  res.setHeader('referrer-policy', 'no-referrer');
+  res.setHeader('permissions-policy', 'camera=(), microphone=(), geolocation=()');
   res.end(body);
 }
 function readJson(req) {
