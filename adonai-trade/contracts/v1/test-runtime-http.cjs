@@ -33,6 +33,9 @@ async function main() {
     assert.equal(marketBody.data_status, 'unavailable');
     assert.equal(marketBody.execution_enabled, false);
     assert.equal((await fetch(base + '/does-not-exist')).status, 404);
+    const unsupportedType = await fetch(base + '/api/v1/policy/evaluate', { method: 'POST', headers: { 'content-type': 'text/plain' }, body: '{"envelope":{"mode":"live"}}' });
+    assert.equal(unsupportedType.status, 415);
+    assert.equal((await unsupportedType.json()).reason_codes[0], 'unsupported_media_type');
     const badJson = await fetch(base + '/api/v1/policy/evaluate', { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{' });
     assert.equal(badJson.status, 400);
     const blocked = await fetch(base + '/api/v1/policy/evaluate', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ envelope: { mode: 'live' }, proposal: { mode: 'live' } }) });
