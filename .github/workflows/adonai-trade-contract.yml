@@ -74,6 +74,17 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '24'
+      - name: Parse prototype intake script with Windows PowerShell 5.1
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $tokens = $null
+          $errors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path 'adonai-trade/scripts/prepare-prototype-intake.ps1').Path, [ref]$tokens, [ref]$errors) | Out-Null
+          if ($errors.Count -gt 0) { $errors | Format-List | Out-String | Write-Error }
+          $script = Get-Content 'adonai-trade/scripts/prepare-prototype-intake.ps1' -Raw
+          if ($script -notmatch 'ExpectedSha256' -or $script -notmatch 'ExtractToDirectory' -or $script -notmatch 'production_files_changed = \$false') { throw 'Prototype intake safety markers missing.' }
+          Write-Host 'Prototype intake PowerShell syntax and safety markers verified; ZIP is intentionally not part of CI.'
       - name: Run isolated runtime verification on Windows PowerShell 5.1
         shell: powershell
         run: |
