@@ -122,9 +122,16 @@ Em todas as mesas: respostas `verified / stale / unverified / unavailable`; nunc
 - O contrato automatizado verifica a existência e o mapeamento dos quatro símbolos. Os runs [39147273715](https://github.com/AdonaiShalom/adonaiturbo/actions/runs/39147273715) passaram nos jobs `contract-tests` e `windows-powershell-runtime`, incluindo o teste do menu.
 - Limite da evidência: isto valida o código do ramo e o mapeamento dos símbolos; ainda não valida renderização real do widget no navegador nem prova que o script esteja incorporado ao protótipo original. Investing.com continua sendo um link para recurso oficial permitido; não está sendo alegada integração de dados direta.
 
+### Atualização de execução — dados intradiários Forex e Internacional
+
+- Forex agora usa Alpha Vantage `FX_INTRADAY` de 1 minuto quando `ALPHAVANTAGE_API_KEY` está configurada; sem essa chave, permanece o fallback Frankfurter/BCE com estado `unverified` e motivo explícito `daily_reference_not_intraday`.
+- Internacional agora usa `TIME_SERIES_INTRADAY` de 1 minuto em vez de `Global Quote`. Os timestamps locais são convertidos usando o fuso informado pelo provedor e a cotação só pode ser `verified` se tiver preço válido e idade de até 120 segundos; dados antigos viram `stale`, fuso/data inválidos viram `unverified`, e resposta de limite/erro vira `unavailable`.
+- Os contratos de quatro mesas e adaptadores passaram no run [39148491528](https://github.com/AdonaiShalom/adonaiturbo/actions/runs/39148491528); o job `contract-tests` terminou `success` e a etapa de verificação isolada do runtime no Windows também terminou `success`. A limpeza final do job Windows ainda estava em andamento na última consulta.
+- Limite: não há prova de cotação live real sem credenciais/plano válidos no ambiente instalado. O status `provider_configured` significa apenas que a variável existe, nunca que o provedor respondeu.
+
 ### Percentual oficial nesta atualização
 
-**31% concluído / 69% restante.** Aumentado em 2 pontos porque o RH agora possui catálogo, leitura real, endpoints de escrita protegidos por token e RPCs transacionais que gravam tarefa + auditoria; os testes Linux/Windows passaram e uma criação/atualização real no Supabase foi confirmada com dois eventos. O token do runtime e o proxy autenticado do Turbo ainda não foram validados localmente. Também seguem pendentes a instalação visual do protótipo original, o teste do widget no navegador e a validação dos dados de mercado ao vivo.
+**33% concluído / 67% restante.** Aumentado em 2 pontos porque, além do RH com tarefas e auditoria transacionais, Cripto/Forex/B3/Internacional agora têm contratos de dados mais rigorosos; Forex e Internacional possuem caminho intradiário de 1 minuto com conversão de fuso, checagem de timestamp e falha segura, e os testes dos adaptadores passaram no CI. Não significa que as credenciais dos provedores foram configuradas nem que cotações reais foram confirmadas. O token do runtime e o proxy autenticado do Turbo ainda não foram validados localmente; a instalação visual do protótipo original e o teste do widget no navegador continuam pendentes.
 
 ### Documentos de planejamento anteriores
 
