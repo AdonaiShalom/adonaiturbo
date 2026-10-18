@@ -35,3 +35,5 @@ jobs:
         run: node adonai-trade/contracts/v1/test-policy-gate.cjs
       - name: Run seasonality regression tests
         run: node adonai-trade/contracts/v1/test-seasonality.cjs
+      - name: Run HTTP runtime tests
+        run: node adonai-trade/contracts/v1/test-runtime-http.cjs
