@@ -15,4 +15,5 @@ assert.ok(Object.values(CHART_SYMBOLS).every(x=>x.label&&x.symbol));
 assert.throws(()=>mount(),/browser_document_required/);
 const menuSource = require('node:fs').readFileSync(require.resolve('../../public/sede3d-menu.js'),'utf8');
 assert.match(menuSource,/if\(!destroyed && current==='overview'\)render\(current\)/,'runtime polling must not rerender and erase active module controls/results');
+assert.match(menuSource,/q\.price!==null&&q\.price!==undefined&&q\.price!==''&&Number\.isFinite\(Number\(q\.price\)\)&&Number\(q\.price\)>0/,'null, empty, zero, or nonnumeric values must never be rendered as verified prices');
 console.log('3D sede menu: PASS (13 modules, four market desks, external sources, LEVI/EU SOU, fail-closed browser requirement)');
