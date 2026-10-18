@@ -5,6 +5,7 @@
   if (root) root.AdonaiTradeSedeMenu = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this, function createMenu() {
   const SYMBOLS = Object.freeze({ CRYPTO: 'BTCUSDT', FOREX: 'EURUSD', B3: 'PETR4', INTERNATIONAL: 'AAPL' });
+  const CHART_SYMBOLS = Object.freeze({ CRYPTO: Object.freeze({symbol:'BINANCE:BTCUSDT',label:'Cripto — BTC/USDT'}), FOREX: Object.freeze({symbol:'OANDA:EURUSD',label:'Forex — EUR/USD'}), B3: Object.freeze({symbol:'BMFBOVESPA:PETR4',label:'B3 — PETR4'}), INTERNATIONAL: Object.freeze({symbol:'NASDAQ:AAPL',label:'Internacional — AAPL'}) });
   const MENU = Object.freeze([
     {id:'overview',label:'Sede 3D',group:'Operação'},
     {id:'rh',label:'RH e equipes',group:'Operação'},
