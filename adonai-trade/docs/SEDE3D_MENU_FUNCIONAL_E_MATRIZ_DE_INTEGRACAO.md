@@ -176,9 +176,17 @@ Em todas as mesas: respostas `verified / stale / unverified / unavailable`; nunc
 - Contrato de menu passou no CI [39151566175](https://github.com/AdonaiShalom/adonaiturbo/actions/runs/39151566175). No último ponto de verificação, o job Windows PowerShell 5.1 ainda estava em andamento.
 - A sede visual original e a aba do Turbo continuam sem instalação comprovada.
 
+### Fear & Greed — timeout configurável, tamanho limitado e CI verde
+
+- A fonte externa tem timeout padrão de 5 s, configurável apenas entre 100 ms e 30 s; configuração inválida e ausência de AbortController falham de forma explícita.
+- Respostas maiores que 64 KiB são rejeitadas, redirecionamentos são bloqueados e a leitura é cancelada quando o limite do corpo transmitido é excedido.
+- Testes adicionais cobrem timeout real via AbortSignal, limite de timeout inválido, Content-Length excessivo e corpo JSON excessivo.
+- CI aprovado no commit `b52f3c5fb1d208c9b8a82bdecd7f59649f42926f`: [run 39152139127](https://github.com/AdonaiShalom/adonaiturbo/actions/runs/39152139127), incluindo `contract-tests` e `windows-powershell-runtime`.
+- O teste usa respostas controladas para validar o contrato. Não prova que o provedor esteja disponível em produção nem que o indicador esteja visualmente instalado no protótipo original.
+
 ### Percentual oficial nesta atualização
 
-**37% concluído / 63% restante.** Avanço de 1 ponto pela inclusão de listas de instrumentos selecionáveis nas quatro mesas e consultas de cotação baseadas no símbolo escolhido. O contrato do menu passou no CI; a verificação Windows PowerShell 5.1 da execução mais recente ainda está pendente. A proteção contra preços inválidos, a ponte com timeout e o instalador reversível têm testes anteriores aprovados. Isso melhora a funcionalidade do menu, mas não comprova cotações live nem instalação visual. O HTML original ainda não foi modificado, e o proxy autenticado do Turbo e as integrações LEVI/EU SOU ponta a ponta seguem pendentes.
+**38% concluído / 62% restante.** Avanço de 1 ponto pela conclusão da proteção de transporte do Fear & Greed: timeout limitado e testável, limite de 64 KiB, bloqueio de redirecionamentos e testes para timeout e payload excessivo. Os testes de contrato e Windows PowerShell 5.1 passaram no CI. As listas das quatro mesas e as proteções contra preços inválidos também estão cobertas por contratos. Isso é avanço de robustez, não comprova fonte live em produção nem instalação visual. O HTML original ainda não está na árvore do branch e não foi instalado no Turbo; proxy autenticado e integrações LEVI/EU SOU ponta a ponta seguem pendentes.
 
 ### Documentos de planejamento anteriores
 
@@ -203,4 +211,4 @@ Os antigos documentos de planejamento não constituem planos ativos independente
 
 Não considerar documentação ou CI de contratos como instalação visual concluída. A medição deve ponderar: protótipo original e aba Turbo 25%; menu/RH/funções 15%; quatro mercados com dados comprovados 20%; TradingView/Investing.com/GREED 10%; Supabase/auditoria/segurança 10%; LEVI + EU SOU 10%; testes de regressão, rollback e release 10%.
 
-Estado oficial atual desta revisão: **37% concluído / 63% restante (estimativa ponderada por evidências, não telemetria automática)**. O valor reconhece os contratos de runtime e adaptadores testados, o menu de módulos implementado no branch e as funções RH/auditoria transacionais testadas no Supabase. Não contabiliza como concluídos os gates visuais, a instalação do protótipo original na aba real, as cotações live com credenciais, o proxy autenticado local, nem os testes de LEVI/EU SOU ponta a ponta. Atualizar a porcentagem somente com evidências reproduzíveis anexadas a cada gate.
+Estado oficial atual desta revisão: **38% concluído / 62% restante (estimativa ponderada por evidências, não telemetria automática)**. O valor reconhece os contratos de runtime e adaptadores testados, o menu de módulos implementado no branch e as funções RH/auditoria transacionais testadas no Supabase. Não contabiliza como concluídos os gates visuais, a instalação do protótipo original na aba real, as cotações live com credenciais, o proxy autenticado local, nem os testes de LEVI/EU SOU ponta a ponta. Atualizar a porcentagem somente com evidências reproduzíveis anexadas a cada gate.
