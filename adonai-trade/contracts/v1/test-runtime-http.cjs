@@ -79,6 +79,23 @@ async function main() {
     await new Promise((resolve, reject) => unconfirmed.close((error) => error ? reject(error) : resolve()));
   }
 
+  const policyLimited = createServer({ now: () => nowMs, auditLedger, policyRateLimit: 2 });
+  await new Promise((resolve) => policyLimited.listen(0, '127.0.0.1', resolve));
+  const policyLimitedBase = 'http://127.0.0.1:' + policyLimited.address().port;
+  try {
+    const request = () => fetch(policyLimitedBase + '/api/v1/policy/evaluate', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ envelope: { mode: 'live' } }) });
+    assert.equal((await request()).status, 422);
+    assert.equal((await request()).status, 422);
+    const limited = await request();
+    assert.equal(limited.status, 429);
+    assert.equal((await limited.json()).reason_codes[0], 'policy_rate_limit_exceeded');
+    assert.equal(limited.headers.get('retry-after'), '60');
+    assert.equal(persisted.length, 3, 'rate-limited request must not write another audit event');
+    console.log('PASS: policy evaluation is rate limited before durable audit writes');
+  } finally {
+    await new Promise((resolve, reject) => policyLimited.close((error) => error ? reject(error) : resolve()));
+  }
+
   const failing = createServer({ now: () => nowMs, auditLedger: { async check() { throw new Error('offline'); }, async append() { throw new Error('offline'); } } });
   await new Promise((resolve) => failing.listen(0, '127.0.0.1', resolve));
   const failedBase = 'http://127.0.0.1:' + failing.address().port;
