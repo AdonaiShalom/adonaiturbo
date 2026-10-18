@@ -21,6 +21,27 @@ const state = await window.AdonaiTradeRuntimeBridge.readState({ baseUrl: '' });
 // Não substitua o estado visual original nem invente equipes, decisões ou probabilidades.
 ```
 
+## Menu funcional complementar para a sede original
+
+Foi criado o arquivo `public/sede3d-menu.js`, com menu navegável para Sede 3D, RH, as quatro mesas (Cripto, Forex, B3 e Internacional), TradingView, Investing.com, Fear & Greed, Inteligência/Risco, LEVI, EU SOU e Auditoria. A camada não substitui nem redesenha a cena 3D original. Inclui consultas de cotação read-only e mostra explicitamente indisponibilidade/dados não verificados.
+
+Depois de copiar o arquivo para o diretório público efetivamente servido, incluir no HTML original **após** a ponte de runtime e só depois da inspeção dos IDs/controles do protótipo:
+
+```html
+<script src="/adonai-trade/public/runtime-bridge.js"></script>
+<script src="/adonai-trade/public/sede3d-menu.js"></script>
+<script>
+  window.adonaiTradeSedeMenu = window.AdonaiTradeSedeMenu.mount({
+    runtimeBaseUrl: 'http://127.0.0.1:3100',
+    pollIntervalMs: 15000
+  });
+</script>
+```
+
+O runtime foi ajustado para permitir CORS apenas das origens locais do Turbo `http://127.0.0.1:3000` e `http://localhost:3000`, configuráveis por `ADONAI_TRADE_ALLOWED_ORIGINS`. Essa permissão não é autenticação. A aplicação deve continuar em rede local confiável, e endpoints privilegiados continuam exigindo seus controles próprios. Testes HTTP cobrem origem permitida, origem negada e preflight.
+
+**Importante:** esse menu é um módulo de integração criado nesta branch; não significa que já foi copiado para a instalação Windows nem incorporado ao HTML original. O HTML do Turbo e o protótipo original não estão na árvore conectada do GitHub. O passo final de instalação exige comparar o ZIP original e o HTML real, copiar o módulo para a pasta pública correta e testar visualmente sem danificar a cena 3D.
+
 ## Cliente de atualização periódica
 
 O arquivo `public/runtime-bridge-client.js` acrescenta leitura inicial e atualização periódica (15 segundos por padrão), sem criar dados. Inclua os dois scripts depois do HTML base da sede e antes do código que recebe os eventos. O cliente publica `adonai-trade:runtime-state` no navegador; a sede precisa ligar esse evento aos componentes visuais existentes, após a inspeção do HTML original.
