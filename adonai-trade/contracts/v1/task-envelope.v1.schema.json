@@ -13,6 +13,7 @@
     "task_type",
     "mode",
     "created_at",
+    "expires_at",
     "payload"
   ],
   "properties": {
