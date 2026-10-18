@@ -9,7 +9,8 @@ function safeEndpoint(raw) {
   if (typeof raw !== 'string' || !raw.trim()) return null;
   try {
     const url = new URL(raw);
-    if (!['http:', 'https:'].includes(url.protocol)) return null;
+    const loopback = ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname.toLowerCase());
+    if (url.protocol !== 'https:' && !(url.protocol === 'http:' && loopback)) return null;
     if (url.username || url.password || url.search || url.hash) return null;
     return url.origin + url.pathname;
   } catch {
