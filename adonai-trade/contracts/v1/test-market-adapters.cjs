@@ -14,13 +14,15 @@ async function main() {
       assert.equal(options.headers.Authorization, 'Bearer test-token');
       return { ok: true, status: 200, async json() { return { results: [{ regularMarketPrice: 38.5, regularMarketTime: Math.floor((nowMs - 2000) / 1000) }] }; } };
     }
-    if (u.hostname === 'www.alphavantage.co') { assert.equal(u.searchParams.get('function'),'TIME_SERIES_INTRADAY'); assert.equal(u.searchParams.get('interval'),'1min'); return { ok: true, status: 200, async json() { return { 'Meta Data': {'6. Time Zone':'US/Eastern'}, 'Time Series (1min)': {'2026-10-18 07:59:00': {'4. close':'123.4'}} }; } }; }
+    if (u.hostname === 'www.alphavantage.co') { assert.equal(u.searchParams.get('interval'),'1min'); if(u.searchParams.get('function')==='FX_INTRADAY') return {ok:true,status:200,async json(){return {'Meta Data':{'6. Time Zone':'US/Eastern'},'Time Series FX (1min)':{'2026-10-18 07:59:00':{'4. close':'1.08'}}};}}; assert.equal(u.searchParams.get('function'),'TIME_SERIES_INTRADAY'); return { ok: true, status: 200, async json() { return { 'Meta Data': {'6. Time Zone':'US/Eastern'}, 'Time Series (1min)': {'2026-10-18 07:59:00': {'4. close':'123.4'}} }; } }; }
     throw new Error('unexpected provider');
   };
   const crypto = await getQuote({ desk: 'CRYPTO', symbol: 'BTCUSDT', fetchImpl: fetchMock, nowMs });
   assert.equal(crypto.status, 'verified'); assert.equal(crypto.price, 67123.45); assert.equal(crypto.execution_enabled, false);
   const forex = await getQuote({ desk: 'FOREX', symbol: 'EURUSD', fetchImpl: fetchMock, nowMs });
   assert.equal(forex.status, 'unverified'); assert.equal(forex.reason_code, 'daily_reference_not_intraday', 'daily reference rates must not be mislabeled as live quotes');
+  const forexIntraday = await getQuote({ desk: 'FOREX', symbol: 'EURUSD', env: { ALPHAVANTAGE_API_KEY: 'test-key' }, fetchImpl: fetchMock, nowMs });
+  assert.equal(forexIntraday.status, 'verified'); assert.equal(forexIntraday.price, 1.08); assert.equal(forexIntraday.currency, 'USD'); assert.equal(forexIntraday.source, 'alphavantage_fx_intraday_1min'); assert.equal(forexIntraday.observed_at, '2026-10-18T11:59:00.000Z');
   const invalidDailyForex = await getQuote({ desk: 'FOREX', symbol: 'EURUSD', fetchImpl: async () => ({ ok: true, status: 200, async json() { return { date: 'not-a-date', rates: { USD: -1 } }; } }), nowMs });
   assert.equal(invalidDailyForex.status, 'unverified'); assert.equal(invalidDailyForex.reason_code, 'invalid_daily_reference_data');
   const impossibleDailyForex = await getQuote({ desk: 'FOREX', symbol: 'EURUSD', fetchImpl: async () => ({ ok: true, status: 200, async json() { return { date: '2026-02-31', rates: { USD: 1.08 } }; } }), nowMs });
