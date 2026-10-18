@@ -52,7 +52,6 @@ async function main() {
     await new Promise((resolve, reject) => unconfigured.close((error) => error ? reject(error) : resolve()));
   }
 
-  }
 
   const failing = createServer({ now: () => nowMs, auditLedger: { async check() { throw new Error('offline'); }, async append() { throw new Error('offline'); } } });
   await new Promise((resolve) => failing.listen(0, '127.0.0.1', resolve));
