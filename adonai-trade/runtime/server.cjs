@@ -55,6 +55,25 @@ function createServer(options = {}) {
   return http.createServer(async (req, res) => {
     const url = new URL(req.url || '/', 'http://127.0.0.1');
     const timestamp = new Date(now()).toISOString();
+    // Narrow local-origin allowlist for the Turbo UI (port 3000) to read this runtime.
+    // This is a browser boundary, not authentication; keep privileged routes protected separately.
+    const allowedOrigins = String(env.ADONAI_TRADE_ALLOWED_ORIGINS ||
+      'http://127.0.0.1:3000,http://localhost:3000').split(',').map((value) => value.trim()).filter(Boolean);
+    const origin = String(req.headers.origin || '');
+    const originAllowed = Boolean(origin && allowedOrigins.includes(origin));
+    if (originAllowed) {
+      res.setHeader('access-control-allow-origin', origin);
+      res.setHeader('vary', 'Origin');
+      res.setHeader('access-control-allow-methods', 'GET, POST, OPTIONS');
+      res.setHeader('access-control-allow-headers', 'Accept, Content-Type, X-Request-Id');
+      res.setHeader('access-control-max-age', '600');
+    }
+    if (req.method === 'OPTIONS' && url.pathname.startsWith('/api/v1/')) {
+      if (!originAllowed) return send(res, 403, { service: SERVICE, version: VERSION, timestamp, status: 'blocked', reason_codes: ['origin_not_allowed'], execution_performed: false });
+      res.statusCode = 204;
+      res.end();
+      return;
+    }
     if (req.method === 'GET' && url.pathname === '/health') return send(res, 200, { service: SERVICE, version: VERSION, timestamp, mode: 'paper', status: 'alive' });
     if (req.method === 'GET' && url.pathname === '/api/v1/integrations') return send(res, 200, { service: SERVICE, version: VERSION, timestamp, ...listIntegrationStatus(env) });
     if (req.method === 'GET' && url.pathname === '/api/v1/markets') return send(res, 200, { service: SERVICE, version: VERSION, timestamp, ...listMarketDesks(env) });
