@@ -25,7 +25,8 @@ async function main() {
   assert.equal(result.persisted, true);
   assert.ok(result.event_id);
 
-  const baseUrl = env.SUPABASE_URL.replace(/\\/+$/, '');
+  let baseUrl = env.SUPABASE_URL;
+  while (baseUrl.endsWith('/')) baseUrl = baseUrl.slice(0, -1);
   const response = await fetch(baseUrl + '/rest/v1/runtime_audit_events?select=event_id,decision,reason_codes,details&event_id=eq.' + encodeURIComponent(result.event_id), {
     method: 'GET',
     headers: {
@@ -48,9 +49,9 @@ async function main() {
     event_id: result.event_id,
     decision: rows[0].decision,
     execution_performed: rows[0].details.execution_performed
-  }) + '\\n');
+  }) + String.fromCharCode(10));
 }
 main().catch((error) => {
-  process.stderr.write(String(error.message || error) + '\\n');
+  process.stderr.write(String(error.message || error) + String.fromCharCode(10));
   process.exitCode = 1;
 });
