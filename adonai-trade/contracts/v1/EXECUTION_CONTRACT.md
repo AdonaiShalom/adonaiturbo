@@ -36,7 +36,7 @@
 
 ## Runtime HTTP inicial
 
-O `runtime/server.cjs` fornece `/health`, `/ready` e `POST /api/v1/policy/evaluate`. Esta primeira fatia não conecta provedores de mercado, não persiste a auditoria e não executa ordens. Por isso, `/ready` retorna `503` até que o ledger durável seja integrado. O endpoint de avaliação declara explicitamente `audit_persisted: false` e `execution_performed: false`.
+O `runtime/server.cjs` fornece `/health`, `/ready` e `POST /api/v1/policy/evaluate`. Esta fatia não conecta provedores de mercado nem executa ordens. O adaptador `runtime/audit-ledger.cjs` grava eventos em `adonai_trade.runtime_audit_events` via PostgREST. `/ready` retorna `200` somente quando a consulta ao ledger funciona; a avaliação só responde depois da gravação. Falha ou ausência do ledger retorna `503`, sem executar ordens. A migration SQL existe no repositório, mas precisa ser aplicada e validada no projeto alvo antes da integração real.
 
 ## Estados de aceite
 
