@@ -82,9 +82,11 @@ try {
     $Markets = (Get-JsonResponse -Url "$Base/api/v1/markets").Body
     Assert-Equal $Markets.mode 'paper' 'Modo das mesas'
     Assert-Equal $Markets.desks.Count 4 'Quantidade de mesas'
+    Assert-Equal $Markets.data_status 'partially_configured' 'Estado de configuração dos provedores'
+    Assert-Equal $Markets.execution_enabled $false 'Execução global habilitada'
     foreach ($Desk in $Markets.desks) {
         Assert-Equal $Desk.execution_enabled $false "Execução habilitada na mesa $($Desk.id)"
-        Assert-Equal $Desk.quote_status 'unavailable' "Estado da cotação $($Desk.id)"
+        Assert-Equal $Desk.quote_status 'not_checked' "Estado da cotação $($Desk.id)"
     }
     $Integrations = (Get-JsonResponse -Url "$Base/api/v1/integrations").Body
     foreach ($Integration in $Integrations.integrations) {
