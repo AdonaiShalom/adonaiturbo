@@ -76,6 +76,8 @@ jobs:
         run: node adonai-trade/contracts/v1/test-fear-greed.cjs
       - name: Run 3D sede menu contract
         run: node adonai-trade/contracts/v1/test-sede3d-menu.cjs
+      - name: Run persisted RH snapshot and HTTP endpoint tests
+        run: node adonai-trade/contracts/v1/test-rh-store.cjs
 
   windows-powershell-runtime:
     runs-on: windows-latest
