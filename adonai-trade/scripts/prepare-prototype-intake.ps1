@@ -52,7 +52,10 @@ try {
     if (-not ($entries | Where-Object { $_ -match '(?i)teia3d\.js' })) {
         Write-Fail "Não encontrei teia3d.js no ZIP principal."
     }
-    if (-not ($entries | Where-Object { $_ -match '(?i)(^|/)public/index\.html    $prototypeHtml = @($entries | Where-Object { $_ -match '(?i)prototipo.*\.html|sede3d\.html' })
+    if (-not ($entries | Where-Object { $_ -match '(?i)(^|/)public/index\.html$' })) {
+        Write-Fail "Não encontrei public/index.html no ZIP principal. Não vou integrar uma interface incompleta."
+    }
+    $prototypeHtml = @($entries | Where-Object { $_ -match '(?i)prototipo.*\.html|sede3d\.html' })
     if ($prototypeHtml.Count -eq 0) { Write-Fail 'Nenhum HTML de protótipo foi encontrado.' }
     $entryCount = $entries.Count
 }
