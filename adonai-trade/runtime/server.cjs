@@ -113,7 +113,7 @@ function createServer(options = {}) {
         return send(res, status, { service: SERVICE, version: VERSION, timestamp, mode: 'paper', status: 'blocked', reason_codes: [code], audit_persisted: false, execution_enabled: false });
       }
     }
-    const rhStatusMatch = req.method === 'PATCH' && url.pathname.match(/^\\/api\\/v1\\/rh\\/tasks\\/([0-9a-f-]{36})\\/status$/i);
+    const rhStatusMatch = req.method === 'PATCH' && url.pathname.match(/^\/api\/v1\/rh\/tasks\/([0-9a-f-]{36})\/status$/i);
     if (rhStatusMatch) {
       const auth = rhWriteAuth(req, env);
       if (!auth.ok) return send(res, auth.status, { service: SERVICE, version: VERSION, timestamp, status: 'blocked', reason_codes: [auth.reason], execution_enabled: false });
