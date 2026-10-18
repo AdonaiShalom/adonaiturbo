@@ -88,6 +88,8 @@ function createServer(options = {}) {
     }
     if (req.method === 'OPTIONS' && url.pathname.startsWith('/api/v1/')) {
       if (!originAllowed) return send(res, 403, { service: SERVICE, version: VERSION, timestamp, status: 'blocked', reason_codes: ['origin_not_allowed'], execution_performed: false });
+      const requestedMethod = String(req.headers['access-control-request-method'] || '').toUpperCase();
+      if (!['GET', 'POST', 'PATCH'].includes(requestedMethod)) return send(res, 403, { service: SERVICE, version: VERSION, timestamp, status: 'blocked', reason_codes: ['method_not_allowed'], execution_performed: false });
       res.statusCode = 204;
       res.end();
       return;
