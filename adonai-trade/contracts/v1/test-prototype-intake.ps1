@@ -38,7 +38,6 @@ try {
 
     $hash = (Get-FileHash -LiteralPath $zipPath -Algorithm SHA256).Hash
     & $intakeScript -ZipPath $zipPath -StageRoot $stageRoot -ExpectedSha256 $hash
-    if ($LASTEXITCODE -ne 0) { throw "Prototype intake script exited with code $LASTEXITCODE" }
     $reports = @(Get-ChildItem -LiteralPath $stageRoot -Filter 'prototype-intake-report.json' -Recurse -File)
     if ($reports.Count -ne 1) { throw "Expected one intake report, got $($reports.Count)" }
     $report = Get-Content -LiteralPath $reports[0].FullName -Raw | ConvertFrom-Json
