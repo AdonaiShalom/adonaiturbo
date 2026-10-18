@@ -77,7 +77,7 @@ async function getQuote({ desk, symbol, env = process.env, fetchImpl = globalThi
       if (!match) return quote('unavailable', { reason_code: 'invalid_forex_pair' });
       const [, base, target] = match;
       const data = await getJson(fetchImpl, 'https://api.frankfurter.dev/v1/latest?base=' + base + '&symbols=' + target);
-      const referenceDate = /^\\d{4}-\\d{2}-\\d{2}$/.test(String(data.date || '')) ? data.date : null;
+      const referenceDate = /^\d{4}-\d{2}-\d{2}$/.test(String(data.date || '')) ? data.date : null;
       const referencePrice = Number(data.rates && data.rates[target]);
       if (!referenceDate || !Number.isFinite(Date.parse(referenceDate + 'T00:00:00Z')) || !Number.isFinite(referencePrice) || referencePrice <= 0) {
         return quote('unverified', { desk: id, symbol: base + '/' + target, source: 'frankfurter_ecb_reference', reason_code: 'invalid_daily_reference_data' });
