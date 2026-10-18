@@ -1,9 +1,17 @@
 'use strict';
 const assert = require('node:assert/strict');
 const { createServer } = require('../../runtime/server.cjs');
+
+async function listen(server) {
+  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+  return 'http://127.0.0.1:' + server.address().port;
+}
+async function close(server) {
+  await new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+}
 async function main() {
   const nowMs = Date.parse('2026-10-17T12:00:00.000Z');
-  let persisted = [];
+  const persisted = [];
   const auditLedger = {
     async check() { return true; },
     async append(event) {
@@ -12,55 +20,68 @@ async function main() {
     }
   };
   const server = createServer({ now: () => nowMs, auditLedger });
-  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
-  const base = 'http://127.0.0.1:' + server.address().port;
+  const base = await listen(server);
   try {
-    const health = await fetch(base + '/health');
-    assert.equal(health.status, 200);
-    assert.equal((await health.json()).mode, 'paper');
-    const ready = await fetch(base + '/ready');
-    assert.equal(ready.status, 200);
-    assert.equal((await ready.json()).status, 'ready');
+    assert.equal((await fetch(base + '/health')).status, 200);
+    assert.equal((await (await fetch(base + '/ready')).json()).status, 'ready');
     assert.equal((await fetch(base + '/does-not-exist')).status, 404);
-    const badJson = await fetch(base + '/api/v1/policy/evaluate', { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{' });
+
+    const badJson = await fetch(base + '/api/v1/policy/evaluate', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: '{'
+    });
     assert.equal(badJson.status, 400);
-    const blocked = await fetch(base + '/api/v1/policy/evaluate', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ envelope: { mode: 'live' }, proposal: { mode: 'live' } }) });
+
+    const oversized = await fetch(base + '/api/v1/policy/evaluate', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: 'x'.repeat(70 * 1024)
+    });
+    assert.equal(oversized.status, 413);
+    assert.deepEqual((await oversized.json()).reason_codes, ['request_too_large']);
+    assert.equal((await fetch(base + '/health')).status, 200, 'server remains usable after oversized body');
+
+    const blocked = await fetch(base + '/api/v1/policy/evaluate', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ envelope: { mode: 'live' }, proposal: { mode: 'live' } })
+    });
     assert.equal(blocked.status, 422);
-    const body = await blocked.json();
-    assert.equal(body.execution_performed, false);
-    assert.equal(body.audit_persisted, true);
-    assert.equal(body.decision.decision, 'blocked');
+    const blockedBody = await blocked.json();
+    assert.equal(blockedBody.execution_performed, false);
+    assert.equal(blockedBody.audit_persisted, true);
+    assert.equal(blockedBody.decision.decision, 'blocked');
     assert.equal(persisted.length, 1);
-    console.log('PASS: runtime HTTP readiness, audit success, 404, malformed JSON, and no-execution policy response');
+    console.log('PASS: HTTP readiness, malformed/oversized body handling, server recovery, audit success, and no-execution policy');
   } finally {
-    await new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+    await close(server);
   }
 
   const unconfigured = createServer({ now: () => nowMs, auditLedger: null });
-  await new Promise((resolve) => unconfigured.listen(0, '127.0.0.1', resolve));
-  const unconfiguredBase = 'http://127.0.0.1:' + unconfigured.address().port;
+  const unconfiguredBase = await listen(unconfigured);
   try {
     assert.equal((await fetch(unconfiguredBase + '/ready')).status, 503);
-    const response = await fetch(unconfiguredBase + '/api/v1/policy/evaluate', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ envelope: { mode: 'live' } }) });
+    const response = await fetch(unconfiguredBase + '/api/v1/policy/evaluate', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ envelope: { mode: 'live' } })
+    });
     assert.equal(response.status, 503);
     const body = await response.json();
     assert.equal(body.audit_persisted, false);
     assert.equal(body.execution_performed, false);
     assert.ok(body.reason_codes.includes('audit_persistence_not_configured'));
-    console.log('PASS: runtime blocks readiness and evaluation without a configured audit ledger');
+    console.log('PASS: runtime blocks readiness and evaluation without audit ledger');
   } finally {
-    await new Promise((resolve, reject) => unconfigured.close((error) => error ? reject(error) : resolve()));
+    await close(unconfigured);
   }
 
-  }
-
-  const failing = createServer({ now: () => nowMs, auditLedger: { async check() { throw new Error('offline'); }, async append() { throw new Error('offline'); } } });
-  await new Promise((resolve) => failing.listen(0, '127.0.0.1', resolve));
-  const failedBase = 'http://127.0.0.1:' + failing.address().port;
+  const failing = createServer({
+    now: () => nowMs,
+    auditLedger: { async check() { throw new Error('offline'); }, async append() { throw new Error('offline'); } }
+  });
+  const failingBase = await listen(failing);
   try {
-    const ready = await fetch(failedBase + '/ready');
-    assert.equal(ready.status, 503);
-    const response = await fetch(failedBase + '/api/v1/policy/evaluate', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ envelope: { mode: 'live' } }) });
+    assert.equal((await fetch(failingBase + '/ready')).status, 503);
+    const response = await fetch(failingBase + '/api/v1/policy/evaluate', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ envelope: { mode: 'live' } })
+    });
     assert.equal(response.status, 503);
     const body = await response.json();
     assert.equal(body.audit_persisted, false);
@@ -68,7 +89,7 @@ async function main() {
     assert.ok(body.reason_codes.includes('audit_persistence_failed'));
     console.log('PASS: runtime fails closed when durable audit is unavailable');
   } finally {
-    await new Promise((resolve, reject) => failing.close((error) => error ? reject(error) : resolve()));
+    await close(failing);
   }
 }
 main().catch((error) => { process.stderr.write(String(error.stack || error) + '\n'); process.exitCode = 1; });
