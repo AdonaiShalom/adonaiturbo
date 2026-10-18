@@ -93,6 +93,11 @@ jobs:
             }
           }
           Write-Host 'Prototype intake and read-only comparison scripts passed PowerShell syntax and safety-marker checks.'
+      - name: Test read-only prototype comparison on Windows PowerShell 5.1
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          & 'adonai-trade/contracts/v1/test-prototype-comparison.ps1'
       - name: Run isolated runtime verification on Windows PowerShell 5.1
         shell: powershell
         run: |
