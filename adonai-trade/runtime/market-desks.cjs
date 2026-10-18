@@ -4,7 +4,7 @@ const DESKS = Object.freeze([
   Object.freeze({ id: 'CRYPTO', label: 'Cripto', venue_scope: 'digital_assets', provider: 'binance_spot_public' }),
   Object.freeze({ id: 'FOREX', label: 'Forex', venue_scope: 'foreign_exchange', provider: 'frankfurter_ecb_daily_reference' }),
   Object.freeze({ id: 'B3', label: 'B3', venue_scope: 'brazil_equities', provider: 'brapi' }),
-  Object.freeze({ id: 'INTERNATIONAL', label: 'Internacional', venue_scope: 'international_markets', provider: 'alphavantage' })
+  Object.freeze({ id: 'INTERNATIONAL', label: 'Internacional', venue_scope: 'international_markets', provider: 'alphavantage_intraday_1min' })
 ]);
 
 function listMarketDesks(env = process.env) {
@@ -15,7 +15,7 @@ function listMarketDesks(env = process.env) {
       (desk.id === 'B3' && Boolean(env.BRAPI_TOKEN)) ||
       (desk.id === 'INTERNATIONAL' && Boolean(env.ALPHAVANTAGE_API_KEY));
     const dataMode = desk.id === 'FOREX' ? 'daily_reference_not_intraday' :
-      desk.id === 'INTERNATIONAL' ? 'provider_timestamp_verification_required' :
+      desk.id === 'INTERNATIONAL' ? 'intraday_1min_timestamp_checked' :
       'read_only_quote_adapter';
     return {
       ...desk,
