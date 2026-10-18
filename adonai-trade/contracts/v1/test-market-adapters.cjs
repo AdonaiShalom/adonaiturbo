@@ -48,7 +48,7 @@ async function main() {
   const badPrice = await getQuote({ desk: 'CRYPTO', symbol: 'BTCUSDT', fetchImpl: async () => ({ ok: true, status: 200, async json() { return { lastPrice: 'NaN', closeTime: nowMs }; } }), nowMs });
   assert.equal(badPrice.status, 'unverified'); assert.equal(badPrice.reason_code, 'invalid_provider_price');
   const providerError = await getQuote({ desk: 'CRYPTO', symbol: 'BTCUSDT', fetchImpl: async () => ({ ok: false, status: 429, async json() { return {}; } }), nowMs });
-  assert.equal(providerError.status, 'unavailable'); assert.equal(providerError.reason_code, 'provider_request_failed');
+  assert.equal(providerError.status, 'unavailable'); assert.equal(providerError.reason_code, 'provider_http_429', 'provider throttling should be distinguishable from network failure');
   const oversizedDeclared = await getQuote({ desk: 'CRYPTO', symbol: 'BTCUSDT', fetchImpl: async () => ({ ok: true, status: 200, headers: { get: (name) => name === 'content-length' ? String(MAX_RESPONSE_BYTES + 1) : null }, async json() { throw new Error('must not parse oversized response'); } }), nowMs });
   assert.equal(oversizedDeclared.status, 'unavailable'); assert.equal(oversizedDeclared.reason_code, 'provider_response_too_large');
   const oversizedBody = await getQuote({ desk: 'CRYPTO', symbol: 'BTCUSDT', fetchImpl: async () => ({ ok: true, status: 200, async json() { return { payload: 'x'.repeat(MAX_RESPONSE_BYTES + 1) }; } }), nowMs });
