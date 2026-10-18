@@ -189,12 +189,12 @@ Em todas as mesas: respostas `verified / stale / unverified / unavailable`; nunc
 - O módulo RH limita respostas Supabase a 1 MiB antes de parsear JSON; para respostas em streaming, cancela a leitura ao exceder o limite. O mesmo limite é aplicado aos RPCs de criação/atualização de tarefas com auditoria.
 - O endpoint RH informa `supabase_response_too_large` explicitamente e falha fechado, sem retornar tarefas/roles parciais como se fossem válidas.
 - Foram adicionados contratos para `Content-Length` acima do limite e JSON excessivo.
-- CI desta alteração ainda está em execução: [run 39152345672](https://github.com/AdonaiShalom/adonaiturbo/actions/runs/39152345672). Não contabilizar como gate aprovado até os dois jobs terminarem verdes.
+- CI concluído com sucesso: [run 39152345672](https://github.com/AdonaiShalom/adonaiturbo/actions/runs/39152345672), com `contract-tests` e `windows-powershell-runtime` aprovados, incluindo a regressão RH persistido.
 - A alteração não modifica nem instala o HTML original e não confirma a disponibilidade real das tabelas Supabase.
 
 ### Percentual oficial nesta atualização
 
-**38% concluído / 62% restante.** Avanço de 1 ponto pela conclusão da proteção de transporte do Fear & Greed: timeout limitado e testável, limite de 64 KiB, bloqueio de redirecionamentos e testes para timeout e payload excessivo. Os testes de contrato e Windows PowerShell 5.1 passaram no CI. As listas das quatro mesas e as proteções contra preços inválidos também estão cobertas por contratos. Isso é avanço de robustez, não comprova fonte live em produção nem instalação visual. O HTML original ainda não está na árvore do branch e não foi instalado no Turbo; proxy autenticado e integrações LEVI/EU SOU ponta a ponta seguem pendentes.
+**39% concluído / 61% restante.** Avanço de 1 ponto pela proteção dos dados de RH lidos do Supabase: respostas limitadas a 1 MiB antes do parse, cancelamento de streams excedentes e falha explícita sem apresentar registros parciais. Os testes de Content-Length/JSON excessivos, o contrato geral e o runtime Windows PowerShell 5.1 passaram no CI. Isso melhora a segurança do RH, mas não comprova disponibilidade das tabelas reais, instalação visual ou integração ponta a ponta. O HTML original ainda não está na árvore do branch e não foi instalado no Turbo; proxy autenticado e integrações LEVI/EU SOU ponta a ponta seguem pendentes.
 
 ### Documentos de planejamento anteriores
 
@@ -219,4 +219,4 @@ Os antigos documentos de planejamento não constituem planos ativos independente
 
 Não considerar documentação ou CI de contratos como instalação visual concluída. A medição deve ponderar: protótipo original e aba Turbo 25%; menu/RH/funções 15%; quatro mercados com dados comprovados 20%; TradingView/Investing.com/GREED 10%; Supabase/auditoria/segurança 10%; LEVI + EU SOU 10%; testes de regressão, rollback e release 10%.
 
-Estado oficial atual desta revisão: **38% concluído / 62% restante (estimativa ponderada por evidências, não telemetria automática)**. O valor reconhece os contratos de runtime e adaptadores testados, o menu de módulos implementado no branch e as funções RH/auditoria transacionais testadas no Supabase. Não contabiliza como concluídos os gates visuais, a instalação do protótipo original na aba real, as cotações live com credenciais, o proxy autenticado local, nem os testes de LEVI/EU SOU ponta a ponta. Atualizar a porcentagem somente com evidências reproduzíveis anexadas a cada gate.
+Estado oficial atual desta revisão: **39% concluído / 61% restante (estimativa ponderada por evidências, não telemetria automática)**. O valor reconhece os contratos de runtime e adaptadores testados, o menu de módulos implementado no branch e as funções RH/auditoria transacionais testadas no Supabase. Não contabiliza como concluídos os gates visuais, a instalação do protótipo original na aba real, as cotações live com credenciais, o proxy autenticado local, nem os testes de LEVI/EU SOU ponta a ponta. Atualizar a porcentagem somente com evidências reproduzíveis anexadas a cada gate.
