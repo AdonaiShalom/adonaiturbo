@@ -54,7 +54,8 @@ const good = {
 
 assert.equal(validEnvelope(good), true, 'valid paper envelope must pass');
 assert.equal(validEnvelope({ ...good, mode: 'live' }), false, 'live mode must fail closed');
-assert.equal(validEnvelope(({ expires_at, ...rest }) => rest)(good), false, 'expiry is mandatory');
+const { expires_at: omittedExpiry, ...withoutExpiry } = good;
+assert.equal(validEnvelope(withoutExpiry), false, 'expiry is mandatory');
 assert.equal(validEnvelope({ ...good, market: 'UNKNOWN' }), false, 'unknown market must be rejected');
 assert.equal(validEnvelope({ ...good, extra: true }), false, 'unknown top-level fields must be rejected');
 assert.equal(validEnvelope({ ...good, task_id: 'not-a-uuid' }), false, 'invalid task id must be rejected');
