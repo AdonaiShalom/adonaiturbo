@@ -1,6 +1,6 @@
 'use strict';
 const assert = require('node:assert/strict');
-const {getMenu,mount,SYMBOLS,CHART_SYMBOLS} = require('../../public/sede3d-menu.js');
+const {getMenu,mount,SYMBOLS,MARKET_SYMBOLS,CHART_SYMBOLS} = require('../../public/sede3d-menu.js');
 const menu = getMenu();
 assert.equal(menu.length,13);
 assert.deepEqual(menu.filter(x=>['CRYPTO','FOREX','B3','INTERNATIONAL'].includes(x.id)).map(x=>x.id),['CRYPTO','FOREX','B3','INTERNATIONAL']);
@@ -19,7 +19,7 @@ assert.match(menuSource,/q\.price!==null&&q\.price!==undefined&&q\.price!==''&&N
 assert.match(menuSource,/MARKET_SYMBOLS/,'each market must expose an instrument watchlist');
 assert.match(menuSource,/Selecionar instrumento de /,'market panel must allow instrument selection');
 assert.match(menuSource,/encodeURIComponent\(selectedSymbol\)/,'quote query must use the selected instrument');
-assert.deepEqual(menu.MARKET_SYMBOLS.CRYPTO,['BTCUSDT','ETHUSDT','BNBUSDT','SOLUSDT','XRPUSDT']);
+assert.deepEqual(MARKET_SYMBOLS.CRYPTO,['BTCUSDT','ETHUSDT','BNBUSDT','SOLUSDT','XRPUSDT']);
 assert.deepEqual(menu.MARKET_SYMBOLS.FOREX,['EURUSD','GBPUSD','USDJPY','AUDUSD','USDCAD','USDCHF','NZDUSD']);
 assert.ok(menu.MARKET_SYMBOLS.B3.includes('PETR4') && menu.MARKET_SYMBOLS.B3.includes('VALE3'));
 assert.ok(menu.MARKET_SYMBOLS.INTERNATIONAL.includes('AAPL') && menu.MARKET_SYMBOLS.INTERNATIONAL.includes('NVDA'));
