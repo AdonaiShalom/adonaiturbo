@@ -44,6 +44,13 @@ async function main() {
   assert.equal(event.details.mode, 'paper');
   assert.equal(event.correlation_id, '00000000-0000-4000-8000-000000000001');
   assert.equal(calls[1].init.headers.authorization, 'Bearer test-only-secret');
+
+  await assert.rejects(() => ledger.append({ decision: { decision: 'execute_order', reason_codes: [] } }), /invalid_audit_decision/, 'ledger must reject execution decisions before writing');
+  assert.equal(calls.length, 2, 'invalid decision must not trigger a network write');
+
+  const failingLedger = createSupabaseAuditLedger({ SUPABASE_URL: 'https://project.supabase.co', SUPABASE_SERVICE_ROLE_KEY: 'test-only-secret' }, async () => ({ ok: false, status: 503 }));
+  await assert.rejects(() => failingLedger.check(), /audit_store_http_503/, 'ledger readiness must fail when persistence is unavailable');
+  await assert.rejects(() => failingLedger.append({ decision: { decision: 'no_order', reason_codes: ['test'] } }), /audit_store_http_503/, 'failed persistence must not be reported as success');
   console.log('PASS: Supabase audit adapter fails closed without config and emits append-only paper audit records');
 }
 main().catch((error) => { process.stderr.write(String(error.stack || error) + '\n'); process.exitCode = 1; });
