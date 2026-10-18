@@ -1,6 +1,36 @@
 'use strict';
 
 const MAX_ROWS = 100;
+const MAX_RESPONSE_BYTES = 1024 * 1024;
+
+async function readJsonLimited(response) {
+  const declaredLength = Number(response.headers && response.headers.get && response.headers.get('content-length'));
+  if (Number.isFinite(declaredLength) && declaredLength > MAX_RESPONSE_BYTES) throw new Error('supabase_response_too_large');
+  if (response.body && typeof response.body.getReader === 'function') {
+    const reader = response.body.getReader();
+    const chunks = [];
+    let size = 0;
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        size += value.byteLength;
+        if (size > MAX_RESPONSE_BYTES) {
+          await reader.cancel().catch(() => {});
+          throw new Error('supabase_response_too_large');
+        }
+        chunks.push(value);
+      }
+    } finally { try { reader.releaseLock(); } catch {} }
+    const merged = new Uint8Array(size);
+    let offset = 0;
+    for (const chunk of chunks) { merged.set(chunk, offset); offset += chunk.byteLength; }
+    return JSON.parse(new TextDecoder().decode(merged));
+  }
+  const payload = await response.json();
+  if (Buffer.byteLength(JSON.stringify(payload), 'utf8') > MAX_RESPONSE_BYTES) throw new Error('supabase_response_too_large');
+  return payload;
+}
 
 function getConfig(env = process.env) {
   const baseUrl = String(env.SUPABASE_URL || '').replace(/\/+$/, '');
@@ -31,7 +61,7 @@ async function getRhSnapshot({ env = process.env, fetchImpl = globalThis.fetch }
       redirect: 'error'
     });
     if (!response.ok) throw new Error('supabase_http_' + response.status);
-    const body = await response.json();
+    const body = await readJsonLimited(response);
     if (!Array.isArray(body)) throw new Error('invalid_supabase_payload');
     return body;
   }
@@ -74,7 +104,7 @@ async function callRpc({ env = process.env, fetchImpl = globalThis.fetch, name, 
     redirect: 'error'
   });
   if (!response.ok) throw Object.assign(new Error('supabase_http_' + response.status), { code: 'supabase_http_' + response.status });
-  return response.json();
+  return readJsonLimited(response);
 }
 
 async function createRhTask({ env = process.env, fetchImpl = globalThis.fetch, taskKey, title, roleKey, market = null, evidence = {} }) {
@@ -97,4 +127,4 @@ async function updateRhTaskStatus({ env = process.env, fetchImpl = globalThis.fe
   }});
 }
 
-module.exports = { getRhSnapshot, getConfig, createRhTask, updateRhTaskStatus, MAX_ROWS };
+module.exports = { getRhSnapshot, getConfig, createRhTask, updateRhTaskStatus, MAX_ROWS, MAX_RESPONSE_BYTES };
