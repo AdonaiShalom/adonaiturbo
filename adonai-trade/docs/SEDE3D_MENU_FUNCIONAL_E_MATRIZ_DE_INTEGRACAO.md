@@ -103,7 +103,7 @@ Em todas as mesas: respostas `verified / stale / unverified / unavailable`; nunc
 
 ### Percentual oficial nesta atualização
 
-**25% concluído / 75% restante.** Mantido sem aumento porque os novos arquivos de código ainda não tiveram uma execução de CI comprovada após a inclusão dos testes, e não existe evidência de instalação visual no protótipo original. Quando o CI validar a nova função, atualizar apenas a parcela correspondente a essa entrega; a integração visual só conta após teste no Turbo.
+**26% concluído / 74% restante.** Aumentado em 1 ponto percentual porque o adaptador read-only Fear & Greed, seu endpoint com rate limit, a ligação ao painel e os testes passaram no CI do branch. Este avanço cobre apenas código validado por testes automatizados; o dado live ainda não foi validado no serviço instalado, e a sede visual continua sem integração comprovada no HTML original. Não contar esse avanço como instalação local.
 
 ### Documentos de planejamento anteriores
 
