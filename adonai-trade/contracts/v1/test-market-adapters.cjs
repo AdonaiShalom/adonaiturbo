@@ -1,6 +1,6 @@
 'use strict';
 const assert = require('node:assert/strict');
-const { getQuote } = require('../../runtime/market-adapters.cjs');
+const { getQuote, MAX_RESPONSE_BYTES } = require('../../runtime/market-adapters.cjs');
 const { createServer } = require('../../runtime/server.cjs');
 
 async function main() {
@@ -12,7 +12,7 @@ async function main() {
     if (u.hostname === 'api.frankfurter.dev') return { ok: true, status: 200, async json() { return { date: '2026-10-18', rates: { USD: 1.08 } }; } };
     if (u.hostname === 'brapi.dev') {
       assert.equal(options.headers.Authorization, 'Bearer test-token');
-      return { ok: true, status: 200, async json() { return { results: [{ regularMarketPrice: 38.5, regularMarketTime: Math.floor((nowMs - 2000) / 1000) }] }; } };
+      return { ok: true, status: 200, async json() { return { results: [{ regularMarketPrice: 38.5, regularMarketTime: Math.floor((nowMs - 2000) / 1000) }] }; }
     }
     if (u.hostname === 'www.alphavantage.co') return { ok: true, status: 200, async json() { return { 'Global Quote': { '05. price': '123.4', '07. latest trading day': '2026-10-17' } }; } };
     throw new Error('unexpected provider');
@@ -31,12 +31,16 @@ async function main() {
   assert.equal(invalid.status, 'unavailable'); assert.equal(invalid.reason_code, 'invalid_crypto_symbol');
   const unknownDesk = await getQuote({ desk: 'MARS', symbol: 'BTCUSDT', fetchImpl: fetchMock, nowMs });
   assert.equal(unknownDesk.status, 'unavailable'); assert.equal(unknownDesk.reason_code, 'unknown_market_desk');
-  const futureQuote = await getQuote({ desk: 'CRYPTO', symbol: 'BTCUSDT', fetchImpl: async () => ({ ok: true, async json() { return { lastPrice: '10', closeTime: nowMs + 120000 }; } }), nowMs });
+  const futureQuote = await getQuote({ desk: 'CRYPTO', symbol: 'BTCUSDT', fetchImpl: async () => ({ ok: true, status: 200, async json() { return { lastPrice: '10', closeTime: nowMs + 120000 }; } }), nowMs });
   assert.equal(futureQuote.status, 'unverified'); assert.equal(futureQuote.reason_code, 'provider_timestamp_in_future');
-  const badPrice = await getQuote({ desk: 'CRYPTO', symbol: 'BTCUSDT', fetchImpl: async () => ({ ok: true, async json() { return { lastPrice: 'NaN', closeTime: nowMs }; } }), nowMs });
+  const badPrice = await getQuote({ desk: 'CRYPTO', symbol: 'BTCUSDT', fetchImpl: async () => ({ ok: true, status: 200, async json() { return { lastPrice: 'NaN', closeTime: nowMs }; } }), nowMs });
   assert.equal(badPrice.status, 'unverified'); assert.equal(badPrice.reason_code, 'invalid_provider_price');
   const providerError = await getQuote({ desk: 'CRYPTO', symbol: 'BTCUSDT', fetchImpl: async () => ({ ok: false, status: 429, async json() { return {}; } }), nowMs });
   assert.equal(providerError.status, 'unavailable'); assert.equal(providerError.reason_code, 'provider_request_failed');
+  const oversizedDeclared = await getQuote({ desk: 'CRYPTO', symbol: 'BTCUSDT', fetchImpl: async () => ({ ok: true, status: 200, headers: { get: (name) => name === 'content-length' ? String(MAX_RESPONSE_BYTES + 1) : null }, async json() { throw new Error('must not parse oversized response'); } }), nowMs });
+  assert.equal(oversizedDeclared.status, 'unavailable'); assert.equal(oversizedDeclared.reason_code, 'provider_response_too_large');
+  const oversizedBody = await getQuote({ desk: 'CRYPTO', symbol: 'BTCUSDT', fetchImpl: async () => ({ ok: true, status: 200, async json() { return { payload: 'x'.repeat(MAX_RESPONSE_BYTES + 1) }; } }), nowMs });
+  assert.equal(oversizedBody.status, 'unavailable'); assert.equal(oversizedBody.reason_code, 'provider_response_too_large');
 
   const server = createServer({ now: () => nowMs, auditLedger: null, env: {}, fetchImpl: fetchMock });
   await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
@@ -53,7 +57,7 @@ async function main() {
     const unknown = await fetch(base + '/api/v1/markets/quote?desk=MARS&symbol=BTCUSDT');
     assert.equal(unknown.status, 503);
     assert.equal((await unknown.json()).reason_code, 'unknown_market_desk');
-    console.log('PASS: market quote freshness, future timestamps, invalid prices, provider errors, credential gating, and read-only HTTP endpoint');
+    console.log('PASS: quote freshness, invalid responses, provider size limits, credential gating, and read-only HTTP endpoint');
   } finally {
     await new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
   }
