@@ -13,6 +13,8 @@ create table if not exists adonai_trade.runtime_audit_events (
 );
 
 alter table adonai_trade.runtime_audit_events enable row level security;
+revoke all on schema adonai_trade from public, anon, authenticated;
+grant usage on schema adonai_trade to service_role;
 revoke all on table adonai_trade.runtime_audit_events from public, anon, authenticated, service_role;
 grant select, insert on table adonai_trade.runtime_audit_events to service_role;
 
@@ -25,6 +27,9 @@ begin
   raise exception 'runtime audit events are append-only';
 end;
 $$;
+
+revoke all on function adonai_trade.reject_runtime_audit_mutation() from public, anon, authenticated;
+grant execute on function adonai_trade.reject_runtime_audit_mutation() to service_role;
 
 drop trigger if exists runtime_audit_events_append_only on adonai_trade.runtime_audit_events;
 create trigger runtime_audit_events_append_only
