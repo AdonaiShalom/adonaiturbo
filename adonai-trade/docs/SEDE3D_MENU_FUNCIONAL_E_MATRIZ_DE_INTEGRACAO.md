@@ -129,6 +129,14 @@ Em todas as mesas: respostas `verified / stale / unverified / unavailable`; nunc
 - Os contratos de quatro mesas e adaptadores passaram no run [39148491528](https://github.com/AdonaiShalom/adonaiturbo/actions/runs/39148491528); os jobs `contract-tests` e `windows-powershell-runtime` terminaram `success`.
 - Limite: não há prova de cotação live real sem credenciais/plano válidos no ambiente instalado. O status `provider_configured` significa apenas que a variável existe, nunca que o provedor respondeu.
 
+### Atualização de segurança HTTP — RH autenticado pelo Turbo
+
+- A revisão de integração encontrou um bloqueio real: o runtime aceitava a origem local do Turbo, mas o preflight CORS não permitia `PATCH` nem o cabeçalho `Authorization` necessários para alterar estado de tarefas do RH.
+- Corrigido `runtime/server.cjs`: allowlist local continua restrita, agora permite `PATCH` e `Authorization`, e rejeita métodos de preflight não autorizados.
+- Ampliado `test-runtime-http.cjs` para provar o preflight `PATCH` com `Authorization`/`Content-Type` e bloquear `DELETE`.
+- CI atual: [39149834223](https://github.com/AdonaiShalom/adonaiturbo/actions/runs/39149834223). Os jobs `contract-tests` e `windows-powershell-runtime` passaram; a verificação isolada em PowerShell 5.1 e o teste HTTP também passaram.
+- Esta correção elimina um bloqueio de navegador no contrato, mas **não** prova que o Turbo local já tenha proxy autenticado nem que a sede original esteja instalada.
+
 ### Percentual oficial nesta atualização
 
 **33% concluído / 67% restante.** Aumentado em 2 pontos porque, além do RH com tarefas e auditoria transacionais, Cripto/Forex/B3/Internacional agora têm contratos de dados mais rigorosos; Forex e Internacional possuem caminho intradiário de 1 minuto com conversão de fuso, checagem de timestamp e falha segura, e os testes dos adaptadores passaram no CI. Não significa que as credenciais dos provedores foram configuradas nem que cotações reais foram confirmadas. O token do runtime e o proxy autenticado do Turbo ainda não foram validados localmente; a instalação visual do protótipo original e o teste do widget no navegador continuam pendentes.
