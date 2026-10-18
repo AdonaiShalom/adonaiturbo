@@ -21,7 +21,7 @@ async function main() {
   assert.match(requests[0].url, /runtime_audit_events\?select=event_id&limit=1$/);
 
   const result = await ledger.append({
-    envelope: { correlation_id: 'corr-test', task_id: 'task-test', market: 'CRYPTO' },
+    envelope: { correlation_id: '11111111-1111-4111-8111-111111111111', task_id: '22222222-2222-4222-8222-222222222222', market: 'CRYPTO' },
     decision: { decision: 'proposal_only', reason_codes: ['paper_only'] },
     requestId: 'request-test'
   });
@@ -34,8 +34,8 @@ async function main() {
   const event = JSON.parse(post.init.body);
   assert.equal(event.event_id, result.event_id);
   assert.equal(event.service, 'adonai-trade');
-  assert.equal(event.correlation_id, 'corr-test');
-  assert.equal(event.task_id, 'task-test');
+  assert.equal(event.correlation_id, '11111111-1111-4111-8111-111111111111');
+  assert.equal(event.task_id, '22222222-2222-4222-8222-222222222222');
   assert.equal(event.market, 'CRYPTO');
   assert.equal(event.decision, 'proposal_only');
   assert.equal(event.details.mode, 'paper');
