@@ -28,6 +28,10 @@ $archive = [System.IO.Compression.ZipFile]::OpenRead($resolvedZip)
 try {
     $entries = @($archive.Entries | ForEach-Object { $_.FullName })
     if ($entries.Count -lt 10) { Write-Fail "ZIP parece incompleto (menos de 10 entradas)." }
+    if ($entries.Count -gt 5000) { Write-Fail "ZIP excede o limite de 5000 entradas. Nenhuma extração foi feita." }
+    $maxEntryBytes = 50MB
+    $maxTotalBytes = 250MB
+    $totalUncompressedBytes = [int64]0
 
     foreach ($entry in $archive.Entries) {
         $normalized = $entry.FullName.Replace('\','/')
