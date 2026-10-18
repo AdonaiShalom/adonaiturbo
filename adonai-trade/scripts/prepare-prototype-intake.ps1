@@ -34,6 +34,9 @@ try {
     $totalUncompressedBytes = [int64]0
 
     foreach ($entry in $archive.Entries) {
+        if ($entry.Length -gt $maxEntryBytes) { Write-Fail "Arquivo no ZIP excede 50 MiB: $($entry.FullName)" }
+        $totalUncompressedBytes += [int64]$entry.Length
+        if ($totalUncompressedBytes -gt $maxTotalBytes) { Write-Fail 'Conteúdo descompactado excede 250 MiB. Nenhuma extração foi feita.' }
         $normalized = $entry.FullName.Replace('\','/')
         if ($normalized.StartsWith('/') -or $normalized -match '(^|/)\.\.(/|$)' -or $normalized -match '^[A-Za-z]:') {
             Write-Fail "Caminho inseguro no ZIP: $($entry.FullName)"
@@ -48,6 +51,49 @@ try {
     }
     if (-not ($entries | Where-Object { $_ -match '(?i)teia3d\.js' })) {
         Write-Fail "Não encontrei teia3d.js no ZIP principal."
+    }
+    if (-not ($entries | Where-Object { $_ -match '(?i)(^|/)public/index\.html    $prototypeHtml = @($entries | Where-Object { $_ -match '(?i)prototipo.*\.html|sede3d\.html' })
+    if ($prototypeHtml.Count -eq 0) { Write-Fail 'Nenhum HTML de protótipo foi encontrado.' }
+    $entryCount = $entries.Count
+}
+finally {
+    $archive.Dispose()
+}
+
+$stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
+$stage = Join-Path $StageRoot ("intake-" + $stamp)
+New-Item -ItemType Directory -Path $stage -Force | Out-Null
+try {
+    [System.IO.Compression.ZipFile]::ExtractToDirectory($resolvedZip, $stage)
+}
+catch {
+    Remove-Item -LiteralPath $stage -Recurse -Force -ErrorAction SilentlyContinue
+    Write-Fail ("Extração de staging falhou: " + $_.Exception.Message)
+}
+
+$manifest = [pscustomobject]@{
+    source_zip = $resolvedZip
+    sha256 = $hash
+    entries = $entryCount
+    extracted_to_staging = $true
+    production_files_changed = $false
+    prototype_html = $prototypeHtml
+    relevant_files = $matches
+    next_gate = 'Comparar o protótipo extraído com C:\AdonaiTurbo\AdonaiTrade; não copiar para produção automaticamente.'
+}
+$reportPath = Join-Path $stage 'prototype-intake-report.json'
+$manifest | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $reportPath -Encoding UTF8
+
+Write-Host '=== PROTÓTIPO VALIDADO E EXTRAÍDO EM STAGING ===' -ForegroundColor Green
+Write-Host ("SHA-256: " + $hash)
+Write-Host ("Entradas: " + $entryCount)
+Write-Host ("Staging: " + $stage)
+Write-Host ("Relatório: " + $reportPath)
+Write-Host 'Nenhum arquivo de produção foi alterado.' -ForegroundColor Yellow
+Write-Host 'Arquivos relevantes:'
+$matches | Sort-Object -Unique | ForEach-Object { Write-Host (" - " + $_) }
+ })) {
+        Write-Fail "Não encontrei public/index.html no ZIP principal. Não vou integrar uma interface incompleta."
     }
     $prototypeHtml = @($entries | Where-Object { $_ -match '(?i)prototipo.*\.html|sede3d\.html' })
     if ($prototypeHtml.Count -eq 0) { Write-Fail 'Nenhum HTML de protótipo foi encontrado.' }
