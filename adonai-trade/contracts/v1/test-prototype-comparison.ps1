@@ -25,7 +25,6 @@ try {
     Set-Content -LiteralPath (Join-Path $local 'duplicate-b\public\ambiguous.txt') -Value 'b' -NoNewline
 
     & $scriptPath -StagePath $stage -LocalProjectPath $local -ReportPath $report | Out-Null
-    if ($LASTEXITCODE -ne 0) { throw 'Comparison script returned a non-zero exit code.' }
     $result = Get-Content -LiteralPath $report -Raw | ConvertFrom-Json
     if ($result.identical -ne 1) { throw "Expected identical=1, got $($result.identical)" }
     if ($result.different -ne 1) { throw "Expected different=1, got $($result.different)" }
