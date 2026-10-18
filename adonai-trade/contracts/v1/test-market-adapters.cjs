@@ -29,8 +29,14 @@ async function main() {
   assert.equal(missing.status, 'unavailable'); assert.equal(missing.reason_code, 'brapi_token_not_configured');
   const invalid = await getQuote({ desk: 'CRYPTO', symbol: 'BTC_USDT', fetchImpl: fetchMock, nowMs });
   assert.equal(invalid.status, 'unavailable'); assert.equal(invalid.reason_code, 'invalid_crypto_symbol');
+  const unknownDesk = await getQuote({ desk: 'MARS', symbol: 'BTCUSDT', fetchImpl: fetchMock, nowMs });
+  assert.equal(unknownDesk.status, 'unavailable'); assert.equal(unknownDesk.reason_code, 'unknown_market_desk');
+  const futureQuote = await getQuote({ desk: 'CRYPTO', symbol: 'BTCUSDT', fetchImpl: async () => ({ ok: true, async json() { return { lastPrice: '10', closeTime: nowMs + 120000 }; } }), nowMs });
+  assert.equal(futureQuote.status, 'unverified'); assert.equal(futureQuote.reason_code, 'provider_timestamp_in_future');
   const badPrice = await getQuote({ desk: 'CRYPTO', symbol: 'BTCUSDT', fetchImpl: async () => ({ ok: true, async json() { return { lastPrice: 'NaN', closeTime: nowMs }; } }), nowMs });
   assert.equal(badPrice.status, 'unverified'); assert.equal(badPrice.reason_code, 'invalid_provider_price');
+  const providerError = await getQuote({ desk: 'CRYPTO', symbol: 'BTCUSDT', fetchImpl: async () => ({ ok: false, status: 429, async json() { return {}; } }), nowMs });
+  assert.equal(providerError.status, 'unavailable'); assert.equal(providerError.reason_code, 'provider_request_failed');
 
   const server = createServer({ now: () => nowMs, auditLedger: null, env: {}, fetchImpl: fetchMock });
   await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
@@ -44,7 +50,10 @@ async function main() {
     const unavailable = await fetch(base + '/api/v1/markets/quote?desk=B3&symbol=PETR4');
     assert.equal(unavailable.status, 503);
     assert.equal((await unavailable.json()).reason_code, 'brapi_token_not_configured');
-    console.log('PASS: quote adapters, timestamp freshness, credentials gating, fail-closed validation, and read-only HTTP endpoint');
+    const unknown = await fetch(base + '/api/v1/markets/quote?desk=MARS&symbol=BTCUSDT');
+    assert.equal(unknown.status, 503);
+    assert.equal((await unknown.json()).reason_code, 'unknown_market_desk');
+    console.log('PASS: market quote freshness, future timestamps, invalid prices, provider errors, credential gating, and read-only HTTP endpoint');
   } finally {
     await new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
   }
