@@ -50,6 +50,35 @@ async function getJson(fetchImpl, url, headers = {}) {
     return data;
   } finally { clearTimeout(timer); }
 }
+
+function zonedLocalTimestampToIso(value, timeZone) {
+  const match = String(value || '').match(/^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})$/);
+  if (!match || typeof timeZone !== 'string' || !timeZone) return null;
+  const [year, month, day, hour, minute, second] = match.slice(1).map(Number);
+  const targetMs = Date.UTC(year, month - 1, day, hour, minute, second);
+  const check = new Date(targetMs);
+  if (check.getUTCFullYear() !== year || check.getUTCMonth() + 1 !== month || check.getUTCDate() !== day ||
+      check.getUTCHours() !== hour || check.getUTCMinutes() !== minute || check.getUTCSeconds() !== second) return null;
+  let candidate = targetMs;
+  let formatter;
+  try {
+    formatter = new Intl.DateTimeFormat('en-US', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' });
+  } catch { return null; }
+  for (let i = 0; i < 4; i++) {
+    const fields = {};
+    for (const part of formatter.formatToParts(new Date(candidate))) if (part.type !== 'literal') fields[part.type] = Number(part.value);
+    const represented = Date.UTC(fields.year, fields.month - 1, fields.day, fields.hour, fields.minute, fields.second);
+    const delta = targetMs - represented;
+    if (!delta) break;
+    candidate += delta;
+  }
+  const finalFields = {};
+  for (const part of formatter.formatToParts(new Date(candidate))) if (part.type !== 'literal') finalFields[part.type] = Number(part.value);
+  if (finalFields.year !== year || finalFields.month !== month || finalFields.day !== day ||
+      finalFields.hour !== hour || finalFields.minute !== minute || finalFields.second !== second) return null;
+  return new Date(candidate).toISOString();
+}
+
 function freshQuote({ desk, symbol, price, currency, source, observedAt, nowMs }) {
   const timestamp = safeTimestamp(observedAt);
   if (!timestamp) return quote('unverified', { desk, symbol, source, reason_code: 'provider_timestamp_missing' });
@@ -95,15 +124,16 @@ async function getQuote({ desk, symbol, env = process.env, fetchImpl = globalThi
       return freshQuote({ desk: id, symbol: normalizedSymbol, price: item.regularMarketPrice, currency: 'BRL', source: 'brapi', observedAt: item.regularMarketTime ? new Date(item.regularMarketTime * 1000).toISOString() : null, nowMs });
     }
     if (!env.ALPHAVANTAGE_API_KEY) return quote('unavailable', { desk: id, symbol: normalizedSymbol, reason_code: 'international_provider_not_configured' });
-    const data = await getJson(fetchImpl, 'https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=' + encodeURIComponent(normalizedSymbol) + '&apikey=' + encodeURIComponent(env.ALPHAVANTAGE_API_KEY));
-    const item = data['Global Quote'];
-    if (!item || !item['05. price'] || !item['07. latest trading day']) return quote('unavailable', { desk: id, symbol: normalizedSymbol, source: 'alphavantage', reason_code: 'provider_quote_missing' });
-    const internationalPrice = Number(item['05. price']);
-    const tradingDay = String(item['07. latest trading day']);
-    const parsedTradingDay = /^\d{4}-\d{2}-\d{2}$/.test(tradingDay) ? new Date(tradingDay + 'T00:00:00Z') : null;
-    const validTradingDay = Boolean(parsedTradingDay && Number.isFinite(parsedTradingDay.getTime()) && parsedTradingDay.toISOString().slice(0, 10) === tradingDay);
-    if (!Number.isFinite(internationalPrice) || internationalPrice <= 0 || !validTradingDay) return quote('unverified', { desk: id, symbol: normalizedSymbol, source: 'alphavantage_global_quote', reason_code: 'invalid_provider_quote_data' });
-    return quote('unverified', { desk: id, symbol: normalizedSymbol, source: 'alphavantage_global_quote', price: internationalPrice, provider_trading_day: tradingDay, reason_code: 'provider_intraday_timestamp_unavailable' });
+    const data = await getJson(fetchImpl, 'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=' + encodeURIComponent(normalizedSymbol) + '&interval=1min&outputsize=compact&apikey=' + encodeURIComponent(env.ALPHAVANTAGE_API_KEY));
+    const metadata = data['Meta Data'];
+    const series = data['Time Series (1min)'];
+    if (!metadata || !series || typeof series !== 'object') return quote('unavailable', { desk: id, symbol: normalizedSymbol, source: 'alphavantage_intraday_1min', reason_code: data.Note || data.Information ? 'provider_limit_or_error' : 'provider_quote_missing' });
+    const timestamps = Object.keys(series).sort().reverse();
+    const latestTimestamp = timestamps[0];
+    const row = latestTimestamp ? series[latestTimestamp] : null;
+    const observedAt = zonedLocalTimestampToIso(latestTimestamp, metadata['6. Time Zone']);
+    if (!row || !observedAt) return quote('unverified', { desk: id, symbol: normalizedSymbol, source: 'alphavantage_intraday_1min', reason_code: 'invalid_provider_timestamp_or_timezone' });
+    return freshQuote({ desk: id, symbol: normalizedSymbol, price: row['4. close'], currency: 'USD', source: 'alphavantage_intraday_1min', observedAt, nowMs });
   } catch (error) {
     const reason = error && error.code === 'PROVIDER_RESPONSE_TOO_LARGE' ? 'provider_response_too_large' : error && error.name === 'AbortError' ? 'provider_timeout' : 'provider_request_failed';
     return quote('unavailable', { desk: id, symbol: normalizedSymbol, reason_code: reason });
