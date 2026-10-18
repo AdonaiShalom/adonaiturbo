@@ -85,10 +85,14 @@ jobs:
             @{ Path = 'adonai-trade/scripts/compare-prototype-staging.ps1'; Required = @('Get-FileHash', 'production_files_changed = \$false', 'IDENTICAL', 'DIFFERENT') }
           )
           foreach ($file in $files) {
+            Write-Host ("Parsing PowerShell file: " + $file.Path)
             $tokens = $null
             $errors = $null
             [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path $file.Path).Path, [ref]$tokens, [ref]$errors) | Out-Null
-            if ($errors.Count -gt 0) { $errors | Format-List | Out-String | Write-Error }
+            if ($errors.Count -gt 0) {
+              $details = ($errors | ForEach-Object { "line $($_.Extent.StartLineNumber), column $($_.Extent.StartColumnNumber): $($_.Message)" }) -join [Environment]::NewLine
+              throw ("PowerShell parse errors in " + $file.Path + ":" + [Environment]::NewLine + $details)
+            }
             $scriptText = Get-Content $file.Path -Raw
             foreach ($marker in $file.Required) {
               if ($scriptText -notmatch $marker) { throw ("Safety marker missing in " + $file.Path + ": " + $marker) }
