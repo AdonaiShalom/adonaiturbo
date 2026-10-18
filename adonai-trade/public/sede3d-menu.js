@@ -73,7 +73,7 @@
           catch(e){result={ok:false,error:e&&e.message?e.message:'erro de rede'};}
           b.disabled=false;b.textContent='Consultar cotação';const old=panel.querySelector('[data-quote]');if(old)old.remove();const out=node('div',undefined,'card');out.dataset.quote='1';
           if(!result.ok)out.append(node('strong','Cotação indisponível'),node('p',result.error||('HTTP '+result.status)));
-          else{const q=result.data;out.append(node('strong','Estado: '+String(q.status||'não verificado')));if(q.status==='verified'&&Number.isFinite(Number(q.price)))out.append(node('p',String(q.symbol)+': '+String(q.price)+' '+String(q.currency||'')));else{out.append(node('p','Preço não apresentado como atual: frescor intradiário não comprovado.'));if(q.reason_code)out.append(node('p','Motivo: '+q.reason_code));}out.append(node('p','Fonte: '+String(q.source||'não informada')),node('p','Horário: '+formatTime(q.observed_at)));}
+          else{const q=result.data;out.append(node('strong','Estado: '+String(q.status||'não verificado')));if(q.status==='verified'&&q.price!==null&&q.price!==undefined&&q.price!==''&&Number.isFinite(Number(q.price))&&Number(q.price)>0)out.append(node('p',String(q.symbol)+': '+String(q.price)+' '+String(q.currency||'')));else{out.append(node('p','Preço não apresentado como atual: frescor intradiário não comprovado.'));if(q.reason_code)out.append(node('p','Motivo: '+q.reason_code));}out.append(node('p','Fonte: '+String(q.source||'não informada')),node('p','Horário: '+formatTime(q.observed_at)));}
           panel.appendChild(out);
         });panel.append(b,node('p','Consulta somente leitura. Nenhuma ordem é enviada.'));
       } else if(id==='rh'){
