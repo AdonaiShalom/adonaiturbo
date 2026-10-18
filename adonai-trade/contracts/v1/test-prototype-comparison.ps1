@@ -15,6 +15,7 @@ try {
     New-Item -ItemType Directory -Path (Join-Path $prototypeRoot 'public') -Force | Out-Null
     New-Item -ItemType Directory -Path (Join-Path $local 'public') -Force | Out-Null
     Set-Content -LiteralPath (Join-Path $prototypeRoot 'public\index.html') -Value '<html></html>' -NoNewline
+    Set-Content -LiteralPath (Join-Path $local 'public\index.html') -Value '<html></html>' -NoNewline
     Set-Content -LiteralPath (Join-Path $prototypeRoot 'public\identical.txt') -Value 'same' -NoNewline
     Set-Content -LiteralPath (Join-Path $local 'public\identical.txt') -Value 'same' -NoNewline
     Set-Content -LiteralPath (Join-Path $prototypeRoot 'public\different.txt') -Value 'prototype' -NoNewline
