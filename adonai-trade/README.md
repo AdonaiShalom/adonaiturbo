@@ -48,5 +48,16 @@ Endpoint `GET /api/v1/markets/quote?desk=...&symbol=...` retorna `verified`, `st
 ## Integrações LEVI e EU SOU
 `GET /api/v1/integrations` expõe configuração para LEVI e EU SOU, mas não os chama nem afirma conectividade. Configure `LEVI_ENDPOINT` e `EU_SOU_ENDPOINT` apenas no ambiente do servidor. Até um teste autenticado ponta a ponta, o status permanece `not_verified`.
 
+## Revisão segura do protótipo visual original (Windows)
+
+O script `scripts/review-local-prototype.ps1` coordena a preparação e a comparação somente leitura. O padrão espera `%USERPROFILE%\Downloads\AdonaiTrade_COMPLETO.zip` com SHA-256 `573AFEF41813311C4411B943802F649D0A66ABB9C5771C3DCC7E485CDEFE343C`, e compara com `C:\AdonaiTurbo\AdonaiTrade`. Execute no PowerShell 5.1:
+
+```powershell
+Set-Location 'C:\AdonaiTurbo\AdonaiTrade'
+& '<caminho-da-cópia-do-repositório>\adonai-trade\scripts\review-local-prototype.ps1'
+```
+
+O script bloqueia se o ZIP/hash não corresponder, extrai apenas em staging e gera um relatório de diferenças. **Não copia, substitui nem apaga arquivos locais.** Revise os caminhos e hashes no relatório antes de preparar uma integração específica e um rollback. O script não substitui validação visual nem testes manuais da aba integrada. O CI testa ZIP sintético e staging; o ZIP real do usuário ainda precisa ser verificado na máquina Windows onde está guardado.
+
 ## Gates ainda pendentes
 Gravação real da auditoria pelo runtime e confirmação do evento no Supabase; teste externo dos provedores com credenciais privadas; integrações autenticadas LEVI/EU SOU; e integração visual na aba existente do Adonai Turbo. A interface 3D não está incluída neste runtime e nenhuma ordem real pode ser executada.
