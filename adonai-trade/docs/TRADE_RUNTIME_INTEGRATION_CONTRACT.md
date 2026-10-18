@@ -26,7 +26,15 @@ Modo permitido nesta etapa: paper trading. Nenhuma ordem real.
 - `execution_mode` deve permanecer `paper`; este contrato não autoriza criação de ordem real.
 - Requisição inválida, timeout, fonte vencida, resposta inválida de dependência ou falha de auditoria devem falhar fechadas: sem proposta executável e sem efeito colateral de negociação.
 
-## 3. Correlação e trilha de auditoria
+## 3. Ledger Supabase do runtime (implementação isolada, migração pendente)
+
+- Migration proposta: `supabase/migrations/20261018100000_runtime_audit_events.sql`.
+- Adaptador: `runtime/audit-ledger.cjs`; usa `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY` apenas no processo servidor, TLS para endpoints remotos, timeout de 4 segundos e insert-only na API do PostgREST.
+- A migration cria `adonai_trade.runtime_audit_events`, ativa RLS, remove grants de `public`/`anon`/`authenticated`, concede `SELECT`/`INSERT` a `service_role` e bloqueia `UPDATE`/`DELETE` por trigger.
+- A migration **não foi aplicada** ao projeto conectado. Antes da aplicação, revisar grants de schema, exposição do schema no PostgREST, política de retenção e auditoria operacional. Nunca expor a chave service-role ao navegador.
+- `/ready` só retorna 200 depois de conseguir consultar o ledger. A avaliação só retorna 200/422 depois de persistir o evento; falha ou ausência do ledger retorna 503 sem executar ordens.
+
+## 4. Correlação e trilha de auditoria
 
 Um `correlation_id` gerado/validado na entrada deve atravessar LEVI → Trade → EU SOU → motor de risco → simulador → ledger. Cada evento persistido deve incluir:
 - timestamp UTC;
@@ -39,7 +47,7 @@ Um `correlation_id` gerado/validado na entrada deve atravessar LEVI → Trade �
 
 Eventos anteriores são append-only. Correção gera novo evento que referencia o anterior; não se sobrescreve evidência silenciosamente.
 
-## 4. Limites obrigatórios do motor de risco
+## 5. Limites obrigatórios do motor de risco
 
 O motor de risco é independente das equipes que sugerem estratégias. Nenhuma decisão de LEVI, RH, modelo quantitativo ou mesa pode contornar veto de risco.
 
@@ -54,7 +62,7 @@ Antes de aceitar uma proposta em paper, validar pelo menos:
 
 Se algum limite não puder ser calculado, a decisão é rejeitar ou colocar em quarentena, nunca presumir risco zero.
 
-## 5. Quatro mesas e fixtures offline
+## 6. Quatro mesas e fixtures offline
 
 Cada mesa deve possuir fixtures determinísticas versionadas, sem depender de APIs externas durante unit tests.
 
@@ -65,7 +73,7 @@ Cada mesa deve possuir fixtures determinísticas versionadas, sem depender de AP
 
 Nenhuma fixture deve ser apresentada na interface como cotação ao vivo.
 
-## 6. Sede 3D e estado real
+## 7. Sede 3D e estado real
 
 A sede 3D deve consumir uma API de estado observável, não inventar atividade localmente. Cada agente/equipe apresentado como ativo deve estar associado a:
 - agent_id/equipe e função;
