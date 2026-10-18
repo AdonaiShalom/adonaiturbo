@@ -8,7 +8,7 @@
 
 1. Todas as solicitações usam o envelope JSON Schema `task-envelope.v1.schema.json`.
 2. O modo de execução é exclusivamente `paper`. Não existe autorização implícita para enviar ordens reais.
-3. `correlation_id` permanece estável em toda a cadeia; `task_id` identifica a tarefa idempotente.
+3. `correlation_id` permanece estável em toda a cadeia; `task_id` identifica a tarefa idempotente. `expires_at` é obrigatório e deve ser posterior a `created_at`.
 4. A mesa só aceita um dos mercados explícitos: B3, INTERNATIONAL, CRYPTO ou FOREX.
 5. Dados `stale`, `invalid`, `unknown`, ausentes ou sem proveniência suficiente não podem fundamentar proposta executável. A resposta deve ser bloqueio explícito, com motivo auditável.
 6. A resposta de EU SOU deve separar fatos/fontes, método, baseline, incerteza, limitações e recomendação. Alegações quânticas não recebem privilégio decisório sem validação contra baseline clássico.
@@ -33,6 +33,10 @@
   "created_at": "timestamp ISO-8601 UTC"
 }
 ```
+
+## Runtime HTTP inicial
+
+O `runtime/server.cjs` fornece `/health`, `/ready` e `POST /api/v1/policy/evaluate`. Esta primeira fatia não conecta provedores de mercado, não persiste a auditoria e não executa ordens. Por isso, `/ready` retorna `503` até que o ledger durável seja integrado. O endpoint de avaliação declara explicitamente `audit_persisted: false` e `execution_performed: false`.
 
 ## Estados de aceite
 
