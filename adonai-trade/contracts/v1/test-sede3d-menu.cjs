@@ -1,10 +1,16 @@
 'use strict';
 const assert = require('node:assert/strict');
-const {getMenu,mount,SYMBOLS} = require('../../public/sede3d-menu.js');
+const {getMenu,mount,SYMBOLS,CHART_SYMBOLS} = require('../../public/sede3d-menu.js');
 const menu = getMenu();
 assert.equal(menu.length,13);
 assert.deepEqual(menu.filter(x=>['CRYPTO','FOREX','B3','INTERNATIONAL'].includes(x.id)).map(x=>x.id),['CRYPTO','FOREX','B3','INTERNATIONAL']);
 for (const id of ['overview','rh','charts','investing','greed','intelligence','levi','eu-sou','audit']) assert.ok(menu.some(x=>x.id===id), 'missing menu item '+id);
 assert.deepEqual(SYMBOLS,{CRYPTO:'BTCUSDT',FOREX:'EURUSD',B3:'PETR4',INTERNATIONAL:'AAPL'});
+assert.deepEqual(Object.keys(CHART_SYMBOLS),['CRYPTO','FOREX','B3','INTERNATIONAL']);
+assert.equal(CHART_SYMBOLS.CRYPTO.symbol,'BINANCE:BTCUSDT');
+assert.equal(CHART_SYMBOLS.FOREX.symbol,'OANDA:EURUSD');
+assert.equal(CHART_SYMBOLS.B3.symbol,'BMFBOVESPA:PETR4');
+assert.equal(CHART_SYMBOLS.INTERNATIONAL.symbol,'NASDAQ:AAPL');
+assert.ok(Object.values(CHART_SYMBOLS).every(x=>x.label&&x.symbol));
 assert.throws(()=>mount(),/browser_document_required/);
 console.log('3D sede menu: PASS (13 modules, four market desks, external sources, LEVI/EU SOU, fail-closed browser requirement)');
