@@ -158,9 +158,16 @@ Em todas as mesas: respostas `verified / stale / unverified / unavailable`; nunc
 - CI verde: [39151072452](https://github.com/AdonaiShalom/adonaiturbo/actions/runs/39151072452), incluindo contrato da ponte e runtime Windows PowerShell 5.1.
 - Isso melhora a robustez da conexão, mas não comprova que o HTML original tenha sido instalado no Turbo nem que a porta 3100 esteja ativa na máquina local.
 
+### Cotação verificada — impedir preço nulo/zero na interface
+
+- Corrigido `public/sede3d-menu.js`: mesmo que uma resposta venha marcada como `verified`, a interface só exibe o preço quando ele é não nulo, não vazio, numérico e maior que zero. Valores `null`, string vazia, zero e não numéricos não são apresentados como cotação verificada.
+- O contrato do menu agora protege explicitamente essa regra, além de preservar controles/resultados durante o polling.
+- CI verde no run [39151228085](https://github.com/AdonaiShalom/adonaiturbo/actions/runs/39151228085): `contract-tests` e `windows-powershell-runtime` passaram, incluindo o contrato do menu e a verificação isolada em PowerShell 5.1.
+- Essa validação reduz o risco de mostrar preço inválido como real; não prova cotação live, credenciais do provedor ou instalação do HTML original no Turbo.
+
 ### Percentual oficial nesta atualização
 
-**35% concluído / 65% restante.** Avanço de 1 ponto pela conclusão e teste da proteção de timeout na ponte da sede 3D, incluindo falha segura para HTTP indisponível e contratos inválidos, com CI de contratos e Windows PowerShell 5.1 aprovado. Somado ao instalador reversível já testado, isso fortalece a preparação da integração; não equivale à instalação visual. O HTML original ainda não foi modificado, as cotações live com credenciais válidas não foram comprovadas, e o proxy autenticado do Turbo e as integrações LEVI/EU SOU ponta a ponta seguem pendentes.
+**36% concluído / 64% restante.** Avanço de 1 ponto pela proteção de exibição de cotações: a interface não apresenta `null`, vazio, zero ou valor não numérico como preço verificado; o contrato do menu e a verificação Windows PowerShell 5.1 passaram no CI. A ponte com timeout explícito e o instalador reversível já possuem testes aprovados. Isso fortalece a integração segura, mas não equivale à instalação visual nem comprova cotações live. O HTML original ainda não foi modificado, e o proxy autenticado do Turbo e as integrações LEVI/EU SOU ponta a ponta seguem pendentes.
 
 ### Documentos de planejamento anteriores
 
@@ -185,4 +192,4 @@ Os antigos documentos de planejamento não constituem planos ativos independente
 
 Não considerar documentação ou CI de contratos como instalação visual concluída. A medição deve ponderar: protótipo original e aba Turbo 25%; menu/RH/funções 15%; quatro mercados com dados comprovados 20%; TradingView/Investing.com/GREED 10%; Supabase/auditoria/segurança 10%; LEVI + EU SOU 10%; testes de regressão, rollback e release 10%.
 
-Estado oficial atual desta revisão: **35% concluído / 65% restante (estimativa ponderada por evidências, não telemetria automática)**. O valor reconhece os contratos de runtime e adaptadores testados, o menu de módulos implementado no branch e as funções RH/auditoria transacionais testadas no Supabase. Não contabiliza como concluídos os gates visuais, a instalação do protótipo original na aba real, as cotações live com credenciais, o proxy autenticado local, nem os testes de LEVI/EU SOU ponta a ponta. Atualizar a porcentagem somente com evidências reproduzíveis anexadas a cada gate.
+Estado oficial atual desta revisão: **36% concluído / 64% restante (estimativa ponderada por evidências, não telemetria automática)**. O valor reconhece os contratos de runtime e adaptadores testados, o menu de módulos implementado no branch e as funções RH/auditoria transacionais testadas no Supabase. Não contabiliza como concluídos os gates visuais, a instalação do protótipo original na aba real, as cotações live com credenciais, o proxy autenticado local, nem os testes de LEVI/EU SOU ponta a ponta. Atualizar a porcentagem somente com evidências reproduzíveis anexadas a cada gate.
