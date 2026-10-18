@@ -126,7 +126,7 @@ Em todas as mesas: respostas `verified / stale / unverified / unavailable`; nunc
 
 - Forex agora usa Alpha Vantage `FX_INTRADAY` de 1 minuto quando `ALPHAVANTAGE_API_KEY` está configurada; sem essa chave, permanece o fallback Frankfurter/BCE com estado `unverified` e motivo explícito `daily_reference_not_intraday`.
 - Internacional agora usa `TIME_SERIES_INTRADAY` de 1 minuto em vez de `Global Quote`. Os timestamps locais são convertidos usando o fuso informado pelo provedor e a cotação só pode ser `verified` se tiver preço válido e idade de até 120 segundos; dados antigos viram `stale`, fuso/data inválidos viram `unverified`, e resposta de limite/erro vira `unavailable`.
-- Os contratos de quatro mesas e adaptadores passaram no run [39148491528](https://github.com/AdonaiShalom/adonaiturbo/actions/runs/39148491528); o job `contract-tests` terminou `success` e a etapa de verificação isolada do runtime no Windows também terminou `success`. A limpeza final do job Windows ainda estava em andamento na última consulta.
+- Os contratos de quatro mesas e adaptadores passaram no run [39148491528](https://github.com/AdonaiShalom/adonaiturbo/actions/runs/39148491528); os jobs `contract-tests` e `windows-powershell-runtime` terminaram `success`.
 - Limite: não há prova de cotação live real sem credenciais/plano válidos no ambiente instalado. O status `provider_configured` significa apenas que a variável existe, nunca que o provedor respondeu.
 
 ### Percentual oficial nesta atualização
