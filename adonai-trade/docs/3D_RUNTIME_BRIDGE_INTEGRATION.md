@@ -45,6 +45,8 @@ O arquivo `public/runtime-bridge-client.js` acrescenta leitura inicial e atualiz
 </script>
 ```
 
+Em falha de rede, o cliente publica um estado explícito `status: 'unavailable'`, com listas vazias e execução desabilitada, para que a interface não mantenha valores antigos como atuais. O callback `onError` também recebe a falha.
+
 Este trecho é o ponto de integração preparado, não uma afirmação de que o HTML original já o contém. A ligação visual final depende da inspeção e alteração controlada do protótipo original.
 
 ## Regras de renderização obrigatórias
