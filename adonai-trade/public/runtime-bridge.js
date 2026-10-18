@@ -29,7 +29,11 @@
       source: 'adonai-trade-runtime',
       mode: 'paper',
       executionEnabled: false,
-      generatedAt: new Date().toISOString(),
+      fetchedAt: new Date().toISOString(),
+      runtimeTimestamps: Object.freeze({
+        markets: typeof markets.timestamp === 'string' ? markets.timestamp : null,
+        integrations: typeof integrations.timestamp === 'string' ? integrations.timestamp : null
+      }),
       marketStatus: markets.data_status || 'unknown',
       desks: Object.freeze(markets.desks.map((desk) => Object.freeze({
         id: desk.id,
