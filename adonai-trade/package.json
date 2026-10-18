@@ -3,11 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "description": "Isolated fail-closed HTTP runtime and policy contracts for Adonai Trade",
-  "engines": {
-    "node": ">=22"
-  },
+  "engines": { "node": ">=22" },
   "scripts": {
     "start": "node runtime/server.cjs",
-    "test": "node contracts/v1/test-contract.cjs && node contracts/v1/test-policy-gate.cjs && node contracts/v1/test-seasonality.cjs && node contracts/v1/test-market-desks.cjs && node contracts/v1/test-integration-status.cjs && node contracts/v1/test-audit-ledger.cjs && node contracts/v1/test-runtime-http.cjs && node contracts/v1/test-runtime-http-fixed.cjs"
+    "test": "node contracts/v1/test-contract.cjs && node contracts/v1/test-policy-gate.cjs && node contracts/v1/test-seasonality.cjs && node contracts/v1/test-market-desks.cjs && node contracts/v1/test-integration-status.cjs && node contracts/v1/test-audit-ledger.cjs && node contracts/v1/test-runtime-http.cjs && node contracts/v1/test-runtime-http-fixed.cjs && node contracts/v1/test-market-adapters.cjs"
   }
 }
