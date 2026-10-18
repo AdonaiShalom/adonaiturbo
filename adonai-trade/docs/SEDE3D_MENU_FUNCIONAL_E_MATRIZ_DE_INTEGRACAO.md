@@ -1,0 +1,109 @@
+# Sede 3D Adonai Trade — menu funcional, módulos e matriz de integração
+
+## Propósito obrigatório
+
+O alvo é **instalar o protótipo original enviado pelo usuário como a nova sede visual da aba Adonai Trade**, substituindo somente o conteúdo dessa aba no Adonai Turbo. Não é criar uma teia 3D genérica e não é substituir o projeto inteiro do Turbo.
+
+Limites de ambiente:
+- Adonai Turbo: `http://127.0.0.1:3000`
+- Runtime independente Adonai Trade: `http://127.0.0.1:3100`
+- PSM Grupo Market: `http://127.0.0.1:3001` — fora do escopo e intocável.
+
+## Inventário de evidências existente
+
+1. O ZIP local de referência registrado pelo usuário é `AdonaiTrade_COMPLETO.zip`, SHA-256 `573AFEF41813311C4411B943802F649D0A66ABB9C5771C3DCC7E485CDEFE343C`. A comparação somente leitura registrada em 18/10 encontrou 144 arquivos no protótipo e 175 na instalação: 130 idênticos, 11 diferentes, 1 só no protótipo, 29 só na instalação e 2 ambíguos. `public/sede3d.html` e `public/teia3d.js` eram idênticos; `public/index.html`, `server.js`, `package.json`, arquivos de ordens/estado e testes tinham diferenças. `test/unit_seguranca.js` aparecia apenas no protótipo.
+2. A branch conectada contém um runtime HTTP isolado, adaptadores de mercado, política fail-closed, ponte read-only e testes de contrato. A ponte não foi inserida no HTML original.
+3. Os quatro mercados já nomeados pelo runtime são Cripto, Forex, B3 e Internacional. Adaptadores configurados não equivalem a cotação atual validada: Forex usa taxa diária de referência e não é intraday; B3 depende de `BRAPI_TOKEN`; Internacional depende de `ALPHAVANTAGE_API_KEY` e o timestamp do Global Quote não prova atualidade. Cripto usa Binance Spot 24h com janela de frescor de 120 s.
+4. O ledger de auditoria está criado no Supabase com RLS habilitado, mas a última consulta registrada encontrou zero eventos; a gravação/leitura real pelo runtime permanece pendente.
+5. LEVI e EU SOU estão declarados por endpoints no Turbo, mas a integração autenticada de ponta a ponta não foi provada.
+6. A execução financeira permanece desabilitada. A instalação pode ficar pronta para operar em modo de análise/paper e passar por gates de segurança; isso não significa habilitar ordens reais sem testes, aprovação e controles explícitos.
+
+## Menu de navegação proposto para o protótipo original
+
+O menu deve ser implementado dentro do protótipo real, preservando sua cena 3D, identidade visual e controles existentes. Cada item deve abrir um painel funcional ou declarar explicitamente “não conectado / não verificado”; não usar botões decorativos que prometem ações inexistentes.
+
+### 1. Sede 3D
+- Visão geral do ambiente e navegação da sede original.
+- Estado do runtime: conectado, degradado ou indisponível.
+- Horário da última leitura separado do horário da cotação.
+- Indicador persistente `PAPER / EXECUÇÃO DESABILITADA` enquanto esse for o contrato.
+
+### 2. RH Adonai Trade
+- Organograma: Orquestrador/LEVI, coordenação de risco, pesquisa, dados, execução simulada, auditoria e supervisão humana.
+- Diretório de agentes/equipes: identificador, função, responsável, estado reportado, tarefa, evidência, última atualização.
+- Quadro de tarefas: fila, em execução, bloqueadas, revisão, concluídas; toda mudança deve ter evento de auditoria.
+- Matriz de permissões: leitura, análise, simulação, aprovação; nenhuma equipe pode enviar ordens reais nesta etapa.
+- Painel de desempenho: somente métricas calculadas de tarefas/eventos reais persistidos; não animar agentes como ativos sem eventos.
+- A ponte atual não fornece estado RH, atividade ou probabilidades. Antes de mostrar equipes “trabalhando”, implementar contrato e persistência para esses campos; até lá, exibir “atividade não reportada”.
+
+### 3. Quatro mesas de mercado
+Cada mesa deve ter painel próprio, watchlist, instrumentos, horário de sessão, provedor, estado da conexão, timestamp, origem, qualidade dos dados, spread/custos quando disponíveis, risco, análises, histórico e modo paper.
+
+- **Cripto:** adaptador Binance Spot; validar símbolo, frescor, limites, custos e falha do provedor.
+- **Forex:** taxa de referência diária deve ser rotulada como diária; não apresentar como cotação intradiária. Adicionar provedor intraday antes de prometer análise operacional intraday.
+- **B3:** integrar Brapi com token privado no servidor; validar timestamp e limites do plano/provedor.
+- **Internacional:** Alpha Vantage com chave privada; não chamar Global Quote de tempo real sem timestamp confiável.
+
+Em todas as mesas: respostas `verified / stale / unverified / unavailable`; nunca transformar indisponibilidade em zero, nunca reutilizar preço antigo como atual, nunca gerar probabilidade sem modelo validado e evidência.
+
+### 4. Gráficos e fontes externas
+- **TradingView:** gráfico/widget oficial por símbolo e mercado, com atribuição e configuração de símbolo; distinguir visualização do gráfico de fonte de dados autorizada para cálculo/execução. Não raspar nem contornar acesso pago.
+- **Investing.com:** acesso ao calendário econômico e páginas/recursos permitidos pelo fornecedor. A incorporação deve respeitar widgets oficiais, termos e licenciamento; se não houver widget autorizado, abrir a fonte em nova aba e registrar a referência.
+- **Fear & Greed (GREED):** tratar como indicador de sentimento separado, com provedor, timestamp, escala, fonte e estado de verificação. Não usar índice de sentimento como probabilidade de lucro ou sinal automático. Se a fonte estiver ausente, mostrar “não conectado”.
+- Cada fonte deve ter status de conexão, última atualização, limitações e link para a origem. O fato de o menu exibir o nome da fonte não prova integração.
+
+### 5. Inteligência, risco e pesquisa
+- Análise técnica e contexto macroeconômico por mesa.
+- Motor de risco: exposição, limites, drawdown, custo/spread, tamanho máximo, bloqueios e explicação da decisão.
+- Backtest reproduzível sem vazamento temporal, com período, instrumento, custos, slippage, benchmark, parâmetros, versão do código e relatório.
+- Cenários e probabilidades só quando houver modelo, calibração, dados e avaliação fora da amostra. Até então: “não calculado / sem evidência”.
+- Cético/auditor: procurar dados atrasados, premissas contraditórias, overfitting e sinais sem fonte.
+
+### 6. LEVI — orquestração
+- LEVI recebe pedido, cria tarefa, seleciona mesa/função, aplica limites de risco e devolve resultado com evidências.
+- Endpoint declarado: `http://127.0.0.1:3000/api/levi/orquestrar`.
+- Integração só pode aparecer como conectada após teste de request/response, autenticação/limites, timeout, rastreamento da tarefa e persistência de auditoria. Status atual registrado: pendente.
+- LEVI não pode afirmar que chamou uma mesa ou RH se a chamada e o evento não existirem.
+
+### 7. EU SOU — motor científico
+- Endpoint declarado: `http://127.0.0.1:3000/api/eu-sou/calcular`.
+- Usar como motor científico para cálculos/revisões de hipóteses e não como fonte de cotações.
+- Toda saída deve carregar entrada, método, unidades, versão, resultado, incerteza/limites e evidência reproduzível.
+- Status de integração ponta a ponta registrado: pendente.
+
+### 8. Auditoria, memória e configuração
+- Trilha append-only de tarefa, fonte, decisão, resultado, usuário/serviço, timestamps e hash/correlação.
+- Saúde dos provedores, endpoints, Supabase, LEVI, EU SOU e runtime.
+- Configuração privada exclusivamente no servidor; nunca expor service-role/API keys ao browser.
+- Exportar relatório de auditoria e estado da instalação; controlar versões e rollback.
+
+## Arquitetura de integração
+
+1. Servir o HTML original preservado e fazer o roteamento da aba Turbo para a sede nova, sem reescrever o resto de `frontend/index.html`.
+2. Manter Trade em 3100. Preferir proxy same-origin do Turbo para as rotas read-only necessárias; não habilitar CORS global.
+3. Adaptar o protótipo por uma camada de integração pequena, não duplicar nem reescrever a cena 3D.
+4. Contratos de API versionados para mercados, RH, tarefas, fontes, LEVI, EU SOU e auditoria.
+5. Supabase como persistência/auditoria com políticas de menor privilégio; credencial service role somente no servidor.
+6. Estados de erro devem falhar fechados e apagar indicadores que possam parecer atuais; execução real continua desabilitada.
+7. PSM não é importado, reconfigurado nem utilizado como backend.
+
+## Ordem de execução e gates de aceite
+
+- [ ] G0 — revalidar o ZIP real por SHA-256 na máquina de origem e gerar relatório de diferenças atual.
+- [ ] G1 — analisar todos os 11 arquivos diferentes, 29 exclusivos da instalação, 1 exclusivo do protótipo e 2 ambíguos; preservar mudanças úteis da instalação e adicionar `unit_seguranca.js` sem sobrescritas cegas.
+- [ ] G2 — integrar a sede original à aba Trade do Turbo com backup, diff mínimo e rollback.
+- [ ] G3 — implementar menu e ramificações acima conectados a funções/contratos reais.
+- [ ] G4 — validar o servidor local 3100 e todos os endpoints em execução.
+- [ ] G5 — provar cotações/fonte/horário dos quatro mercados e status explícito para cada provedor.
+- [ ] G6 — implementar RH com estado real de tarefas e evidências; não simular atividade.
+- [ ] G7 — conectar TradingView, Investing.com e GREED com fontes autorizadas, atribuição e timestamps.
+- [ ] G8 — provar persistência e leitura do ledger Supabase, RLS e política de segredos.
+- [ ] G9 — provar LEVI e EU SOU ponta a ponta com rastreio e auditoria.
+- [ ] G10 — executar testes unitários, contratos, integração, navegador, falhas de rede, regressão das abas e rollback.
+- [ ] G11 — revisão final, documentação, artefato de release e publicação após aprovação dos gates.
+
+## Percentual — regra de medição
+
+Não considerar documentação ou CI de contratos como instalação visual concluída. A medição deve ponderar: protótipo original e aba Turbo 25%; menu/RH/funções 15%; quatro mercados com dados comprovados 20%; TradingView/Investing.com/GREED 10%; Supabase/auditoria/segurança 10%; LEVI + EU SOU 10%; testes de regressão, rollback e release 10%.
+
+Estado de partida desta revisão: **25% concluído / 75% restante (estimativa de escopo, não telemetria automática)**. A estimativa reconhece que o runtime e os contratos existem, mas os gates visuais, de dados ao vivo, RH, fontes externas, auditoria ponta a ponta e integrações permanecem abertos. Atualizar a porcentagem somente com evidências reproduzíveis anexadas a cada gate.
