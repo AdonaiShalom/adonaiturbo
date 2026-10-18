@@ -17,6 +17,12 @@ async function main() {
   try {
     const health = await fetch(base + '/health');
     assert.equal(health.status, 200);
+    assert.equal(health.headers.get('cache-control'), 'no-store');
+    assert.equal(health.headers.get('x-content-type-options'), 'nosniff');
+    assert.equal(health.headers.get('x-frame-options'), 'DENY');
+    assert.equal(health.headers.get('content-security-policy'), "default-src 'none'; frame-ancestors 'none'; base-uri 'none'");
+    assert.equal(health.headers.get('referrer-policy'), 'no-referrer');
+    assert.equal(health.headers.get('permissions-policy'), 'camera=(), microphone=(), geolocation=()');
     assert.equal((await health.json()).mode, 'paper');
     const ready = await fetch(base + '/ready');
     assert.equal(ready.status, 200);
