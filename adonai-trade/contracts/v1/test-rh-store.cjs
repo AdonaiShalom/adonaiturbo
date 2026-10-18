@@ -1,6 +1,6 @@
 'use strict';
 const assert = require('node:assert/strict');
-const { getRhSnapshot, createRhTask, updateRhTaskStatus } = require('../../runtime/rh-store.cjs');
+const { getRhSnapshot, createRhTask, updateRhTaskStatus, MAX_RESPONSE_BYTES } = require('../../runtime/rh-store.cjs');
 const { createServer } = require('../../runtime/server.cjs');
 
 async function main() {
@@ -35,6 +35,12 @@ async function main() {
   assert.deepEqual(unavailable.roles,[]);
   const failed=await getRhSnapshot({env,fetchImpl:async()=>({ok:false,status:403})});
   assert.equal(failed.status,'unavailable');
+  const oversizedHeader=await getRhSnapshot({env,fetchImpl:async()=>({ok:true,status:200,headers:{get:(name)=>name==='content-length'?String(MAX_RESPONSE_BYTES+1):null},async json(){throw new Error('oversized response must not be parsed');}})});
+  assert.equal(oversizedHeader.status,'unavailable');
+  assert.equal(oversizedHeader.reason_code,'supabase_response_too_large');
+  const oversizedJson=await getRhSnapshot({env,fetchImpl:async(url)=>({ok:true,status:200,async json(){return url.includes('/rh_roles?')?[{role_key:'risk',payload:'x'.repeat(MAX_RESPONSE_BYTES+1)}]:[];}})});
+  assert.equal(oversizedJson.status,'unavailable');
+  assert.equal(oversizedJson.reason_code,'supabase_response_too_large');
 
   const serverEnv={...env,RH_API_TOKEN:'test-rh-token-that-is-at-least-32-chars'};
   const server=createServer({now:()=>Date.parse('2026-10-18T12:00:00Z'),env:serverEnv,auditLedger:null,fetchImpl:fakeFetch});
