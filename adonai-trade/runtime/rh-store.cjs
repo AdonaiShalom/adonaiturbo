@@ -80,7 +80,7 @@ async function getRhSnapshot({ env = process.env, fetchImpl = globalThis.fetch }
       note: 'Roles are a catalog. Activity is reported only by persisted tasks/events; not_reported is not active.'
     };
   } catch (error) {
-    return { status: 'unavailable', reason_code: error && /^supabase_http_/.test(error.message) ? error.message : 'supabase_read_failed', roles: [], tasks: [], activity_is_real: false };
+    return { status: 'unavailable', reason_code: error && (/^supabase_http_/.test(error.message) || error.message === 'supabase_response_too_large') ? error.message : 'supabase_read_failed', roles: [], tasks: [], activity_is_real: false };
   }
 }
 
