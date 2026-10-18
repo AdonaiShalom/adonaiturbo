@@ -37,7 +37,25 @@
         if (!stopped) publish(state);
         return state;
       } catch (error) {
-        if (!stopped && onError) onError(error);
+        if (!stopped) {
+          const unavailable = Object.freeze({
+            source: 'adonai-trade-runtime',
+            status: 'unavailable',
+            mode: 'paper',
+            executionEnabled: false,
+            generatedAt: new Date().toISOString(),
+            desks: Object.freeze([]),
+            integrations: Object.freeze([]),
+            evidencePolicy: Object.freeze({
+              probabilitiesAvailable: false,
+              teamActivityAvailable: false,
+              reason: 'Runtime state unavailable; do not present cached indicators as current.'
+            }),
+            errorCode: error && typeof error.message === 'string' ? error.message : 'runtime_unavailable'
+          });
+          try { publish(unavailable); } catch (_) { /* Keep polling and report through onError. */ }
+          if (onError) onError(error);
+        }
         return null;
       } finally {
         running = false;
