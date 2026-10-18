@@ -43,6 +43,7 @@ function createServer(options = {}) {
   const auditLedger = options.auditLedger === undefined ? createSupabaseAuditLedger(env) : options.auditLedger;
   const fetchImpl = options.fetchImpl || globalThis.fetch;
   const quoteRateLimit = createRateLimiter({ limit: options.quoteRateLimit || 30, windowMs: 60000, maxKeys: 1000, now });
+  const policyRateLimit = createRateLimiter({ limit: options.policyRateLimit || 20, windowMs: 60000, maxKeys: 1000, now });
   return http.createServer(async (req, res) => {
     const url = new URL(req.url || '/', 'http://127.0.0.1');
     const timestamp = new Date(now()).toISOString();
@@ -66,6 +67,13 @@ function createServer(options = {}) {
       catch { return send(res, 503, { service: SERVICE, version: VERSION, timestamp, mode: 'paper', status: 'not_ready', reason_codes: ['audit_persistence_unavailable'] }); }
     }
     if (req.method === 'POST' && url.pathname === '/api/v1/policy/evaluate') {
+      const rate = policyRateLimit(req.socket && req.socket.remoteAddress || 'unknown');
+      res.setHeader('ratelimit-limit', String(rate.limit));
+      res.setHeader('ratelimit-remaining', String(rate.remaining));
+      if (!rate.allowed) {
+        res.setHeader('retry-after', String(rate.retryAfterSeconds));
+        return send(res, 429, { service: SERVICE, version: VERSION, timestamp, status: 'rate_limited', reason_codes: ['policy_rate_limit_exceeded'], retry_after_seconds: rate.retryAfterSeconds, execution_performed: false, audit_persisted: false });
+      }
       let input;
       try { input = await readJson(req); }
       catch (error) {
