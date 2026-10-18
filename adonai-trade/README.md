@@ -36,7 +36,7 @@ O comando exige confirmação explícita e imprime somente o status e o identifi
 
 ## Adaptadores de cotações (somente leitura)
 - Cripto: Binance Spot 24h; usa o horário de fechamento do último negócio e rejeita dados fora da janela de 120 segundos.
-- Forex: Frankfurter / referência do BCE; é uma taxa de referência diária, não cotação intradiária. Dados fora da janela são marcados como `stale`.
+- Forex: Frankfurter / referência do BCE; é uma taxa de referência diária, não cotação intradiária. É marcada como `unverified` para impedir que a taxa diária seja confundida com uma cotação em tempo real; dados inválidos também são rejeitados.
 - B3: Brapi; requer `BRAPI_TOKEN` privado e um timestamp de mercado recente.
 - Internacional: Alpha Vantage; requer `ALPHAVANTAGE_API_KEY`. A resposta Global Quote não fornece timestamp intradiário confiável, então o adaptador a marca `unverified` em vez de fingir que é cotação atual.
 
