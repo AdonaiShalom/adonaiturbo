@@ -1,7 +1,7 @@
 'use strict';
 
 const assert = require('node:assert/strict');
-const { summarizeMonthlySeasonality } = require('../runtime/seasonality.cjs');
+const { summarizeMonthlySeasonality } = require('../../runtime/seasonality.cjs');
 
 const closes = [
   { period: '2022-01', close: 100 }, { period: '2022-02', close: 110 },
