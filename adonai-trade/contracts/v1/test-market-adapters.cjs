@@ -56,6 +56,7 @@ async function main() {
     const base = 'http://127.0.0.1:' + server.address().port;
     const response = await fetch(base + '/api/v1/markets/quote?desk=CRYPTO&symbol=BTCUSDT');
     assert.equal(response.status, 200);
+    assert.equal(response.headers.get('cache-control'), 'no-store', 'market quotes must not be cached by browsers or intermediaries');
     const body = await response.json();
     assert.equal(body.status, 'verified');
     assert.equal(body.execution_enabled, false);
