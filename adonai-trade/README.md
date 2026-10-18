@@ -17,9 +17,22 @@ Módulo independente de análise e operações de mercado do ecossistema Adonai.
 ## Runtime HTTP
 Requer Node.js 22+. Execute `npm test` e depois `npm start`. O servidor escuta em `127.0.0.1:3100` por padrão. Endpoints: `GET /health`, `GET /ready`, `GET /api/v1/integrations`, `GET /api/v1/markets`, `GET /api/v1/markets/quote?desk=CRYPTO&symbol=BTCUSDT` e `POST /api/v1/policy/evaluate`.
 
-O ledger usa o schema PostgREST `adonai_trade`. A migration `supabase/migrations/20261018100000_runtime_audit_events.sql` foi aplicada ao projeto Supabase conectado; a tabela existe com RLS habilitado, mas a contagem de eventos observada era zero. Isso **não** comprova uma gravação ponta a ponta do runtime. Configure `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY` somente no ambiente privado do servidor; nunca publique a chave nem a envie ao navegador.
+O ledger usa o schema PostgREST `adonai_trade`. A migration `supabase/migrations/20261018100000_runtime_audit_events.sql` foi aplicada ao projeto Supabase conectado; a tabela existe com RLS habilitado. A última consulta de verificação encontrou zero eventos, portanto ainda não há prova de gravação ponta a ponta pelo runtime. Configure `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY` somente no ambiente privado do servidor; nunca publique a chave nem a envie ao navegador.
 
 Sem ledger disponível, `/ready` permanece em HTTP 503 e a avaliação falha fechada em HTTP 503. Uma avaliação bem-sucedida registra somente uma decisão de política; nenhuma ordem é executada.
+
+## Smoke test explícito da auditoria real
+O script `scripts/verify-audit-live.cjs` faz uma gravação `no_order` de teste e lê o mesmo evento de volta usando a chave de serviço no ambiente privado. Ele não envia ordens, mas cria um registro permanente append-only. Para executá-lo deliberadamente, com credenciais já configuradas no servidor:
+```sh
+ADONAI_TRADE_CONFIRM_LIVE_AUDIT=YES npm run verify:audit:live
+```
+No Windows PowerShell:
+```powershell
+$env:ADONAI_TRADE_CONFIRM_LIVE_AUDIT = 'YES'
+npm.cmd run verify:audit:live
+Remove-Item Env:ADONAI_TRADE_CONFIRM_LIVE_AUDIT
+```
+O comando exige confirmação explícita e imprime somente o status e o identificador do evento. Não execute no computador compartilhado e não cole a chave em terminal gravado, chat, navegador ou log. O script não foi executado nesta sessão porque as credenciais privadas do runtime não estão disponíveis aqui.
 
 ## Adaptadores de cotações (somente leitura)
 - Cripto: Binance Spot 24h; usa o horário de fechamento do último negócio e rejeita dados fora da janela de 120 segundos.
