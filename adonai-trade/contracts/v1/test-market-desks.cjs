@@ -23,7 +23,7 @@ assert.equal(configured.desks.find((desk) => desk.id === 'CRYPTO').provider_conf
 assert.equal(configured.desks.find((desk) => desk.id === 'FOREX').provider_configured, true);
 assert.equal(configured.desks.find((desk) => desk.id === 'B3').provider_configured, true);
 assert.equal(configured.desks.find((desk) => desk.id === 'INTERNATIONAL').provider_configured, true);
-assert.equal(configured.desks.find((desk) => desk.id === 'FOREX').data_mode, 'daily_reference_not_intraday');
+assert.equal(configured.desks.find((desk) => desk.id === 'FOREX').data_mode, 'intraday_1min_timestamp_checked');
 assert.equal(configured.desks.find((desk) => desk.id === 'INTERNATIONAL').data_mode, 'intraday_1min_timestamp_checked');
 assert.equal(configured.execution_enabled, false);
 const partial = listMarketDesks({ BRAPI_TOKEN: 'configured-test-token' });
