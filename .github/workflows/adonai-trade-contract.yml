@@ -18,6 +18,7 @@ on:
       - 'adonai-trade/runtime/**'
       - 'adonai-trade/supabase/**'
       - 'adonai-trade/package.json'
+      - 'adonai-trade/public/**'
       - 'adonai-trade/README.md'
       - 'adonai-trade/scripts/**'
       - '.github/workflows/adonai-trade-contract.yml'
