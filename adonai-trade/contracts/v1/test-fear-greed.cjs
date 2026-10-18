@@ -28,6 +28,14 @@ async function main() {
   const future = await getFearGreed({ nowMs, fetchImpl: async () => ({ ok: true, async json() { return { data: [{ value: '44', timestamp: String(Math.floor((nowMs + 60000) / 1000)) }] }; } }) });
   assert.equal(future.reason_code, 'provider_timestamp_in_future');
 
+  const badTimeout = await getFearGreed({ nowMs, timeoutMs: 99, fetchImpl: fetchOk });
+  assert.equal(badTimeout.status, 'unavailable');
+  assert.equal(badTimeout.reason_code, 'invalid_timeout_configuration');
+
+  const timedOut = await getFearGreed({ nowMs, timeoutMs: 100, fetchImpl: async (_url, options) => new Promise((_resolve, reject) => options.signal.addEventListener('abort', () => reject(new Error('aborted')), { once: true })) });
+  assert.equal(timedOut.status, 'unavailable');
+  assert.equal(timedOut.reason_code, 'provider_timeout');
+
   const oversized = await getFearGreed({ nowMs, fetchImpl: async (_url, options) => {
     assert.equal(options.redirect, 'error');
     assert.ok(options.signal instanceof AbortSignal);
