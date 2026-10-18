@@ -21,6 +21,8 @@ async function main() {
  assert.equal(state.evidencePolicy.teamActivityAvailable,false); assert.ok(state.desks.every(d=>d.executionEnabled===false));
  assert.throws(()=>normalize({desks:[]},{integrations:null}),/runtime_contract_mismatch/);
  await assert.rejects(readState({fetchImpl:async()=>({ok:false,status:503})}),/runtime_http_503/);
+ await assert.rejects(readState({timeoutMs:99,fetchImpl:fakeFetch}),/invalid_runtime_timeout/);
+ await assert.rejects(readState({baseUrl:'http://runtime.test',timeoutMs:100,fetchImpl:async()=>new Promise(()=>{})}),/runtime_timeout/);
  console.log('3D runtime bridge contract: PASS (read-only; no invented activity/probabilities)');
 }
 main().catch(e=>{console.error(e);process.exitCode=1;});
