@@ -1,0 +1,10 @@
+'use strict';
+const assert = require('node:assert/strict');
+const {getMenu,mount,SYMBOLS} = require('../../public/sede3d-menu.js');
+const menu = getMenu();
+assert.equal(menu.length,13);
+assert.deepEqual(menu.filter(x=>['CRYPTO','FOREX','B3','INTERNATIONAL'].includes(x.id)).map(x=>x.id),['CRYPTO','FOREX','B3','INTERNATIONAL']);
+for (const id of ['overview','rh','charts','investing','greed','intelligence','levi','eu-sou','audit']) assert.ok(menu.some(x=>x.id===id), 'missing menu item '+id);
+assert.deepEqual(SYMBOLS,{CRYPTO:'BTCUSDT',FOREX:'EURUSD',B3:'PETR4',INTERNATIONAL:'AAPL'});
+assert.throws(()=>mount(),/browser_document_required/);
+console.log('3D sede menu: PASS (13 modules, four market desks, external sources, LEVI/EU SOU, fail-closed browser requirement)');
