@@ -40,6 +40,8 @@ jobs:
         run: node adonai-trade/contracts/v1/test-policy-gate.cjs
       - name: Run seasonality regression tests
         run: node adonai-trade/contracts/v1/test-seasonality.cjs
+      - name: Run four market desk tests
+        run: node adonai-trade/contracts/v1/test-market-desks.cjs
       - name: Run Supabase audit adapter tests
         run: node adonai-trade/contracts/v1/test-audit-ledger.cjs
       - name: Run HTTP runtime tests
