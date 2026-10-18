@@ -192,9 +192,16 @@ Em todas as mesas: respostas `verified / stale / unverified / unavailable`; nunc
 - CI concluído com sucesso: [run 39152345672](https://github.com/AdonaiShalom/adonaiturbo/actions/runs/39152345672), com `contract-tests` e `windows-powershell-runtime` aprovados, incluindo a regressão RH persistido.
 - A alteração não modifica nem instala o HTML original e não confirma a disponibilidade real das tabelas Supabase.
 
+### Adaptadores dos quatro mercados — diagnóstico de HTTP preservado
+
+- Respostas HTTP não exitosas dos provedores agora mantêm um motivo explícito como `provider_http_429`, em vez de serem confundidas com falha de rede genérica. Isso facilita distinguir limitação de taxa do provedor de indisponibilidade de rede.
+- O contrato de mercado valida que HTTP 429 permaneça `unavailable` e que o código de motivo seja preservado, sem preço exibido como válido.
+- CI verde no commit `5cf08d5e5a5ccad8cee678d22f2dbe89ced2e324`: [run 39152518809](https://github.com/AdonaiShalom/adonaiturbo/actions/runs/39152518809), ambos os jobs `contract-tests` e `windows-powershell-runtime` aprovados.
+- Os testes são determinísticos e não comprovam que credenciais live estejam configuradas nem que os quatro provedores estejam disponíveis no ambiente de execução.
+
 ### Percentual oficial nesta atualização
 
-**39% concluído / 61% restante.** Avanço de 1 ponto pela proteção dos dados de RH lidos do Supabase: respostas limitadas a 1 MiB antes do parse, cancelamento de streams excedentes e falha explícita sem apresentar registros parciais. Os testes de Content-Length/JSON excessivos, o contrato geral e o runtime Windows PowerShell 5.1 passaram no CI. Isso melhora a segurança do RH, mas não comprova disponibilidade das tabelas reais, instalação visual ou integração ponta a ponta. O HTML original ainda não está na árvore do branch e não foi instalado no Turbo; proxy autenticado e integrações LEVI/EU SOU ponta a ponta seguem pendentes.
+**40% concluído / 60% restante.** Avanço de 1 ponto pelo diagnóstico correto de falhas HTTP dos provedores de mercado: limites de taxa como HTTP 429 agora são distinguíveis de falhas de rede, com contrato de regressão aprovado. A proteção de RH/Supabase com limite de 1 MiB também passou nos testes, assim como o runtime Windows PowerShell 5.1. São melhorias comprovadas de robustez e diagnóstico; não comprovam cotações live em produção, credenciais configuradas ou instalação visual. O HTML original ainda não está na árvore do branch e não foi instalado no Turbo; proxy autenticado e integrações LEVI/EU SOU ponta a ponta seguem pendentes.
 
 ### Documentos de planejamento anteriores
 
@@ -219,4 +226,4 @@ Os antigos documentos de planejamento não constituem planos ativos independente
 
 Não considerar documentação ou CI de contratos como instalação visual concluída. A medição deve ponderar: protótipo original e aba Turbo 25%; menu/RH/funções 15%; quatro mercados com dados comprovados 20%; TradingView/Investing.com/GREED 10%; Supabase/auditoria/segurança 10%; LEVI + EU SOU 10%; testes de regressão, rollback e release 10%.
 
-Estado oficial atual desta revisão: **39% concluído / 61% restante (estimativa ponderada por evidências, não telemetria automática)**. O valor reconhece os contratos de runtime e adaptadores testados, o menu de módulos implementado no branch e as funções RH/auditoria transacionais testadas no Supabase. Não contabiliza como concluídos os gates visuais, a instalação do protótipo original na aba real, as cotações live com credenciais, o proxy autenticado local, nem os testes de LEVI/EU SOU ponta a ponta. Atualizar a porcentagem somente com evidências reproduzíveis anexadas a cada gate.
+Estado oficial atual desta revisão: **40% concluído / 60% restante (estimativa ponderada por evidências, não telemetria automática)**. O valor reconhece os contratos de runtime e adaptadores testados, o menu de módulos implementado no branch e as funções RH/auditoria transacionais testadas no Supabase. Não contabiliza como concluídos os gates visuais, a instalação do protótipo original na aba real, as cotações live com credenciais, o proxy autenticado local, nem os testes de LEVI/EU SOU ponta a ponta. Atualizar a porcentagem somente com evidências reproduzíveis anexadas a cada gate.
