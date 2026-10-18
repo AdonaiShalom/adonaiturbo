@@ -5,6 +5,7 @@ const { createSupabaseAuditLedger } = require('./audit-ledger.cjs');
 const { listMarketDesks } = require('./market-desks.cjs');
 const { getQuote } = require('./market-adapters.cjs');
 const { listIntegrationStatus } = require('./integration-status.cjs');
+const { createRateLimiter } = require('./rate-limit.cjs');
 const MAX_BODY_BYTES = 64 * 1024;
 const SERVICE = 'adonai-trade';
 const VERSION = '0.1.0';
@@ -41,6 +42,7 @@ function createServer(options = {}) {
   const env = options.env || process.env;
   const auditLedger = options.auditLedger === undefined ? createSupabaseAuditLedger(env) : options.auditLedger;
   const fetchImpl = options.fetchImpl || globalThis.fetch;
+  const quoteRateLimit = createRateLimiter({ limit: options.quoteRateLimit || 30, windowMs: 60000, maxKeys: 1000, now });
   return http.createServer(async (req, res) => {
     const url = new URL(req.url || '/', 'http://127.0.0.1');
     const timestamp = new Date(now()).toISOString();
@@ -48,6 +50,13 @@ function createServer(options = {}) {
     if (req.method === 'GET' && url.pathname === '/api/v1/integrations') return send(res, 200, { service: SERVICE, version: VERSION, timestamp, ...listIntegrationStatus(env) });
     if (req.method === 'GET' && url.pathname === '/api/v1/markets') return send(res, 200, { service: SERVICE, version: VERSION, timestamp, ...listMarketDesks() });
     if (req.method === 'GET' && url.pathname === '/api/v1/markets/quote') {
+      const rate = quoteRateLimit(req.socket && req.socket.remoteAddress || 'unknown');
+      res.setHeader('ratelimit-limit', String(rate.limit));
+      res.setHeader('ratelimit-remaining', String(rate.remaining));
+      if (!rate.allowed) {
+        res.setHeader('retry-after', String(rate.retryAfterSeconds));
+        return send(res, 429, { service: SERVICE, version: VERSION, timestamp, status: 'rate_limited', reason_codes: ['quote_rate_limit_exceeded'], retry_after_seconds: rate.retryAfterSeconds, execution_enabled: false });
+      }
       const result = await getQuote({ desk: url.searchParams.get('desk'), symbol: url.searchParams.get('symbol'), env, fetchImpl, nowMs: now() });
       return send(res, result.status === 'unavailable' ? 503 : 200, { service: SERVICE, version: VERSION, timestamp, ...result });
     }
