@@ -15,6 +15,7 @@ function validEnvelope(value) {
   if (Object.keys(value).some((key) => !allowed.has(key))) return false;
   if (schema.required.some((key) => !(key in value))) return false;
   if (value.schema_version !== '1.0.0' || value.mode !== 'paper') return false;
+  if (typeof value.expires_at !== 'string' || Number.isNaN(Date.parse(value.expires_at)) || Date.parse(value.expires_at) <= Date.parse(value.created_at || '')) return false;
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value.correlation_id)) return false;
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value.task_id)) return false;
   if (typeof value.requested_by !== 'string' || !value.requested_by.trim() || value.requested_by.length > 128) return false;
@@ -47,11 +48,13 @@ const good = {
   task_type: 'analyze_instrument',
   mode: 'paper',
   created_at: '2026-10-17T10:00:00Z',
+  expires_at: '2026-10-17T10:05:00Z',
   payload: { instrument: 'PETR4' }
 };
 
 assert.equal(validEnvelope(good), true, 'valid paper envelope must pass');
 assert.equal(validEnvelope({ ...good, mode: 'live' }), false, 'live mode must fail closed');
+assert.equal(validEnvelope(({ expires_at, ...rest }) => rest)(good), false, 'expiry is mandatory');
 assert.equal(validEnvelope({ ...good, market: 'UNKNOWN' }), false, 'unknown market must be rejected');
 assert.equal(validEnvelope({ ...good, extra: true }), false, 'unknown top-level fields must be rejected');
 assert.equal(validEnvelope({ ...good, task_id: 'not-a-uuid' }), false, 'invalid task id must be rejected');
