@@ -3,7 +3,7 @@
 const crypto = require('node:crypto');
 
 function createSupabaseAuditLedger(env = process.env, fetchImpl = fetch) {
-  const baseUrl = (env.SUPABASE_URL || '').replace(/\/+$/, '');
+  const baseUrl = (env.SUPABASE_URL || '').replace(/\\/+$/, '');
   const key = env.SUPABASE_SERVICE_ROLE_KEY || '';
   if (!baseUrl || !key) return null;
   let parsed;
@@ -12,6 +12,7 @@ function createSupabaseAuditLedger(env = process.env, fetchImpl = fetch) {
   if ((parsed.protocol !== 'https:' && !localHttp) || parsed.username || parsed.password || parsed.search || parsed.hash) return null;
 
   const endpoint = baseUrl + '/rest/v1/runtime_audit_events';
+  const verifyEndpoint = baseUrl + '/rest/v1/rpc/verify_runtime_audit_chain';
   async function request(url, init) {
     const response = await fetchImpl(url, {
       ...init,
@@ -26,10 +27,22 @@ function createSupabaseAuditLedger(env = process.env, fetchImpl = fetch) {
     if (!response.ok) throw new Error('audit_store_http_' + response.status);
     return response;
   }
-
+  async function verifyChain() {
+    const response = await request(verifyEndpoint, {
+      method: 'POST',
+      headers: { 'accept-profile': 'adonai_trade', 'content-profile': 'adonai_trade' },
+      body: '{}'
+    });
+    let result;
+    try { result = await response.json(); } catch { throw new Error('audit_chain_invalid_response'); }
+    if (!result || result.ok !== true || !Number.isSafeInteger(result.checked) || result.checked < 0) {
+      throw new Error('audit_chain_verification_failed');
+    }
+    return result;
+  }
   return {
     async check() {
-      await request(endpoint + '?select=event_id&limit=1', { method: 'GET', headers: { 'accept-profile': 'adonai_trade' } });
+      await verifyChain();
       return true;
     },
     async append(input) {
@@ -48,20 +61,16 @@ function createSupabaseAuditLedger(env = process.env, fetchImpl = fetch) {
         market: envelope && envelope.market || null,
         decision: decision.decision,
         reason_codes: Array.isArray(decision.reason_codes) ? decision.reason_codes : ['unspecified'],
-        details: {
-          mode: 'paper',
-          execution_performed: false,
-          request_id: input.requestId || null
-        }
+        details: { mode: 'paper', execution_performed: false, request_id: input.requestId || null }
       };
       await request(endpoint, {
         method: 'POST',
         headers: { prefer: 'return=minimal', 'content-profile': 'adonai_trade' },
         body: JSON.stringify(event)
       });
-      return { persisted: true, event_id: event.event_id };
+      const chain = await verifyChain();
+      return { persisted: true, event_id: event.event_id, chain_verified: true, chain_checked: chain.checked };
     }
   };
 }
-
 module.exports = { createSupabaseAuditLedger };
