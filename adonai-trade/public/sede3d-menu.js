@@ -146,7 +146,7 @@
     }
     async function refresh(){
       if(destroyed)return;
-      try{const bridge=root.AdonaiTradeRuntimeBridge;if(!bridge||typeof bridge.readState!=='function')throw new Error('runtime_bridge_unavailable');state=await bridge.readState({baseUrl});footer.textContent='Runtime conectado • '+formatTime(state.fetchedAt)+' • modo paper';}
+      try{const bridge=root.AdonaiTradeRuntimeBridge;if(!bridge||typeof bridge.readState!=='function')throw new Error('runtime_bridge_unavailable');state=await bridge.readState({baseUrl});footer.textContent=(state.status==='ready'?'Runtime pronto • auditoria verificada':'Runtime não pronto')+' • '+formatTime(state.fetchedAt)+' • modo paper';}
       catch{state=null;footer.textContent='Runtime indisponível • sem dados atuais • modo paper';}
       // Polling must not destroy a module's active controls or query results every 15 seconds.
       // The overview is safe to refresh automatically; other modules refresh on explicit navigation/action.

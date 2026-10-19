@@ -40,12 +40,14 @@
     }
   }
 
-  function normalize(markets, integrations) {
-    if (!Array.isArray(markets.desks) || !Array.isArray(integrations.integrations)) {
+  function normalize(markets, integrations, readiness) {
+    if (!Array.isArray(markets.desks) || !Array.isArray(integrations.integrations) || !readiness || readiness.status !== 'ready') {
       throw new Error('runtime_contract_mismatch');
     }
     return Object.freeze({
       source: 'adonai-trade-runtime',
+      status: 'ready',
+      readiness: Object.freeze({ status: readiness.status, dependencies: readiness.dependencies || {} }),
       mode: 'paper',
       executionEnabled: false,
       fetchedAt: new Date().toISOString(),
@@ -86,11 +88,12 @@
     if (typeof fetchImpl !== 'function') throw new Error('fetch_unavailable');
     const timeoutMs = Number(options.timeoutMs === undefined ? 5000 : options.timeoutMs);
     if (!Number.isFinite(timeoutMs) || timeoutMs < 100 || timeoutMs > 30000) throw new Error('invalid_runtime_timeout');
-    const [markets, integrations] = await Promise.all([
+    const [markets, integrations, readiness] = await Promise.all([
       readJson(fetchImpl, baseUrl + '/api/v1/markets', timeoutMs),
-      readJson(fetchImpl, baseUrl + '/api/v1/integrations', timeoutMs)
+      readJson(fetchImpl, baseUrl + '/api/v1/integrations', timeoutMs),
+      readJson(fetchImpl, baseUrl + '/ready', timeoutMs)
     ]);
-    return normalize(markets, integrations);
+    return normalize(markets, integrations, readiness);
   }
 
   return Object.freeze({ readState, normalize });
