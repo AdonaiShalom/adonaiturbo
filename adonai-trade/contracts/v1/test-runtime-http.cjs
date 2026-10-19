@@ -40,6 +40,9 @@ async function main() {
     assert.equal(marketBody.execution_enabled, false);
     const turboRead = await fetch(base + '/api/v1/markets', { headers: { origin: 'http://127.0.0.1:3000' } });
     assert.equal(turboRead.headers.get('access-control-allow-origin'), 'http://127.0.0.1:3000');
+    const legacyRead = await fetch(base + '/api/v1/markets', { headers: { origin: 'http://127.0.0.1:3100' } });
+    assert.equal(legacyRead.status, 200);
+    assert.equal(legacyRead.headers.get('access-control-allow-origin'), 'http://127.0.0.1:3100');
     const deniedOrigin = await fetch(base + '/api/v1/markets', { headers: { origin: 'https://untrusted.example' } });
     assert.equal(deniedOrigin.headers.get('access-control-allow-origin'), null);
     const preflight = await fetch(base + '/api/v1/markets', {
