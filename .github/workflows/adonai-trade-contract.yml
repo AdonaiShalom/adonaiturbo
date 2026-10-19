@@ -12,6 +12,7 @@ on:
       - '.github/workflows/adonai-trade-contract.yml'
   push:
     branches:
+      - 'main'
       - 'work/adonai-trade-runtime-contracts-20261017'
     paths:
       - 'adonai-trade/contracts/v1/**'
@@ -78,6 +79,9 @@ jobs:
         run: node adonai-trade/contracts/v1/test-sede3d-menu.cjs
       - name: Run persisted RH snapshot and HTTP endpoint tests
         run: node adonai-trade/contracts/v1/test-rh-store.cjs
+      - name: Run complete package suite including reversible installer
+        working-directory: adonai-trade
+        run: npm test
 
   windows-powershell-runtime:
     runs-on: windows-latest
