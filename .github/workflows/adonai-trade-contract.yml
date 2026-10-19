@@ -1,0 +1,135 @@
+name: Adonai Trade contract checks
+
+on:
+  pull_request:
+    paths:
+      - 'adonai-trade/contracts/v1/**'
+      - 'adonai-trade/runtime/**'
+      - 'adonai-trade/supabase/**'
+      - 'adonai-trade/package.json'
+      - 'adonai-trade/public/**'
+      - 'adonai-trade/scripts/**'
+      - '.github/workflows/adonai-trade-contract.yml'
+  push:
+    branches:
+      - 'main'
+      - 'work/adonai-trade-runtime-contracts-20261017'
+    paths:
+      - 'adonai-trade/contracts/v1/**'
+      - 'adonai-trade/runtime/**'
+      - 'adonai-trade/supabase/**'
+      - 'adonai-trade/package.json'
+      - 'adonai-trade/public/**'
+      - 'adonai-trade/README.md'
+      - 'adonai-trade/scripts/**'
+      - '.github/workflows/adonai-trade-contract.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  contract-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Validate JSON schema syntax
+        run: node -e "JSON.parse(require('node:fs').readFileSync('adonai-trade/contracts/v1/task-envelope.v1.schema.json','utf8')); console.log('Schema JSON valid')"
+      - name: Validate local PowerShell harness contract
+        shell: bash
+        run: |
+          test -s adonai-trade/scripts/verify-runtime-local.ps1
+          grep -Fq '127.0.0.1:$Port' adonai-trade/scripts/verify-runtime-local.ps1
+          grep -Fq "PowerShell 5.1 throws on HTTP 4xx/5xx" adonai-trade/scripts/verify-runtime-local.ps1
+          grep -Fq "nenhuma ordem foi executada" adonai-trade/scripts/verify-runtime-local.ps1 || grep -Fq "Nenhuma ordem foi executada" adonai-trade/scripts/verify-runtime-local.ps1
+          echo 'PowerShell harness markers verified; this does not replace running it on Windows.'
+      - name: Run contract safety tests
+        run: node adonai-trade/contracts/v1/test-contract.cjs
+      - name: Run deterministic policy gate tests
+        run: node adonai-trade/contracts/v1/test-policy-gate.cjs
+      - name: Run seasonality regression tests
+        run: node adonai-trade/contracts/v1/test-seasonality.cjs
+      - name: Run four market desk tests
+        run: node adonai-trade/contracts/v1/test-market-desks.cjs
+      - name: Run LEVI/EU SOU integration status tests
+        run: node adonai-trade/contracts/v1/test-integration-status.cjs
+      - name: Run Supabase audit adapter tests
+        run: node adonai-trade/contracts/v1/test-audit-ledger.cjs
+      - name: Run Supabase audit adapter fail-closed tests
+        run: node adonai-trade/contracts/v1/test-audit-ledger-adapter.cjs
+      - name: Verify live audit smoke requires explicit opt-in
+        run: node adonai-trade/contracts/v1/test-live-audit-smoke-guard.cjs
+      - name: Run HTTP runtime tests
+        run: node adonai-trade/contracts/v1/test-runtime-http.cjs
+      - name: Run HTTP body-limit regression tests
+        run: node adonai-trade/contracts/v1/test-runtime-http-fixed.cjs
+      - name: Run read-only market adapter regressions
+        run: node adonai-trade/contracts/v1/test-market-adapters.cjs
+      - name: Run original 3D prototype runtime bridge contract
+        run: node adonai-trade/contracts/v1/test-runtime-bridge.cjs
+      - name: Run 3D runtime polling client regression
+        run: node adonai-trade/contracts/v1/test-runtime-bridge-client.cjs
+      - name: Run Fear & Greed source adapter and HTTP endpoint tests
+        run: node adonai-trade/contracts/v1/test-fear-greed.cjs
+      - name: Run 3D sede menu contract
+        run: node adonai-trade/contracts/v1/test-sede3d-menu.cjs
+      - name: Run persisted RH snapshot and HTTP endpoint tests
+        run: node adonai-trade/contracts/v1/test-rh-store.cjs
+      - name: Run complete package suite including reversible installer
+        working-directory: adonai-trade
+        run: npm test
+
+  windows-powershell-runtime:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Parse prototype intake and comparison scripts with Windows PowerShell 5.1
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $files = @(
+            @{ Path = 'adonai-trade/scripts/prepare-prototype-intake.ps1'; Required = @('ExpectedSha256', 'ExtractToDirectory', 'production_files_changed = \$false', 'maxEntryBytes = 50MB', 'maxTotalBytes = 250MB', 'entries.Count -gt 5000', 'public/index\\.html') },
+            @{ Path = 'adonai-trade/scripts/compare-prototype-staging.ps1'; Required = @('Get-FileHash', 'production_files_changed = \$false', 'IDENTICAL', 'DIFFERENT') }
+            @{ Path = 'adonai-trade/scripts/review-local-prototype.ps1'; Required = @('prepare-prototype-intake.ps1', 'compare-prototype-staging.ps1', 'ExpectedSha256', 'production_files_changed -ne', 'somente leitura') }
+          )
+          foreach ($file in $files) {
+            Write-Host ("Parsing PowerShell file: " + $file.Path)
+            $tokens = $null
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path $file.Path).Path, [ref]$tokens, [ref]$errors) | Out-Null
+            if ($errors.Count -gt 0) {
+              $details = ($errors | ForEach-Object { "line $($_.Extent.StartLineNumber), column $($_.Extent.StartColumnNumber): $($_.Message)" }) -join [Environment]::NewLine
+              throw ("PowerShell parse errors in " + $file.Path + ":" + [Environment]::NewLine + $details)
+            }
+            $scriptText = Get-Content $file.Path -Raw
+            foreach ($marker in $file.Required) {
+              if ($scriptText -notmatch $marker) { throw ("Safety marker missing in " + $file.Path + ": " + $marker) }
+            }
+          }
+          Write-Host 'Prototype intake and read-only comparison scripts passed PowerShell syntax and safety-marker checks.'
+      - name: Test prototype ZIP intake in isolated staging on Windows PowerShell 5.1
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          & 'adonai-trade/contracts/v1/test-prototype-intake.ps1'
+      - name: Test read-only prototype comparison on Windows PowerShell 5.1
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          & 'adonai-trade/contracts/v1/test-prototype-comparison.ps1'
+      - name: Run isolated runtime verification on Windows PowerShell 5.1
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $project = (Resolve-Path 'adonai-trade').Path
+          & .\adonai-trade\scripts\verify-runtime-local.ps1 -ProjectPath $project -Port 3107
+          if ($LASTEXITCODE -ne 0) { throw "PowerShell runtime verification failed: $LASTEXITCODE" }
