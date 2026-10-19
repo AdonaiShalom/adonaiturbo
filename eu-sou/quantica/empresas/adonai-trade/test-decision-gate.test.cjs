@@ -112,3 +112,26 @@ test("crypto requires funding/basis evidence", () => {
 test("risk limits unavailable blocks", () => {
   assert.ok(validateDecision(fixture(), { ...context, riskLimits: undefined }).reasons.includes("trusted_risk_limits_unavailable"));
 });
+test("partial trusted risk limits block", () => {
+  assert.ok(validateDecision(fixture(), { ...context, riskLimits: { maxExposure: 0.5 } }).reasons.includes("trusted_risk_limits_unavailable"));
+});
+test("Forex carry requires a timestamped numeric rollover", () => {
+  const d = fixture({ market: "forex", instrument: { symbol: "EURUSD", venue: "provider", quote_currency: "USD" } });
+  d.economics.carry = { rollover_bps: 0.2, as_of: "2026-10-19T17:59:00Z" };
+  assert.deepEqual(validateDecision(d, context), { status: "pass", reasons: [] });
+});
+test("Crypto funding requires timestamped rate and interval", () => {
+  const d = fixture({ market: "crypto", instrument: { symbol: "BTCUSDT", venue: "exchange", quote_currency: "USDT" } });
+  d.economics.funding = { rate: 0.0001, interval_hours: 8, as_of: "2026-10-19T17:59:00Z" };
+  assert.deepEqual(validateDecision(d, context), { status: "pass", reasons: [] });
+});
+test("future Forex carry timestamp blocks", () => {
+  const d = fixture({ market: "forex", instrument: { symbol: "EURUSD", venue: "provider", quote_currency: "USD" } });
+  d.economics.carry = { rollover_bps: 0.2, as_of: "2026-10-19T18:01:00Z" };
+  assert.ok(validateDecision(d, context).reasons.includes("forex_rollover_timestamp_invalid"));
+});
+test("future crypto funding timestamp blocks", () => {
+  const d = fixture({ market: "crypto", instrument: { symbol: "BTCUSDT", venue: "exchange", quote_currency: "USDT" } });
+  d.economics.funding = { rate: 0.0001, interval_hours: 8, as_of: "2026-10-19T18:01:00Z" };
+  assert.ok(validateDecision(d, context).reasons.includes("crypto_funding_timestamp_invalid"));
+});
