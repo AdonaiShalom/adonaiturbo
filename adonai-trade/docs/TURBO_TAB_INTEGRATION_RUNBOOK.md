@@ -5,7 +5,7 @@
 
 ## Objetivo
 
-Conectar o protótipo original `PROTOTIPO_Sede3D_abrir_no_navegador.html` à aba Adonai Trade de `C:\\AdonaiTurbo\\frontend\\index.html`, mantendo o runtime independente em `C:\\AdonaiTurbo\\AdonaiTrade` na porta 3100. O Turbo permanece em 3000 e o PSM Grupo Market em 3001.
+Conectar o protótipo original `PROTOTIPO_Sede3D_abrir_no_navegador.html` à aba Adonai Trade de `C:\\AdonaiTurbo\\frontend\\index.html`, preservando o servidor legado na porta 3100 e iniciando o runtime isolado read-only/paper na porta 3107. O Turbo permanece em 3000 e o PSM Grupo Market em 3001.
 
 Este runbook não declara que a integração já ocorreu. O repositório conectado não contém o `frontend/index.html` real do Turbo nem o arquivo original de 75.915 bytes; portanto, uma edição automática do HTML seria especulativa e poderia danificar a navegação existente.
 
@@ -13,7 +13,7 @@ Este runbook não declara que a integração já ocorreu. O repositório conecta
 
 - A ponte HTTP e o cliente de polling estão no pacote isolado e têm testes automatizados.
 - O CI do repositório executou os testes de contrato da ponte com sucesso.
-- Isso não prova que o protótipo está incorporado no Turbo, que o serviço local da porta 3100 está saudável, que há cotações ao vivo ou que o ledger de auditoria está gravando eventos.
+- Isso não prova que o protótipo está incorporado no Turbo, que os serviços locais nas portas 3100/3107 estão saudáveis, que há cotações ao vivo ou que o ledger de auditoria está gravando eventos.
 - O HTML original deve ser preservado e comparado por hash antes de qualquer patch.
 - Modo paper; execução financeira real desabilitada.
 
@@ -43,14 +43,14 @@ $PrototypeCandidates | ForEach-Object {
 } | Format-List
 
 Write-Host '=== 2. PORTAS E ENDPOINTS ===' -ForegroundColor Cyan
-foreach ($Port in @(3000,3100,3001)) {
+foreach ($Port in @(3000,3100,3107,3001)) {
   $listeners = Get-NetTCPConnection -State Listen -LocalPort $Port -ErrorAction SilentlyContinue
   [pscustomobject]@{ Port = $Port; Listening = [bool]$listeners; PIDs = (($listeners | Select-Object -ExpandProperty OwningProcess -Unique) -join ',') }
 }
 foreach ($Url in @(
   'http://127.0.0.1:3000/',
-  'http://127.0.0.1:3100/api/v1/markets',
-  'http://127.0.0.1:3100/api/v1/integrations'
+  'http://127.0.0.1:3107/api/v1/markets',
+  'http://127.0.0.1:3107/api/v1/integrations'
 )) {
   try {
     $r = Invoke-WebRequest -Uri $Url -TimeoutSec 4 -UseBasicParsing
@@ -69,7 +69,7 @@ Write-Host 'Diagnóstico concluído; nenhum arquivo foi alterado.' -ForegroundCo
 3. Preferir uma integração same-origin/proxy para as rotas `/api/v1/markets` e `/api/v1/integrations`; não abrir CORS indiscriminado.
 4. A ponte deve falhar fechada: `executionEnabled: false`, status de indisponibilidade explícito e nenhum indicador antigo apresentado como atual.
 5. Não inventar agentes em atividade, decisões, probabilidades ou cotações. `probability: null` permanece “não disponível”; atividade não instrumentada permanece “não reportada”.
-6. Preservar Turbo (3000), Trade (3100) e PSM (3001) como sistemas separados.
+6. Preservar Turbo (3000), Trade legado (3100), runtime read-only/paper (3107) e PSM (3001) como sistemas separados.
 7. Testar inicialização, navegação entre abas, atualização periódica, erro de rede, payload inválido, retorno ao Turbo e ausência de efeitos colaterais.
 8. Executar os testes de contrato e os testes locais do projeto em cópia isolada quando houver testes que gravem/apaguem dados.
 9. Registrar diff, hashes antes/depois, resultados dos testes e plano de rollback.

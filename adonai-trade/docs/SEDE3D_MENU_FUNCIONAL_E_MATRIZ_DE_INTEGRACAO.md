@@ -6,7 +6,8 @@ O alvo é **instalar o protótipo original enviado pelo usuário como a nova sed
 
 Limites de ambiente:
 - Adonai Turbo: `http://127.0.0.1:3000`
-- Runtime independente Adonai Trade: `http://127.0.0.1:3100`
+- Servidor legado Adonai Trade: `http://127.0.0.1:3100` (preservado)
+- Runtime isolado read-only/paper desta branch: `http://127.0.0.1:3107`
 - PSM Grupo Market: `http://127.0.0.1:3001` — fora do escopo e intocável.
 
 ## Inventário de evidências existente
@@ -80,7 +81,7 @@ Em todas as mesas: respostas `verified / stale / unverified / unavailable`; nunc
 ## Arquitetura de integração
 
 1. Servir o HTML original preservado e fazer o roteamento da aba Turbo para a sede nova, sem reescrever o resto de `frontend/index.html`.
-2. Manter Trade em 3100. Preferir proxy same-origin do Turbo para as rotas read-only necessárias; não habilitar CORS global.
+2. Preservar o servidor legado em 3100. O runtime fail-closed desta branch usa 3107 para evitar conflito de bind; conectar o menu ao runtime isolado e validar os dois processos antes de qualquer proxy.
 3. Adaptar o protótipo por uma camada de integração pequena, não duplicar nem reescrever a cena 3D.
 4. Contratos de API versionados para mercados, RH, tarefas, fontes, LEVI, EU SOU e auditoria.
 5. Supabase como persistência/auditoria com políticas de menor privilégio; credencial service role somente no servidor.
@@ -156,7 +157,7 @@ Em todas as mesas: respostas `verified / stale / unverified / unavailable`; nunc
 - A ponte de leitura da sede agora tem timeout configurável de 5 segundos por endpoint (limites aceitos: 100–30.000 ms). Erros HTTP, JSON inválido, tempo excedido e indisponibilidade resultam em erro explícito, sem transformar estado antigo em dado atual.
 - O contrato cobre timeout, configuração inválida, HTTP 503 e contrato de resposta incompatível.
 - CI verde: [39151072452](https://github.com/AdonaiShalom/adonaiturbo/actions/runs/39151072452), incluindo contrato da ponte e runtime Windows PowerShell 5.1.
-- Isso melhora a robustez da conexão, mas não comprova que o HTML original tenha sido instalado no Turbo nem que a porta 3100 esteja ativa na máquina local.
+- Isso melhora a robustez da conexão, mas não comprova que o HTML original tenha sido instalado no Turbo nem que as portas 3100 e 3107 estejam ativas na máquina local.
 
 ### Cotação verificada — impedir preço nulo/zero na interface
 
@@ -202,7 +203,7 @@ Em todas as mesas: respostas `verified / stale / unverified / unavailable`; nunc
 ### Busca ampliada do protótipo original — bloqueio confirmado
 
 - A inspeção remota do GitHub não contém os arquivos de produção do Windows, mas o inventário PowerShell executado na máquina do usuário confirmou que `C:\AdonaiTurbo\frontend\index.html` existe (371.772 bytes, SHA-256 `E3D248ED2BD99EF64A6ACB1860A16FC451B656C163CBAB09E57F895690CD9758`) e que `C:\AdonaiTurbo\AdonaiTrade\public\sede3d.html` existe (75.930 bytes, SHA-256 `75A74F0FFEB61E47586F07330308DEF29187008C4DD4F17BA2583533F97A8B2F`).
-- O index do Turbo já contém a aba Trade e um iframe para `http://127.0.0.1:3100/`; o protótipo original é um canvas 3D e declara explicitamente `PROTÓTIPO · dados simulados`. Portanto, a hipótese principal a validar é apontar a aba ao caminho da sede e, em seguida, conectar e comprovar cada endpoint real sem confundir simulação com dado de mercado.
+- O index do Turbo já contém a aba Trade e um iframe para `http://127.0.0.1:3100/`; o protótipo original é um canvas 3D e declara explicitamente `PROTÓTIPO · dados simulados`. O runtime isolado desta branch foi separado para `3107`, pois o servidor legado já ocupa `3100`. Validar ambos sem confundir simulação com dado de mercado.
 - A verificação local de `/health` retornou HTTP 404 em 3000 e 3100, o que apenas confirma que essa rota não respondeu; não confirma se a raiz, `/sede3d.html` ou as APIs estão operacionais. A porta 3001 não aceitou conexão nessa verificação e permanece fora do escopo.
 - O conector GitHub não pode editar diretamente esses arquivos locais do Windows. A próxima etapa é testar a rota estática `/sede3d.html` e mapear os endpoints que o protótipo chama, antes de fazer backup e aplicar a mudança mínima no index do Turbo.
 
@@ -220,7 +221,7 @@ Os antigos documentos de planejamento não constituem planos ativos independente
 - [ ] G1 — analisar todos os 11 arquivos diferentes, 29 exclusivos da instalação, 1 exclusivo do protótipo e 2 ambíguos; preservar mudanças úteis da instalação e adicionar `unit_seguranca.js` sem sobrescritas cegas.
 - [ ] G2 — integrar a sede original à aba Trade do Turbo com backup, diff mínimo e rollback.
 - [ ] G3 — implementar menu e ramificações acima conectados a funções/contratos reais.
-- [ ] G4 — validar o servidor local 3100 e todos os endpoints em execução.
+- [ ] G4 — validar o servidor legado 3100 e o runtime isolado 3107, incluindo contratos, falhas e auditoria.
 - [ ] G5 — provar cotações/fonte/horário dos quatro mercados e status explícito para cada provedor.
 - [ ] G6 — implementar RH com estado real de tarefas e evidências; não simular atividade.
 - [ ] G7 — conectar TradingView, Investing.com e GREED com fontes autorizadas, atribuição e timestamps.

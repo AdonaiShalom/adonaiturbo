@@ -6,6 +6,8 @@ Este documento especifica a ligação segura entre o runtime HTTP e o protótipo
 
 ## Contrato disponível
 
+**Separação de portas:** o servidor legado do Trade permanece em `3100`. O runtime fail-closed isolado desta branch usa `3107` por padrão para evitar conflito entre dois processos que disputam a mesma porta. A ponte/menu e os testes do runtime apontam para `3107`; não pare nem substitua o servidor legado para ativar este serviço.
+
 O adaptador `public/runtime-bridge.js` expõe `AdonaiTradeRuntimeBridge.readState({ baseUrl })` e consulta somente:
 
 - `GET /api/v1/markets`
@@ -32,7 +34,7 @@ Depois de copiar o arquivo para o diretório público efetivamente servido, incl
 <script src="/adonai-trade/public/sede3d-menu.js"></script>
 <script>
   window.adonaiTradeSedeMenu = window.AdonaiTradeSedeMenu.mount({
-    runtimeBaseUrl: 'http://127.0.0.1:3100',
+    runtimeBaseUrl: 'http://127.0.0.1:3107',
     pollIntervalMs: 15000
   });
 </script>
