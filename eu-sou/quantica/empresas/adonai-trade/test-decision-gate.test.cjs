@@ -35,6 +35,9 @@ const context = {
   auditHealthy: true,
   idempotencyAvailable: true,
   portfolioStateAvailable: true,
+  sourceProvenanceVerified: true,
+  modelValidationPassed: true,
+  probabilityCalibrationVerified: true,
   riskLimits: { maxExpectedShortfall: 0.05, maxDrawdownEstimate: 0.2, maxExposure: 0.5 }
 };
 
@@ -142,4 +145,14 @@ test("unsupported market blocks", () => {
 test("decision created too far in future blocks", () => {
   const d = fixture({ created_at: "2026-10-19T18:01:00Z", expires_at: "2026-10-19T18:05:00Z" });
   assert.ok(validateDecision(d, context).reasons.includes("created_at_in_future"));
+});
+
+test("unverified source provenance blocks even when fields are present", () => {
+  assert.ok(validateDecision(fixture(), { ...context, sourceProvenanceVerified: false }).reasons.includes("source_provenance_not_independently_verified"));
+});
+test("unvalidated model blocks even when hashes are present", () => {
+  assert.ok(validateDecision(fixture(), { ...context, modelValidationPassed: false }).reasons.includes("model_validation_not_verified"));
+});
+test("unverified probability calibration blocks even when method label exists", () => {
+  assert.ok(validateDecision(fixture(), { ...context, probabilityCalibrationVerified: false }).reasons.includes("probability_calibration_not_verified"));
 });
