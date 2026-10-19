@@ -11,6 +11,8 @@ const TASK_TYPES = new Set([
 ]);
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const DATA_QUALITIES = new Set(['verified', 'partial', 'stale', 'invalid', 'unknown']);
+const HASH_SHA256 = /^[a-f0-9]{64}$/i;
+const HORIZON_UNITS = new Set(['minute', 'hour', 'day', 'week']);
 
 function isRecord(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -52,7 +54,7 @@ function validateEnvelope(envelope) {
     const context = envelope.data_context;
     if (!isRecord(context)) errors.push('data_context_must_be_object');
     else {
-      const allowedContext = new Set(['provider', 'observed_at', 'license_reference', 'data_quality']);
+      const allowedContext = new Set(['provider', 'observed_at', 'license_reference', 'data_quality', 'content_hash']);
       for (const key of Object.keys(context)) if (!allowedContext.has(key)) errors.push('unknown_data_context_field:' + key);
       if (context.data_quality !== undefined && !DATA_QUALITIES.has(context.data_quality)) errors.push('invalid_data_quality');
       if (context.observed_at !== undefined && (typeof context.observed_at !== 'string' || !Number.isFinite(Date.parse(context.observed_at)))) errors.push('invalid_observed_at');
@@ -63,14 +65,45 @@ function validateEnvelope(envelope) {
     const context = envelope.scientific_context;
     if (!isRecord(context)) errors.push('scientific_context_must_be_object');
     else {
-      const allowedContext = new Set(['method', 'baseline', 'uncertainty', 'evidence_refs']);
+      const allowedContext = new Set(['method', 'baseline', 'uncertainty', 'evidence_refs', 'event', 'horizon', 'probability', 'calibration_method', 'calibration_window', 'calibration_status', 'uncertainty_interval', 'model_version', 'model_hash', 'dataset_hash', 'validation_run_id', 'source_hashes', 'cost_context']);
       for (const key of Object.keys(context)) if (!allowedContext.has(key)) errors.push('unknown_scientific_context_field:' + key);
       if (context.evidence_refs !== undefined &&
           (!Array.isArray(context.evidence_refs) || context.evidence_refs.length > 30 ||
            context.evidence_refs.some((ref) => typeof ref !== 'string' || ref.length > 512))) {
         errors.push('invalid_evidence_refs');
       }
+      if (envelope.task_type === 'paper_order_proposal') {
+        for (const key of ['method', 'baseline', 'event', 'calibration_method', 'calibration_window', 'model_version', 'validation_run_id']) {
+          if (typeof context[key] !== 'string' || !context[key].trim()) errors.push('scientific_' + key + '_required');
+        }
+        if (!Array.isArray(context.evidence_refs) || context.evidence_refs.length === 0) errors.push('scientific_evidence_required');
+        if (context.calibration_status !== 'verified') errors.push('probability_calibration_not_verified');
+        if (typeof context.probability !== 'number' || !Number.isFinite(context.probability) || context.probability < 0 || context.probability > 1) errors.push('invalid_scientific_probability');
+        const horizon = context.horizon;
+        if (!isRecord(horizon) || typeof horizon.value !== 'number' || !Number.isFinite(horizon.value) || horizon.value <= 0 || !HORIZON_UNITS.has(horizon.unit)) errors.push('invalid_scientific_horizon');
+        const interval = context.uncertainty_interval;
+        if (!isRecord(interval) || typeof interval.lower !== 'number' || !Number.isFinite(interval.lower) ||
+            typeof interval.upper !== 'number' || !Number.isFinite(interval.upper) ||
+            interval.lower < 0 || interval.upper > 1 || interval.lower > interval.upper ||
+            (typeof context.probability === 'number' && (context.probability < interval.lower || context.probability > interval.upper))) {
+          errors.push('invalid_scientific_uncertainty_interval');
+        }
+        if (!HASH_SHA256.test(context.model_hash || '') || !HASH_SHA256.test(context.dataset_hash || '')) errors.push('invalid_scientific_model_or_dataset_hash');
+        if (!Array.isArray(context.source_hashes) || context.source_hashes.length === 0 || context.source_hashes.some((hash) => !HASH_SHA256.test(hash || ''))) errors.push('invalid_scientific_source_hashes');
+        const costs = context.cost_context;
+        if (!isRecord(costs) ||
+            !['spread_bps', 'fees_bps', 'slippage_bps', 'net_expected_value'].every((key) => typeof costs[key] === 'number' && Number.isFinite(costs[key])) ||
+            ['spread_bps', 'fees_bps', 'slippage_bps'].some((key) => costs[key] < 0) ||
+            typeof costs.currency !== 'string' || !costs.currency.trim()) errors.push('invalid_scientific_cost_context');
+      }
     }
+  }
+  if (envelope.data_context && isRecord(envelope.data_context) &&
+      envelope.data_context.content_hash !== undefined && !HASH_SHA256.test(envelope.data_context.content_hash || '')) {
+    errors.push('invalid_data_content_hash');
+  }
+  if (envelope.task_type === 'paper_order_proposal' && !isRecord(envelope.scientific_context)) {
+    errors.push('scientific_context_required_for_paper_proposal');
   }
   return errors;
 }
