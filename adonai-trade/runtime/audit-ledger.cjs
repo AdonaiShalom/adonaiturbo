@@ -3,7 +3,7 @@
 const crypto = require('node:crypto');
 
 function createSupabaseAuditLedger(env = process.env, fetchImpl = fetch) {
-  const baseUrl = (env.SUPABASE_URL || '').replace(/\\/+$/, '');
+  const baseUrl = (env.SUPABASE_URL || '').replace(/\/+$/, '');
   const key = env.SUPABASE_SERVICE_ROLE_KEY || '';
   if (!baseUrl || !key) return null;
   let parsed;
