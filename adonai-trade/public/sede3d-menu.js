@@ -37,7 +37,7 @@
     const rootElement = options.root || document.body;
     if (!rootElement || typeof rootElement.appendChild !== 'function') throw new Error('menu_root_required');
     if (document.getElementById('adonai-trade-sede-menu')) return {destroy(){}};
-    const baseUrl = String(options.runtimeBaseUrl || 'http://127.0.0.1:3100').replace(/\/$/,'');
+    const baseUrl = String(options.runtimeBaseUrl || 'http://127.0.0.1:3107').replace(/\/$/,'');
     const style = document.createElement('style');
     style.id = 'adonai-trade-sede-menu-style';
     style.textContent = [
@@ -67,7 +67,7 @@
       current=id;for(const [key,b] of buttons)b.setAttribute('aria-current',String(key===id));
       panel.replaceChildren();const item=MENU.find(x=>x.id===id);panel.append(node('h2',item?item.label:'Adonai Trade'),node('div','PAPER • ordens reais desabilitadas','danger'));
       if(id==='overview'){
-        panel.append(card('Sede original','Cena preservada','Esta camada complementa a cena 3D original; não a substitui.'),card('Runtime 3100',state?'Leitura recebida':'Aguardando / indisponível',state?'Última leitura: '+formatTime(state.fetchedAt):'Ainda não há confirmação de conexão.'));
+        panel.append(card('Sede original','Cena preservada','Esta camada complementa a cena 3D original; não a substitui.'),card('Runtime 3107',state?'Leitura recebida':'Aguardando / indisponível',state?'Última leitura: '+formatTime(state.fetchedAt):'Ainda não há confirmação de conexão.'));
         panel.append(card('Dados e evidências','Sem inferências','Atividade de equipes e probabilidades só aparecem quando o runtime fornecer evidência verificável.'));
       } else if(['CRYPTO','FOREX','B3','INTERNATIONAL'].includes(id)){
         const d=state&&state.desks.find(x=>x.id===id);

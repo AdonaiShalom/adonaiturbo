@@ -14,7 +14,7 @@ const TAGS = [
   '(function(){',
   "  function mount(){",
   "    if (!window.AdonaiTradeSedeMenu || window.__adonaiTradeMenuMounted) return;",
-  "    window.__adonaiTradeMenuMounted = window.AdonaiTradeSedeMenu.mount({runtimeBaseUrl:'http://127.0.0.1:3100'});",
+  "    window.__adonaiTradeMenuMounted = window.AdonaiTradeSedeMenu.mount({runtimeBaseUrl:'http://127.0.0.1:3107'});",
   '  }',
   "  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount, {once:true});",
   '  else mount();',

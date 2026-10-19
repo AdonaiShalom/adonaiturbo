@@ -9,8 +9,8 @@ async function main() {
   if(url.endsWith('/api/v1/integrations')) return {ok:true,status:200,json:async()=>({timestamp:'2026-10-18T15:00:01.000Z',integrations:[{id:'levi',status:'not_verified',configured:true,authenticated:false,execution_enabled:false}]})};
   throw new Error('unexpected_url');
  };
- const state=await readState({baseUrl:'http://127.0.0.1:3100/',fetchImpl:fakeFetch});
- assert.deepEqual(requests.sort(),['http://127.0.0.1:3100/api/v1/integrations','http://127.0.0.1:3100/api/v1/markets']);
+ const state=await readState({baseUrl:'http://127.0.0.1:3107/',fetchImpl:fakeFetch});
+ assert.deepEqual(requests.sort(),['http://127.0.0.1:3107/api/v1/integrations','http://127.0.0.1:3107/api/v1/markets']);
  assert.equal(state.mode,'paper'); assert.equal(state.executionEnabled,false); assert.equal(state.desks.length,2);
  assert.equal(state.runtimeTimestamps.markets,'2026-10-18T15:00:00.000Z');
  assert.equal(state.runtimeTimestamps.integrations,'2026-10-18T15:00:01.000Z');

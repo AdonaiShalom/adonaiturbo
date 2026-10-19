@@ -200,7 +200,7 @@ function createServer(options = {}) {
   });
 }
 if (require.main === module) {
-  const port = Number(process.env.PORT || 3100);
+  const port = Number(process.env.PORT || 3107);
   const host = process.env.HOST || '127.0.0.1';
   if (!Number.isInteger(port) || port < 0 || port > 65535) { process.stderr.write('Invalid PORT; expected integer 0..65535.\n'); process.exit(2); }
   const server = createServer();

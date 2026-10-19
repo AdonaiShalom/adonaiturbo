@@ -3,7 +3,7 @@
 Módulo independente de análise e operações de mercado do ecossistema Adonai.
 
 ## Execução local
-- Servidor local: `http://127.0.0.1:3100/`
+- Servidor local: `http://127.0.0.1:3107/`
 - O Adonai Turbo permanece na porta `3000`.
 - Este módulo não deve ser misturado ao PSM Grupo Market.
 
@@ -15,7 +15,7 @@ Módulo independente de análise e operações de mercado do ecossistema Adonai.
 - Este runtime é somente leitura e modo paper; não envia ordens.
 
 ## Runtime HTTP
-Requer Node.js 22+. Execute `npm test` e depois `npm start`. O servidor escuta em `127.0.0.1:3100` por padrão. Endpoints: `GET /health`, `GET /ready`, `GET /api/v1/integrations`, `GET /api/v1/markets`, `GET /api/v1/markets/quote?desk=CRYPTO&symbol=BTCUSDT` e `POST /api/v1/policy/evaluate`.
+Requer Node.js 22+. Execute `npm test` e depois `npm start`. O servidor escuta em `127.0.0.1:3107` por padrão. Endpoints: `GET /health`, `GET /ready`, `GET /api/v1/integrations`, `GET /api/v1/markets`, `GET /api/v1/markets/quote?desk=CRYPTO&symbol=BTCUSDT` e `POST /api/v1/policy/evaluate`.
 
 O ledger usa o schema PostgREST `adonai_trade`. A migration `supabase/migrations/20261018100000_runtime_audit_events.sql` foi aplicada ao projeto Supabase conectado; a tabela existe com RLS habilitado. A última consulta de verificação encontrou zero eventos, portanto ainda não há prova de gravação ponta a ponta pelo runtime. Configure `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY` somente no ambiente privado do servidor; nunca publique a chave nem a envie ao navegador.
 
