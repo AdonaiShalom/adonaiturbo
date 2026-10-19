@@ -1,0 +1,30 @@
+name: EU SOU Adonai Trade decision gate tests
+
+on:
+  push:
+    branches:
+      - work/adonai-trade-eu-sou-market-research-20261019
+    paths:
+      - 'eu-sou/quantica/empresas/adonai-trade/decision-gate.cjs'
+      - 'eu-sou/quantica/empresas/adonai-trade/test-decision-gate.test.cjs'
+      - '.github/workflows/eu-sou-gate-tests.yml'
+  pull_request:
+    paths:
+      - 'eu-sou/quantica/empresas/adonai-trade/decision-gate.cjs'
+      - 'eu-sou/quantica/empresas/adonai-trade/test-decision-gate.test.cjs'
+      - '.github/workflows/eu-sou-gate-tests.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  offline-gate-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Run deterministic offline tests (no network, no credentials, no orders)
+        run: node --test eu-sou/quantica/empresas/adonai-trade/test-decision-gate.test.cjs
