@@ -135,3 +135,11 @@ test("future crypto funding timestamp blocks", () => {
   d.economics.funding = { rate: 0.0001, interval_hours: 8, as_of: "2026-10-19T18:01:00Z" };
   assert.ok(validateDecision(d, context).reasons.includes("crypto_funding_timestamp_invalid"));
 });
+
+test("unsupported market blocks", () => {
+  assert.ok(validateDecision(fixture({ market: "unknown" }), context).reasons.includes("market_unsupported"));
+});
+test("decision created too far in future blocks", () => {
+  const d = fixture({ created_at: "2026-10-19T18:01:00Z", expires_at: "2026-10-19T18:05:00Z" });
+  assert.ok(validateDecision(d, context).reasons.includes("created_at_in_future"));
+});
