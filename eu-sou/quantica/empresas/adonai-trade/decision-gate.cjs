@@ -77,6 +77,9 @@ function validateDecision(d, context = {}) {
       !validHash(e.dataset_hash) || !nonEmpty(e.baseline) || !nonEmpty(e.validation_run_id)) {
     add("model_dataset_validation_provenance_missing");
   }
+  if (context.sourceProvenanceVerified !== true) add("source_provenance_not_independently_verified");
+  if (context.modelValidationPassed !== true) add("model_validation_not_verified");
+  if (context.probabilityCalibrationVerified !== true) add("probability_calibration_not_verified");
   if (context.temporalLeakage === true) add("temporal_leakage_detected");
 
   const economics = d.economics;
