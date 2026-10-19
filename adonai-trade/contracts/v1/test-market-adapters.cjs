@@ -29,6 +29,28 @@ async function main() {
   assert.equal(impossibleDailyForex.status, 'unverified'); assert.equal(impossibleDailyForex.reason_code, 'invalid_daily_reference_data');
   const b3 = await getQuote({ desk: 'B3', symbol: 'PETR4', env: { BRAPI_TOKEN: 'test-token' }, fetchImpl: fetchMock, nowMs });
   assert.equal(b3.status, 'verified'); assert.equal(b3.currency, 'BRL');
+  const b3IsoTimestamp = await getQuote({
+    desk: 'B3',
+    symbol: 'PETR4',
+    env: { BRAPI_TOKEN: 'test-token' },
+    fetchImpl: async (url, options = {}) => {
+      assert.equal(new URL(url).hostname, 'brapi.dev');
+      assert.equal(options.headers.Authorization, 'Bearer test-token');
+      return {
+        ok: true,
+        status: 200,
+        async json() {
+          return { results: [{ regularMarketPrice: 38.5, regularMarketTime: new Date(nowMs - 2000).toISOString() }] };
+        }
+      };
+    },
+    nowMs
+  });
+  assert.equal(b3IsoTimestamp.status, 'verified', 'Brapi ISO timestamp strings should be parsed as dates, not multiplied as epoch seconds');
+  assert.equal(b3IsoTimestamp.currency, 'BRL');
+  assert.equal(b3IsoTimestamp.source, 'brapi');
+  assert.equal(b3IsoTimestamp.observed_at, new Date(nowMs - 2000).toISOString());
+  assert.equal(b3IsoTimestamp.execution_enabled, false);
   const international = await getQuote({ desk: 'INTERNATIONAL', symbol: 'IBM', env: { ALPHAVANTAGE_API_KEY: 'test-key' }, fetchImpl: fetchMock, nowMs });
   assert.equal(international.status, 'verified'); assert.equal(international.price, 123.4); assert.equal(international.source, 'alphavantage_intraday_1min'); assert.equal(international.observed_at, '2026-10-18T11:59:00.000Z'); assert.equal(international.execution_enabled, false);
   const badInternationalPrice = await getQuote({ desk: 'INTERNATIONAL', symbol: 'IBM', env: { ALPHAVANTAGE_API_KEY: 'test-key' }, fetchImpl: async () => ({ ok: true, status: 200, async json() { return { 'Meta Data': {'6. Time Zone':'US/Eastern'}, 'Time Series (1min)': {'2026-10-18 07:59:00': {'4. close':'-1'}} }; } }), nowMs });
