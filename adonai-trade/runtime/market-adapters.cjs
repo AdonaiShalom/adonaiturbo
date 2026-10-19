@@ -133,7 +133,17 @@ async function getQuote({ desk, symbol, env = process.env, fetchImpl = globalThi
       const data = await getJson(fetchImpl, 'https://brapi.dev/api/quote/' + encodeURIComponent(normalizedSymbol), { Authorization: 'Bearer ' + env.BRAPI_TOKEN });
       const item = Array.isArray(data.results) ? data.results[0] : null;
       if (!item) return quote('unavailable', { desk: id, symbol: normalizedSymbol, source: 'brapi', reason_code: 'provider_quote_missing' });
-      return freshQuote({ desk: id, symbol: normalizedSymbol, price: item.regularMarketPrice, currency: 'BRL', source: 'brapi', observedAt: item.regularMarketTime ? new Date(item.regularMarketTime * 1000).toISOString() : null, nowMs });
+      const marketTime = item.regularMarketTime;
+      let observedAt = null;
+      if (typeof marketTime === 'number' && Number.isFinite(marketTime)) {
+        const milliseconds = marketTime * 1000;
+        if (Number.isFinite(milliseconds) && Math.abs(milliseconds) <= 8640000000000000) {
+          observedAt = new Date(milliseconds).toISOString();
+        }
+      } else if (typeof marketTime === 'string') {
+        observedAt = safeTimestamp(marketTime);
+      }
+      return freshQuote({ desk: id, symbol: normalizedSymbol, price: item.regularMarketPrice, currency: 'BRL', source: 'brapi', observedAt, nowMs });
     }
     if (!env.ALPHAVANTAGE_API_KEY) return quote('unavailable', { desk: id, symbol: normalizedSymbol, reason_code: 'international_provider_not_configured' });
     const data = await getJson(fetchImpl, 'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=' + encodeURIComponent(normalizedSymbol) + '&interval=1min&outputsize=compact&apikey=' + encodeURIComponent(env.ALPHAVANTAGE_API_KEY));
