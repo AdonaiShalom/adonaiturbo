@@ -76,7 +76,7 @@ function createServer(options = {}) {
     // Narrow local-origin allowlist for the Turbo UI (port 3000) to read this runtime.
     // This is a browser boundary, not authentication; keep privileged routes protected separately.
     const allowedOrigins = String(env.ADONAI_TRADE_ALLOWED_ORIGINS ||
-      'http://127.0.0.1:3000,http://localhost:3000').split(',').map((value) => value.trim()).filter(Boolean);
+      'http://127.0.0.1:3000,http://localhost:3000,http://127.0.0.1:3100,http://localhost:3100').split(',').map((value) => value.trim()).filter(Boolean);
     const origin = String(req.headers.origin || '');
     const originAllowed = Boolean(origin && allowedOrigins.includes(origin));
     if (originAllowed) {
