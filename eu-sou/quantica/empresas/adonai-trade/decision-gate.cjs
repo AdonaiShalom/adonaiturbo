@@ -1,6 +1,6 @@
 /**
  * EU SOU -> deterministic gate reference implementation.
- * Scope: validation only. It never places or routes financial orders.
+ * Validation only; it never places or routes financial orders.
  * Node.js >= 18, CommonJS, no third-party dependencies.
  */
 "use strict";
@@ -18,12 +18,8 @@ function parseTimestamp(v) {
   return Number.isFinite(n) ? n : null;
 }
 function nonEmpty(v) { return typeof v === "string" && v.trim().length > 0; }
+function validHash(v) { return typeof v === "string" && HASH_RE.test(v); }
 
-/**
- * validateDecision(decision, context) returns {status:"pass"|"block", reasons:[code]}.
- * context.now may be supplied for deterministic tests. Context must come from a
- * trusted server; never take portfolio/audit/idempotency facts from the proposal.
- */
 function validateDecision(d, context = {}) {
   const reasons = [];
   const add = (code) => { if (!reasons.includes(code)) reasons.push(code); };
@@ -69,7 +65,7 @@ function validateDecision(d, context = {}) {
   else for (const s of e.sources) {
     if (!isObject(s) || !nonEmpty(s.url) || !nonEmpty(s.license_status) ||
         !["allowed", "restricted_approved"].includes(s.license_status) ||
-        !HASH_RE.test(s.content_hash || "")) add("source_provenance_invalid");
+        !validHash(s.content_hash)) add("source_provenance_invalid");
     const retrieved = parseTimestamp(s && s.retrieved_at);
     const asOf = parseTimestamp(s && s.data_as_of);
     if (retrieved === null || asOf === null || asOf > retrieved || retrieved > now + 30000) add("source_timestamp_invalid");
@@ -77,8 +73,8 @@ function validateDecision(d, context = {}) {
         (!finite(s.max_age_seconds) || s.max_age_seconds < 0 ||
          retrieved === null || now - retrieved > s.max_age_seconds * 1000)) add("source_stale");
   }
-  if (!isObject(e) || !nonEmpty(e.model_version) || !HASH_RE.test(e.model_hash || "") ||
-      !HASH_RE.test(e.dataset_hash || "") || !nonEmpty(e.baseline) || !nonEmpty(e.validation_run_id)) {
+  if (!isObject(e) || !nonEmpty(e.model_version) || !validHash(e.model_hash) ||
+      !validHash(e.dataset_hash) || !nonEmpty(e.baseline) || !nonEmpty(e.validation_run_id)) {
     add("model_dataset_validation_provenance_missing");
   }
   if (context.temporalLeakage === true) add("temporal_leakage_detected");
@@ -89,22 +85,41 @@ function validateDecision(d, context = {}) {
   else if (["estimated_spread_bps", "estimated_fees_bps", "estimated_slippage_bps"].some(k => economics[k] < 0)) {
     add("economics_cost_invalid");
   }
-  if (["forex", "crypto"].includes(d.market) && !isObject(economics)) add("market_specific_costs_missing");
-  if (d.market === "forex" && !isObject(economics?.carry)) add("forex_rollover_or_carry_unavailable");
-  if (d.market === "crypto" && !isObject(economics?.funding)) add("crypto_funding_basis_unavailable");
+  if (d.market === "forex") {
+    if (!isObject(economics) || !isObject(economics.carry) ||
+        !finite(economics.carry.rollover_bps) || !nonEmpty(economics.carry.as_of)) {
+      add("forex_rollover_or_carry_unavailable");
+    } else if (parseTimestamp(economics.carry.as_of) === null || parseTimestamp(economics.carry.as_of) > now) {
+      add("forex_rollover_timestamp_invalid");
+    }
+  }
+  if (d.market === "crypto") {
+    if (!isObject(economics) || !isObject(economics.funding) ||
+        !finite(economics.funding.rate) || !finite(economics.funding.interval_hours) ||
+        economics.funding.interval_hours <= 0 || !nonEmpty(economics.funding.as_of)) {
+      add("crypto_funding_basis_unavailable");
+    } else if (parseTimestamp(economics.funding.as_of) === null || parseTimestamp(economics.funding.as_of) > now) {
+      add("crypto_funding_timestamp_invalid");
+    }
+  }
 
   const risk = d.risk;
   if (!isObject(risk) || !finite(risk.expected_shortfall) || !finite(risk.max_drawdown_estimate) ||
       !finite(risk.exposure_after) || !nonEmpty(risk.limit_profile)) add("risk_context_incomplete");
-  else {
-    if (risk.expected_shortfall < 0 || risk.max_drawdown_estimate < 0 || risk.exposure_after < 0) add("risk_value_invalid");
-    if (!isObject(context.riskLimits)) add("trusted_risk_limits_unavailable");
-    else {
-      if (finite(context.riskLimits.maxExpectedShortfall) && risk.expected_shortfall > context.riskLimits.maxExpectedShortfall) add("expected_shortfall_limit_exceeded");
-      if (finite(context.riskLimits.maxDrawdownEstimate) && risk.max_drawdown_estimate > context.riskLimits.maxDrawdownEstimate) add("drawdown_limit_exceeded");
-      if (finite(context.riskLimits.maxExposure) && risk.exposure_after > context.riskLimits.maxExposure) add("exposure_limit_exceeded");
-    }
+  else if (risk.expected_shortfall < 0 || risk.max_drawdown_estimate < 0 || risk.exposure_after < 0) add("risk_value_invalid");
+
+  const limits = context.riskLimits;
+  if (!isObject(limits) ||
+      !finite(limits.maxExpectedShortfall) || limits.maxExpectedShortfall < 0 ||
+      !finite(limits.maxDrawdownEstimate) || limits.maxDrawdownEstimate < 0 ||
+      !finite(limits.maxExposure) || limits.maxExposure < 0) {
+    add("trusted_risk_limits_unavailable");
+  } else if (isObject(risk)) {
+    if (finite(risk.expected_shortfall) && risk.expected_shortfall > limits.maxExpectedShortfall) add("expected_shortfall_limit_exceeded");
+    if (finite(risk.max_drawdown_estimate) && risk.max_drawdown_estimate > limits.maxDrawdownEstimate) add("drawdown_limit_exceeded");
+    if (finite(risk.exposure_after) && risk.exposure_after > limits.maxExposure) add("exposure_limit_exceeded");
   }
+
   if (context.portfolioStateAvailable !== true) add("portfolio_state_unavailable");
   if (context.auditHealthy !== true) add("audit_not_healthy");
   if (context.idempotencyAvailable !== true) add("idempotency_store_unavailable");
