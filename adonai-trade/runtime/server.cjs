@@ -9,6 +9,7 @@ const { listIntegrationStatus } = require('./integration-status.cjs');
 const { createRateLimiter } = require('./rate-limit.cjs');
 const { getFearGreed } = require('./fear-greed.cjs');
 const { getRhSnapshot, createRhTask, updateRhTaskStatus } = require('./rh-store.cjs');
+const { verifyAttestedDecisionTrace } = require('./decision-attestation.cjs');
 const MAX_BODY_BYTES = 64 * 1024;
 const SERVICE = 'adonai-trade';
 const VERSION = '0.1.0';
@@ -97,6 +98,23 @@ function createServer(options = {}) {
     if (req.method === 'GET' && url.pathname === '/health') return send(res, 200, { service: SERVICE, version: VERSION, timestamp, mode: 'paper', status: 'alive' });
     if (req.method === 'GET' && url.pathname === '/api/v1/integrations') return send(res, 200, { service: SERVICE, version: VERSION, timestamp, ...listIntegrationStatus(env) });
     if (req.method === 'GET' && url.pathname === '/api/v1/markets') return send(res, 200, { service: SERVICE, version: VERSION, timestamp, ...listMarketDesks(env) });
+    if (req.method === 'POST' && url.pathname === '/api/v1/decision-trace/verify') {
+      const contentType = String(req.headers['content-type'] || '').split(';', 1)[0].trim().toLowerCase();
+      if (contentType !== 'application/json') return send(res, 415, { service: SERVICE, version: VERSION, timestamp, mode: 'paper', status: 'blocked', reason_codes: ['unsupported_media_type'], execution_enabled: false });
+      let trace;
+      try { trace = await readJson(req); }
+      catch (error) { return send(res, error.statusCode || 400, { service: SERVICE, version: VERSION, timestamp, mode: 'paper', status: 'blocked', reason_codes: [error.message === 'request_too_large' ? 'request_too_large' : 'invalid_json'], execution_enabled: false }); }
+      const verification = verifyAttestedDecisionTrace(trace, env);
+      const configurationOnly = verification.errors.length > 0 && verification.errors.every((code) => code.startsWith('attestation_secret_not_configured:'));
+      const statusCode = verification.valid ? 200 : configurationOnly ? 503 : 422;
+      return send(res, statusCode, {
+        service: SERVICE, version: VERSION, timestamp, mode: 'paper',
+        status: verification.valid ? 'verified' : 'blocked',
+        valid: verification.valid, authenticated: verification.authenticated,
+        reason_codes: verification.errors, execution_enabled: false,
+        order_execution_performed: false
+      });
+    }
 
     if (req.method === 'POST' && url.pathname === '/api/v1/rh/tasks') {
       const auth = rhWriteAuth(req, env);
@@ -195,7 +213,7 @@ function createServer(options = {}) {
         return send(res, decision.decision === 'blocked' ? 422 : 200, { service: SERVICE, version: VERSION, timestamp, mode: 'paper', audit_persisted: true, audit_event_id: audit.event_id, execution_performed: false, decision });
       } catch { return send(res, 503, { service: SERVICE, version: VERSION, timestamp, mode: 'paper', status: 'blocked', audit_persisted: false, execution_performed: false, reason_codes: ['audit_persistence_failed'], decision }); }
     }
-    if (req.method === 'GET' && url.pathname === '/') return send(res, 200, { service: SERVICE, version: VERSION, mode: 'paper', endpoints: ['/health', '/ready', '/api/v1/integrations', '/api/v1/markets', '/api/v1/markets/quote?desk=CRYPTO&symbol=BTCUSDT', '/api/v1/sentiment/fear-greed', '/api/v1/rh', '/api/v1/rh/tasks (POST; RH_API_TOKEN required)', '/api/v1/rh/tasks/:id/status (PATCH; RH_API_TOKEN required)', '/api/v1/policy/evaluate'], limitations: ['read_only_market_adapters', 'no_order_execution'] });
+    if (req.method === 'GET' && url.pathname === '/') return send(res, 200, { service: SERVICE, version: VERSION, mode: 'paper', endpoints: ['/health', '/ready', '/api/v1/integrations', '/api/v1/markets', '/api/v1/decision-trace/verify (POST; stage-specific HMAC attestations required)', '/api/v1/markets/quote?desk=CRYPTO&symbol=BTCUSDT', '/api/v1/sentiment/fear-greed', '/api/v1/rh', '/api/v1/rh/tasks (POST; RH_API_TOKEN required)', '/api/v1/rh/tasks/:id/status (PATCH; RH_API_TOKEN required)', '/api/v1/policy/evaluate'], limitations: ['read_only_market_adapters', 'no_order_execution'] });
     return send(res, 404, { status: 'not_found', reason_codes: ['route_not_found'] });
   });
 }
