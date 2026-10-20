@@ -20,9 +20,29 @@ const envelope = {
     observed_at: '2026-10-17T11:59:30.000Z',
     license_reference: 'test-fixture',
     data_quality: 'verified'
+  },
+  scientific_context: {
+    method: 'análise estatística de teste',
+    baseline: 'referência clássica determinística',
+    uncertainty: 'estimativa não experimental; fixture de teste',
+    evidence_refs: ['fixture://evidence/1']
   }
 };
 const proposal = { mode: 'paper', action: 'paper_order_proposal' };
+
+const noScientificContext = evaluatePolicy({
+  envelope: (() => { const e = { ...envelope }; delete e.scientific_context; return e; })(),
+  proposal, risk: { status: 'approved', independent: true, checks: [{ name: 'exposure_limit', status: 'pass' }] }
+}, { nowMs });
+assert.equal(noScientificContext.decision, 'blocked');
+assert.ok(noScientificContext.reason_codes.includes('scientific_context_missing_or_incomplete'));
+
+const incompleteScientificContext = evaluatePolicy({
+  envelope: { ...envelope, scientific_context: { method: 'quantum', baseline: '', uncertainty: '', evidence_refs: [] } },
+  proposal, risk: { status: 'approved', independent: true, checks: [{ name: 'exposure_limit', status: 'pass' }] }
+}, { nowMs });
+assert.equal(incompleteScientificContext.decision, 'blocked');
+assert.ok(incompleteScientificContext.reason_codes.includes('scientific_context_missing_or_incomplete'));
 const approvedRisk = {
   status: 'approved',
   independent: true,
