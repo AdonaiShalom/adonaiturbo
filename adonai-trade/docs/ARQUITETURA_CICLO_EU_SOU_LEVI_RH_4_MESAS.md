@@ -117,7 +117,13 @@ A inspeção do código versionado mostra componentes úteis, mas ainda não pro
 
 Portanto, a arquitetura descrita aqui é o contrato obrigatório para implementação e testes; não declarar EU SOU → LEVI → RH → quatro mesas integrado até que a sequência seja demonstrada por teste de contrato/ponta a ponta e eventos correlacionados persistidos.
 
-## 8. Critérios de aceite para declarar alinhamento
+## 8. Validador de trilha correlacionada adicionado
+
+Foi adicionado `runtime/decision-trace.cjs`, com testes em `contracts/v1/test-decision-trace.cjs`, à suíte `npm test` e ao workflow de CI. O validador exige uma trilha em ordem estrita: EU SOU pesquisou → LEVI encaminhou → RH autorizou → mesa propôs → risco independente aprovou → auditoria confirmou persistência → resultado foi avaliado. Exige também o mesmo `correlation_id`, referências de evidência em cada etapa e `execution_enabled: false`.
+
+Este é um **validador de contrato de trilha**, não um orquestrador que execute chamadas reais entre os serviços. Um documento/objeto de trilha pode ser validado, mas sua existência isolada não prova que os agentes realmente realizaram as ações. A comprovação de origem requer eventos gerados pelos componentes reais, assinaturas/identidades verificáveis e persistência correlacionada no ledger.
+
+## 9. Critérios de aceite para declarar alinhamento
 
 - [ ] Teste mostra que notícia, cotação, índice e estatística entram no pipeline de pesquisa do EU SOU, com fonte/frescor.
 - [ ] Teste demonstra análise matemática e, quando pertinente, avaliação quântica/nanoquântica com método, baseline e incerteza.
