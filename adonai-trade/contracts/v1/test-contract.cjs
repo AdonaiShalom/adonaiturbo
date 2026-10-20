@@ -35,6 +35,11 @@ function validEnvelope(value) {
     const ctx = value.scientific_context;
     if (!ctx || typeof ctx !== 'object' || Array.isArray(ctx)) return false;
     if (Object.keys(ctx).some((key) => !Object.hasOwn(schema.properties.scientific_context.properties, key))) return false;
+    if (value.task_type !== 'health_check') {
+      if (!['method', 'baseline', 'uncertainty', 'evidence_refs'].every((key) => Object.hasOwn(ctx, key))) return false;
+      if (['method', 'baseline', 'uncertainty'].some((key) => typeof ctx[key] !== 'string' || !ctx[key].trim() || ctx[key].length > schema.properties.scientific_context.properties[key].maxLength)) return false;
+      if (!Array.isArray(ctx.evidence_refs) || ctx.evidence_refs.length < 1 || ctx.evidence_refs.length > 30 || ctx.evidence_refs.some((x) => typeof x !== 'string' || !x.trim() || x.length > 512)) return false;
+    }
     if (ctx.evidence_refs !== undefined && (!Array.isArray(ctx.evidence_refs) || ctx.evidence_refs.length > 30 || ctx.evidence_refs.some((x) => typeof x !== 'string' || x.length > 512))) return false;
   }
   return true;
@@ -63,6 +68,8 @@ assert.equal(validEnvelope(good), true, 'valid paper envelope must pass');
 const { scientific_context: omittedScientificContext, ...withoutScientificContext } = good;
 assert.equal(validEnvelope(withoutScientificContext), false, 'scientific context is mandatory for analysis tasks');
 assert.equal(validEnvelope({ ...withoutScientificContext, task_type: 'health_check' }), true, 'health checks may omit scientific context');
+assert.equal(validEnvelope({ ...good, scientific_context: { method: 'x', baseline: 'x', uncertainty: '', evidence_refs: ['ref'] } }), false, 'scientific uncertainty must be non-empty');
+assert.equal(validEnvelope({ ...good, scientific_context: { method: 'x', baseline: 'x', uncertainty: 'x', evidence_refs: [] } }), false, 'at least one evidence reference is required');
 assert.equal(validEnvelope({ ...good, mode: 'live' }), false, 'live mode must fail closed');
 const { expires_at: omittedExpiry, ...withoutExpiry } = good;
 assert.equal(validEnvelope(withoutExpiry), false, 'expiry is mandatory');
