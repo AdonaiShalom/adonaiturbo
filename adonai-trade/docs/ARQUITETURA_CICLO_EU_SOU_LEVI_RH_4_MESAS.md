@@ -123,6 +123,8 @@ Foi adicionado `runtime/decision-trace.cjs`, com testes em `contracts/v1/test-de
 
 Este é um **validador de contrato de trilha**, não um orquestrador que execute chamadas reais entre os serviços. Um documento/objeto de trilha pode ser validado, mas sua existência isolada não prova que os agentes realmente realizaram as ações. A comprovação de origem requer eventos gerados pelos componentes reais, assinaturas/identidades verificáveis e persistência correlacionada no ledger.
 
+Foi adicionado `runtime/decision-attestation.cjs` e o endpoint `POST /api/v1/decision-trace/verify`. Cada uma das sete etapas requer HMAC-SHA256 com segredo específico de etapa (mínimo 32 bytes), verificação em tempo constante e integridade de payload aninhado; segredo ausente bloqueia a validação. Os testes cobrem assinatura válida, adulteração, segredo incorreto/ausente e resposta HTTP fail-closed. Isso autentica o conteúdo assinado com os segredos configurados, mas ainda não prova que a chamada de cada serviço foi executada por uma identidade de produção nem que a trilha foi persistida no ledger real.
+
 ## 9. Critérios de aceite para declarar alinhamento
 
 - [ ] Teste mostra que notícia, cotação, índice e estatística entram no pipeline de pesquisa do EU SOU, com fonte/frescor.
