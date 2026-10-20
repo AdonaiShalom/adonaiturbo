@@ -111,7 +111,7 @@ O status de integração deve separar configuração, conectividade, autenticaç
 A inspeção do código versionado mostra componentes úteis, mas ainda não prova o ciclo completo:
 - `runtime/integration-status.cjs` declara endpoints LEVI/EU SOU e explicitamente retorna `not_verified`; não realiza as chamadas aos serviços.
 - `runtime/market-desks.cjs` lista as quatro mesas e mantém `execution_enabled: false`; configuração de provedor não comprova cotação disponível.
-- `runtime/policy-gate.cjs` valida envelope, modo paper, qualidade/proveniência e contexto científico opcional; o contexto científico ainda não é obrigatório em todas as tarefas.
+- `runtime/policy-gate.cjs` valida envelope, modo paper, qualidade/proveniência e agora bloqueia tarefas que não sejam `health_check` quando o contexto científico (método, baseline clássica, incerteza e evidências) está ausente ou incompleto. A exigência contratual foi refletida no JSON Schema e nos testes; isso não demonstra, por si só, que o EU SOU real produziu esse contexto nem que a cadeia ponta a ponta está conectada.
 - `runtime/rh-store.cjs` lê papéis/tarefas persistidos, mas cadastro não comprova que as tarefas foram encaminhadas pelo ciclo.
 - A documentação do runtime informa que a escrita/leitura real do ledger e o teste autenticado ponta a ponta LEVI/EU SOU continuam sendo portões separados a comprovar.
 
