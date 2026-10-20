@@ -27,6 +27,8 @@ function validateDecisionTrace(trace) {
     return { valid: false, errors };
   }
 
+  const parsedTimes = [];
+  const eventIds = new Set();
   for (let i = 0; i < STAGES.length; i++) {
     const event = trace.events[i];
     if (!isRecord(event)) {
@@ -36,7 +38,19 @@ function validateDecisionTrace(trace) {
     if (event.stage !== STAGES[i]) errors.push('invalid_stage_order:' + i);
     if (event.correlation_id !== trace.correlation_id) errors.push('correlation_id_mismatch:' + i);
     if (typeof event.actor !== 'string' || !event.actor.trim()) errors.push('actor_required:' + i);
-    if (typeof event.at !== 'string' || !Number.isFinite(Date.parse(event.at))) errors.push('timestamp_invalid:' + i);
+    if (typeof event.at !== 'string' || !Number.isFinite(Date.parse(event.at)) || !/^\\d{4}-\\d{2}-\\d{2}T/.test(event.at)) {
+      errors.push('timestamp_invalid:' + i);
+      parsedTimes.push(null);
+    } else {
+      const parsed = Date.parse(event.at);
+      parsedTimes.push(parsed);
+      if (i > 0 && parsedTimes[i - 1] !== null && parsed < parsedTimes[i - 1]) errors.push('timestamp_order_invalid:' + i);
+    }
+    if (event.event_id !== undefined) {
+      if (typeof event.event_id !== 'string' || !event.event_id.trim()) errors.push('event_id_invalid:' + i);
+      else if (eventIds.has(event.event_id)) errors.push('duplicate_event_id:' + i);
+      else eventIds.add(event.event_id);
+    }
     if (!Array.isArray(event.evidence_refs) || event.evidence_refs.length === 0 ||
         event.evidence_refs.some(ref => typeof ref !== 'string' || !ref.trim())) {
       errors.push('evidence_required:' + i);
