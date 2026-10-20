@@ -49,10 +49,19 @@ const good = {
   mode: 'paper',
   created_at: '2026-10-17T10:00:00Z',
   expires_at: '2026-10-17T10:05:00Z',
-  payload: { instrument: 'PETR4' }
+  payload: { instrument: 'PETR4' },
+  scientific_context: {
+    method: 'análise estatística de fixture',
+    baseline: 'baseline clássica',
+    uncertainty: 'fixture de teste, sem alegação experimental',
+    evidence_refs: ['fixture://evidence/1']
+  }
 };
 
 assert.equal(validEnvelope(good), true, 'valid paper envelope must pass');
+const { scientific_context: omittedScientificContext, ...withoutScientificContext } = good;
+assert.equal(validEnvelope(withoutScientificContext), false, 'scientific context is mandatory for analysis tasks');
+assert.equal(validEnvelope({ ...withoutScientificContext, task_type: 'health_check' }), true, 'health checks may omit scientific context');
 assert.equal(validEnvelope({ ...good, mode: 'live' }), false, 'live mode must fail closed');
 const { expires_at: omittedExpiry, ...withoutExpiry } = good;
 assert.equal(validEnvelope(withoutExpiry), false, 'expiry is mandatory');
