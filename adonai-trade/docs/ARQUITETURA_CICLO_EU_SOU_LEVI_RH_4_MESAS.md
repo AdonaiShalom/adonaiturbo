@@ -119,7 +119,7 @@ Portanto, a arquitetura descrita aqui é o contrato obrigatório para implementa
 
 ## 8. Validador de trilha correlacionada adicionado
 
-Foi adicionado `runtime/decision-trace.cjs`, com testes em `contracts/v1/test-decision-trace.cjs`, à suíte `npm test` e ao workflow de CI. O validador exige uma trilha em ordem estrita: EU SOU pesquisou → LEVI encaminhou → RH autorizou → mesa propôs → risco independente aprovou → auditoria confirmou persistência → resultado foi avaliado. Exige também o mesmo `correlation_id`, referências de evidência em cada etapa e `execution_enabled: false`.
+Foi adicionado `runtime/decision-trace.cjs`, com testes em `contracts/v1/test-decision-trace.cjs`, à suíte `npm test` e ao workflow de CI. O validador exige uma trilha em ordem estrita: EU SOU pesquisou → LEVI encaminhou → RH autorizou → mesa propôs → risco independente aprovou → auditoria confirmou persistência → resultado foi avaliado. Exige também o mesmo `correlation_id`, referências de evidência em cada etapa, timestamps ISO em ordem cronológica, IDs de evento únicos quando fornecidos e `execution_enabled: false`. Os testes negativos cobrem relógio fora de ordem e IDs duplicados.
 
 Este é um **validador de contrato de trilha**, não um orquestrador que execute chamadas reais entre os serviços. Um documento/objeto de trilha pode ser validado, mas sua existência isolada não prova que os agentes realmente realizaram as ações. A comprovação de origem requer eventos gerados pelos componentes reais, assinaturas/identidades verificáveis e persistência correlacionada no ledger.
 
