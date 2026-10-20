@@ -21,6 +21,7 @@ function validEnvelope(value) {
   if (typeof value.requested_by !== 'string' || !value.requested_by.trim() || value.requested_by.length > 128) return false;
   if (!schema.properties.market.enum.includes(value.market)) return false;
   if (!schema.properties.task_type.enum.includes(value.task_type)) return false;
+  if (value.task_type !== 'health_check' && (!value.scientific_context || typeof value.scientific_context !== 'object' || Array.isArray(value.scientific_context))) return false;
   if (typeof value.created_at !== 'string' || Number.isNaN(Date.parse(value.created_at))) return false;
   if (!value.payload || typeof value.payload !== 'object' || Array.isArray(value.payload)) return false;
   if (value.expires_at !== undefined && (typeof value.expires_at !== 'string' || Number.isNaN(Date.parse(value.expires_at)))) return false;
