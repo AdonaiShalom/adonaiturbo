@@ -51,6 +51,8 @@ jobs:
         run: node adonai-trade/contracts/v1/test-contract.cjs
       - name: Run deterministic policy gate tests
         run: node adonai-trade/contracts/v1/test-policy-gate.cjs
+      - name: Run correlated decision trace tests
+        run: node adonai-trade/contracts/v1/test-decision-trace.cjs
       - name: Run seasonality regression tests
         run: node adonai-trade/contracts/v1/test-seasonality.cjs
       - name: Run four market desk tests
