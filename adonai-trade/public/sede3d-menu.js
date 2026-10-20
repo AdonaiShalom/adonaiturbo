@@ -21,6 +21,7 @@
     {id:'INTERNATIONAL',label:'Internacional',group:'Quatro mercados'},
     {id:'charts',label:'TradingView',group:'Fontes'},
     {id:'investing',label:'Investing.com',group:'Fontes'},
+    {id:'brapi',label:'Brapi — dados B3',group:'Fontes'},
     {id:'greed',label:'Fear & Greed',group:'Fontes'},
     {id:'intelligence',label:'Inteligência e risco',group:'Controle'},
     {id:'levi',label:'LEVI',group:'Integrações'},
@@ -116,6 +117,27 @@
         selector.addEventListener('change',()=>showChart(selector.value));panel.append(selector,chartWrap,node('p','A seleção altera o gráfico, não a fonte independente das cotações operacionais.'));showChart('CRYPTO');
       } else if(id==='investing'){
         panel.append(card('Investing.com','Calendário econômico oficial','Para incorporar um widget, o proprietário do site deve aceitar os termos do fornecedor e gerar o código oficial. Nenhum dado é raspado nem tratado como feed de execução.'),external('https://www.investing.com/economic-calendar/','Abrir calendário econômico Investing.com'),external('https://br.investing.com/webmaster-tools/economic-calendar','Configurar widget oficial e revisar termos'));
+      } else if(id==='brapi'){
+        panel.append(card('Brapi — dados da B3','Consulta de leitura somente','Esta verificação consulta o adaptador B3 do runtime. A credencial fica somente no servidor e nunca é exibida no menu.'));
+        const load=node('button','Testar leitura B3 via Brapi');load.type='button';
+        load.addEventListener('click',async()=>{
+          load.disabled=true;load.textContent='Consultando B3…';let result;
+          try{const r=await fetch(baseUrl+'/api/v1/markets/quote?desk=B3&symbol=PETR4',{headers:{accept:'application/json'},cache:'no-store'});result={ok:r.ok,data:await r.json(),status:r.status};}
+          catch(e){result={ok:false,error:e&&e.message?e.message:'erro de rede'};}
+          load.disabled=false;load.textContent='Testar leitura B3 via Brapi';
+          const old=panel.querySelector('[data-brapi-result]');if(old)old.remove();
+          const out=node('div',undefined,'card');out.dataset.brapiResult='1';
+          if(!result.ok){out.append(node('strong','Consulta indisponível'),node('p',result.error||('HTTP '+result.status)),node('p','Verifique a conectividade do runtime e a configuração privada da fonte.'));}
+          else{
+            const q=result.data||{};
+            out.append(node('strong','Estado: '+String(q.status||'não verificado')));
+            if(q.status==='verified'&&q.price!==null&&q.price!==undefined&&q.price!==''&&Number.isFinite(Number(q.price))&&Number(q.price)>0)out.append(node('p','PETR4: '+String(q.price)+' '+String(q.currency||'BRL')));
+            else out.append(node('p','Preço não confirmado como atual; não usar como cotação validada.'));
+            out.append(node('p','Fonte: '+String(q.source||'não informada')),node('p','Observado em: '+formatTime(q.observed_at)),node('p','Motivo: '+String(q.reason_code||'nenhum informado')),node('p','Modo: somente leitura; execução habilitada: não'));
+          }
+          panel.appendChild(out);
+        });
+        panel.append(load,external('https://brapi.dev/','Abrir Brapi'),external('https://brapi.dev/docs','Documentação da API'),node('p','O teste confirma apenas a leitura deste símbolo. Outros ativos e contratos precisam ser validados individualmente.'));
       } else if(id==='greed'){
         panel.append(card('Fear & Greed','Indicador de sentimento — não é sinal de trade','Fonte: Alternative.me. Escala 0–100; dado diário. Não é probabilidade de lucro nem habilita ordens.'));
         const load=node('button','Consultar índice');load.type='button';
