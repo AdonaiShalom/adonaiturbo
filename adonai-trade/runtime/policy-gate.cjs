@@ -112,8 +112,7 @@ function evaluatePolicy(input, options = {}) {
     const validScientific = isRecord(scientific) &&
       typeof scientific.method === 'string' && scientific.method.trim().length > 0 &&
       typeof scientific.baseline === 'string' && scientific.baseline.trim().length > 0 &&
-      ((typeof scientific.uncertainty === 'string' && scientific.uncertainty.trim().length > 0) ||
-       (typeof scientific.uncertainty === 'number' && Number.isFinite(scientific.uncertainty) && scientific.uncertainty >= 0)) &&
+      typeof scientific.uncertainty === 'string' && scientific.uncertainty.trim().length > 0 &&
       Array.isArray(scientific.evidence_refs) && scientific.evidence_refs.length > 0 &&
       scientific.evidence_refs.every((ref) => typeof ref === 'string' && ref.trim().length > 0);
     if (!validScientific) {
