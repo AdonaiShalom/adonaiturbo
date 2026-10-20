@@ -496,6 +496,7 @@
         '<button class="proj" data-p="turbo" aria-pressed="false"><img alt="" src="' + LOGO.turbo + '"><span><b>Adonai Turbo</b><small>Programa desenvolvedor</small></span></button>' +
         '<button class="proj" data-p="market" aria-pressed="true"><img alt="" src="' + LOGO.market + '"><span><b>Adonai Market Digital</b><small>Sistema operacional do negócio</small></span></button>' +
         '<button class="proj" data-p="financas" aria-pressed="false"><img alt="" src="' + LOGO.financas + '"><span><b>Adonai Finanças</b><small>Estrutura de agentes; dados locais em construção</small></span></button>' +
+        '<button class="proj" data-p="trade" aria-pressed="false" title="Abrir AdonaiTrade"><span aria-hidden="true" style="display:inline-grid;place-items:center;width:34px;height:34px;border-radius:9px;background:#FFC83D;color:#071321;font-weight:800">AT</span><span><b>AdonaiTrade</b><small>Sede 3D · modo paper</small></span></button>' +
         '<span class="espaco"></span>' +
         '<span class="chip" id="chipO" data-ok="false"><i></i>Ollama</span><span class="chip" id="chip2" data-ok="false"></span>' +
         '<button class="btn" id="bSim">Atualizar agora</button>' +
@@ -503,7 +504,33 @@
       "</header>" +
       '<nav class="side" id="nav" aria-label="Ferramentas"></nav>' +
       '<main class="main" id="main"></main>';
-    $$(".proj").forEach((b) => b.addEventListener("click", () => { S.proj = b.dataset.p; S.sel = null; navegar(S.view); }));
+    $(".proj").forEach((b) => b.addEventListener("click", () => {
+      if (b.dataset.p === "trade") {
+        $(".proj").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+        $("#nav").style.display = "none";
+        $("#main").innerHTML =
+          '<section style="display:flex;flex-direction:column;gap:12px;min-height:100%;height:100%">' +
+            '<header style="display:flex;flex-wrap:wrap;align-items:center;gap:10px">' +
+              '<div style="flex:1;min-width:220px"><h1 style="font-family:var(--serif);font-size:24px;color:var(--head)">AdonaiTrade</h1>' +
+              '<p class="mut">Sede 3D original · quatro mesas · modo paper · execução financeira real desabilitada</p></div>' +
+              '<button class="btn pri" id="tradeReload" type="button">Recarregar sede</button>' +
+              '<a class="btn" href="http://127.0.0.1:3100/sede3d" target="_blank" rel="noopener noreferrer">Abrir separadamente</a>' +
+            '</header>' +
+            '<p class="mut">A sede é servida pelo processo local na porta 3100. Se não carregar, o servidor está indisponível; esta aba não contorna o bloqueio de auditoria.</p>' +
+            '<iframe id="tradeSedeFrame" title="AdonaiTrade" src="http://127.0.0.1:3100/sede3d" ' +
+              'style="display:block;width:100%;flex:1;min-height:520px;border:1px solid var(--line);border-radius:12px;background:var(--panel)" ' +
+              'allow="fullscreen" referrerpolicy="no-referrer"></iframe>' +
+          '</section>';
+        $("#tradeReload").addEventListener("click", () => {
+          const frame = $("#tradeSedeFrame");
+          frame.src = "about:blank";
+          requestAnimationFrame(() => { frame.src = "http://127.0.0.1:3100/sede3d"; });
+        });
+        return;
+      }
+      $("#nav").style.display = "";
+      S.proj = b.dataset.p; S.sel = null; navegar(S.view);
+    }));
     $("#bSim").addEventListener("click", () => { if (window.rSync) window.rSync(); });
     $("#bTema").addEventListener("click", () => {
       const escuro = document.documentElement.dataset.theme === "dark" || (!document.documentElement.dataset.theme && matchMedia("(prefers-color-scheme: dark)").matches);
