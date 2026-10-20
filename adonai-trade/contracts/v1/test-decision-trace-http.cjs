@@ -47,12 +47,6 @@ async function main() {
     assert.equal(rejected.status, 422);
     assert.ok((await rejected.json()).reason_codes.includes('attestation_signature_invalid:EU_SOU_RESEARCHED'));
 
-    const missingSecrets = await fetch(base + '/api/v1/decision-trace/verify', {
-      method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify(trace)
-    });
-    // Same server env remains configured; test configuration failure with an isolated server below.
-    assert.equal(missingSecrets.status, 200);
-
     const unconfigured = createServer({ env: {}, auditLedger: null });
     await new Promise(resolve => unconfigured.listen(0, '127.0.0.1', resolve));
     try {
