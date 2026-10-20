@@ -13,10 +13,20 @@ const SECRET_BY_STAGE = Object.freeze({
   EVALUATED: 'EVALUATOR_ATTESTATION_SECRET'
 });
 
+function canonicalize(value) {
+  if (Array.isArray(value)) return value.map(canonicalize);
+  if (value && typeof value === 'object') {
+    const result = {};
+    for (const key of Object.keys(value).sort()) result[key] = canonicalize(value[key]);
+    return result;
+  }
+  return value;
+}
+
 function canonicalEvent(event) {
   const copy = { ...event };
   delete copy.signature;
-  return JSON.stringify(copy, Object.keys(copy).sort());
+  return JSON.stringify(canonicalize(copy));
 }
 
 function signEvent(event, secret) {
