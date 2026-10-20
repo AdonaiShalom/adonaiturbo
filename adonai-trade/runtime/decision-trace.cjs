@@ -38,7 +38,7 @@ function validateDecisionTrace(trace) {
     if (event.stage !== STAGES[i]) errors.push('invalid_stage_order:' + i);
     if (event.correlation_id !== trace.correlation_id) errors.push('correlation_id_mismatch:' + i);
     if (typeof event.actor !== 'string' || !event.actor.trim()) errors.push('actor_required:' + i);
-    if (typeof event.at !== 'string' || !Number.isFinite(Date.parse(event.at)) || !/^\\d{4}-\\d{2}-\\d{2}T/.test(event.at)) {
+    if (typeof event.at !== 'string' || !Number.isFinite(Date.parse(event.at)) || !/^\d{4}-\d{2}-\d{2}T/.test(event.at)) {
       errors.push('timestamp_invalid:' + i);
       parsedTimes.push(null);
     } else {
