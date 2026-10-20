@@ -6,6 +6,10 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const MARKER = '<!-- ADONAI_TRADE_SEDE3D_MENU_V1 -->';
+const OFFICIAL_PROTOTYPE_NAMES = new Set([
+  'sede3d.html',
+  'prototipo_sede3d_abrir_no_navegador.html'
+]);
 const TAGS = [
   '<script defer src="./runtime-bridge.js"></script>',
   '<script defer src="./runtime-bridge-client.js"></script>',
@@ -34,6 +38,10 @@ function plan(html) {
 
 function install(file, options = {}) {
   const target = path.resolve(file);
+  const baseName = path.basename(target).toLowerCase();
+  if (!OFFICIAL_PROTOTYPE_NAMES.has(baseName)) {
+    throw new Error('official_sede3d_prototype_required');
+  }
   if (!fs.existsSync(target) || !fs.statSync(target).isFile()) throw new Error('prototype_html_not_found');
   const dir = path.dirname(target);
   for (const asset of ['runtime-bridge.js', 'runtime-bridge-client.js', 'sede3d-menu.js']) {
@@ -63,7 +71,7 @@ if (require.main === module) {
   const write = args.includes('--write');
   const target = args.find((arg) => !arg.startsWith('--'));
   if (!target) {
-    process.stderr.write('Uso: node scripts/install-sede3d-menu.cjs <caminho-para-prototipo.html> [--write]\n');
+    process.stderr.write('Uso: node scripts/install-sede3d-menu.cjs <sede3d.html|PROTOTIPO_Sede3D_abrir_no_navegador.html> [--write]\n');
     process.exitCode = 2;
   } else {
     try {
@@ -80,4 +88,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = Object.freeze({ MARKER, plan, install });
+module.exports = Object.freeze({ MARKER, OFFICIAL_PROTOTYPE_NAMES, plan, install });
