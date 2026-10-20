@@ -71,4 +71,13 @@ const noEvaluation = structuredClone(good);
 noEvaluation.events[6].benchmark = '';
 assert.ok(validateDecisionTrace(noEvaluation).errors.includes('evaluation_or_benchmark_missing'));
 
+const reversedTime = structuredClone(good);
+reversedTime.events[4].at = '2026-10-20T11:59:00.000Z';
+assert.ok(validateDecisionTrace(reversedTime).errors.includes('timestamp_order_invalid:4'));
+
+const duplicateEventId = structuredClone(good);
+duplicateEventId.events[0].event_id = 'same-event';
+duplicateEventId.events[1].event_id = 'same-event';
+assert.ok(validateDecisionTrace(duplicateEventId).errors.includes('duplicate_event_id:1'));
+
 console.log('PASS: correlated decision trace enforces EU SOU, LEVI, RH, desk, independent risk, paper audit, and evaluation.');
