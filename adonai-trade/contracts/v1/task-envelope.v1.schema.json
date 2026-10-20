@@ -16,6 +16,16 @@
     "expires_at",
     "payload"
   ],
+  "allOf": [
+    {
+      "if": {
+        "properties": { "task_type": { "const": "health_check" } },
+        "required": ["task_type"]
+      },
+      "then": {},
+      "else": { "required": ["scientific_context"] }
+    }
+  ],
   "properties": {
     "schema_version": {
       "const": "1.0.0"
