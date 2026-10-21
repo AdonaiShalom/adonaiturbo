@@ -158,7 +158,7 @@ function createServer(options = {}) {
         return send(res, 429, { service: SERVICE, version: VERSION, timestamp, status: 'rate_limited', reason_codes: ['smart_money_rate_limit_exceeded'], rankings: [], execution_enabled: false });
       }
       const requestedWindow = url.searchParams.get('window') || '24h';
-      const result = await getSmartMoneyLeaderboard({ fetchImpl, window: requestedWindow, nowMs: now() });
+      const result = await getSmartMoneyLeaderboard({ fetchImpl, apiKey: env.OPEN_FOMO_API_KEY, window: requestedWindow, nowMs: now() });
       return send(res, result.status === 'unavailable' ? 503 : 200, { service: SERVICE, version: VERSION, timestamp, mode: 'paper', ...result });
     }
 
