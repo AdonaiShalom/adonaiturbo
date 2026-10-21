@@ -21,6 +21,7 @@ function validEnvelope(value) {
   if (typeof value.requested_by !== 'string' || !value.requested_by.trim() || value.requested_by.length > 128) return false;
   if (!schema.properties.market.enum.includes(value.market)) return false;
   if (!schema.properties.task_type.enum.includes(value.task_type)) return false;
+  if (value.task_type !== 'health_check' && (!value.scientific_context || typeof value.scientific_context !== 'object' || Array.isArray(value.scientific_context))) return false;
   if (typeof value.created_at !== 'string' || Number.isNaN(Date.parse(value.created_at))) return false;
   if (!value.payload || typeof value.payload !== 'object' || Array.isArray(value.payload)) return false;
   if (value.expires_at !== undefined && (typeof value.expires_at !== 'string' || Number.isNaN(Date.parse(value.expires_at)))) return false;
@@ -34,6 +35,11 @@ function validEnvelope(value) {
     const ctx = value.scientific_context;
     if (!ctx || typeof ctx !== 'object' || Array.isArray(ctx)) return false;
     if (Object.keys(ctx).some((key) => !Object.hasOwn(schema.properties.scientific_context.properties, key))) return false;
+    if (value.task_type !== 'health_check') {
+      if (!['method', 'baseline', 'uncertainty', 'evidence_refs'].every((key) => Object.hasOwn(ctx, key))) return false;
+      if (['method', 'baseline', 'uncertainty'].some((key) => typeof ctx[key] !== 'string' || !ctx[key].trim() || ctx[key].length > schema.properties.scientific_context.properties[key].maxLength)) return false;
+      if (!Array.isArray(ctx.evidence_refs) || ctx.evidence_refs.length < 1 || ctx.evidence_refs.length > 30 || ctx.evidence_refs.some((x) => typeof x !== 'string' || !x.trim() || x.length > 512)) return false;
+    }
     if (ctx.evidence_refs !== undefined && (!Array.isArray(ctx.evidence_refs) || ctx.evidence_refs.length > 30 || ctx.evidence_refs.some((x) => typeof x !== 'string' || x.length > 512))) return false;
   }
   return true;
@@ -49,10 +55,21 @@ const good = {
   mode: 'paper',
   created_at: '2026-10-17T10:00:00Z',
   expires_at: '2026-10-17T10:05:00Z',
-  payload: { instrument: 'PETR4' }
+  payload: { instrument: 'PETR4' },
+  scientific_context: {
+    method: 'análise estatística de fixture',
+    baseline: 'baseline clássica',
+    uncertainty: 'fixture de teste, sem alegação experimental',
+    evidence_refs: ['fixture://evidence/1']
+  }
 };
 
 assert.equal(validEnvelope(good), true, 'valid paper envelope must pass');
+const { scientific_context: omittedScientificContext, ...withoutScientificContext } = good;
+assert.equal(validEnvelope(withoutScientificContext), false, 'scientific context is mandatory for analysis tasks');
+assert.equal(validEnvelope({ ...withoutScientificContext, task_type: 'health_check' }), true, 'health checks may omit scientific context');
+assert.equal(validEnvelope({ ...good, scientific_context: { method: 'x', baseline: 'x', uncertainty: '', evidence_refs: ['ref'] } }), false, 'scientific uncertainty must be non-empty');
+assert.equal(validEnvelope({ ...good, scientific_context: { method: 'x', baseline: 'x', uncertainty: 'x', evidence_refs: [] } }), false, 'at least one evidence reference is required');
 assert.equal(validEnvelope({ ...good, mode: 'live' }), false, 'live mode must fail closed');
 const { expires_at: omittedExpiry, ...withoutExpiry } = good;
 assert.equal(validEnvelope(withoutExpiry), false, 'expiry is mandatory');

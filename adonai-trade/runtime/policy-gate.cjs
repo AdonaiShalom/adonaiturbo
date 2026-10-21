@@ -104,6 +104,22 @@ function evaluatePolicy(input, options = {}) {
     return { status: 'blocked', decision: 'blocked', reason_codes: ['market_data_stale_or_future_dated'] };
   }
 
+  // Research, analysis, news and trade proposals must carry an EU SOU evidence context.
+  // A quantum/nanoquantum method is not forced when it is irrelevant; the context must
+  // state the method actually used, classical baseline, uncertainty and traceable evidence.
+  if (envelope.task_type !== 'health_check') {
+    const scientific = envelope.scientific_context;
+    const validScientific = isRecord(scientific) &&
+      typeof scientific.method === 'string' && scientific.method.trim().length > 0 &&
+      typeof scientific.baseline === 'string' && scientific.baseline.trim().length > 0 &&
+      typeof scientific.uncertainty === 'string' && scientific.uncertainty.trim().length > 0 &&
+      Array.isArray(scientific.evidence_refs) && scientific.evidence_refs.length > 0 &&
+      scientific.evidence_refs.every((ref) => typeof ref === 'string' && ref.trim().length > 0);
+    if (!validScientific) {
+      return { status: 'blocked', decision: 'blocked', reason_codes: ['scientific_context_missing_or_incomplete'] };
+    }
+  }
+
   const proposal = input.proposal;
   if (!isRecord(proposal)) {
     return { status: 'blocked', decision: 'blocked', reason_codes: ['proposal_missing_or_invalid'] };
