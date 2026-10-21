@@ -144,6 +144,16 @@ function createServer(options = {}) {
       const result = await getRhSnapshot({ env, fetchImpl });
       return send(res, result.status === 'unavailable' ? 503 : 200, { service: SERVICE, version: VERSION, timestamp, mode: 'paper', execution_enabled: false, ...result });
     }
+    if (req.method === 'GET' && url.pathname === '/api/v1/smart-money/status') {
+      return send(res, 503, {
+        service: SERVICE, version: VERSION, timestamp, mode: 'paper',
+        status: 'unavailable', provider: 'Open-Fomo-API (terceiro não oficial)',
+        provider_configured: Boolean(String(env.OPEN_FOMO_API_KEY || '').trim()),
+        events: [], rankings: [], execution_enabled: false,
+        reason_codes: ['smart_money_adapter_not_implemented', 'source_data_not_verified']
+      });
+    }
+
     if (req.method === 'GET' && url.pathname === '/api/v1/sentiment/fear-greed') {
       const rate = sentimentRateLimit(req.socket && req.socket.remoteAddress || 'unknown');
       res.setHeader('ratelimit-limit', String(rate.limit));
