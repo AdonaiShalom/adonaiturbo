@@ -26,4 +26,4 @@ assert.deepEqual(MARKET_SYMBOLS.CRYPTO,['BTCUSDT','ETHUSDT','BNBUSDT','SOLUSDT',
 assert.deepEqual(MARKET_SYMBOLS.FOREX,['EURUSD','GBPUSD','USDJPY','AUDUSD','USDCAD','USDCHF','NZDUSD']);
 assert.ok(MARKET_SYMBOLS.B3.includes('PETR4') && MARKET_SYMBOLS.B3.includes('VALE3'));
 assert.ok(MARKET_SYMBOLS.INTERNATIONAL.includes('AAPL') && MARKET_SYMBOLS.INTERNATIONAL.includes('NVDA'));
-console.log('3D sede menu: PASS (13 modules, four market desks, external sources, LEVI/EU SOU, fail-closed browser requirement)');
+console.log('3D sede menu: PASS (14 modules, including Radar Smart Money; four market desks; external sources; LEVI/EU SOU; fail-closed browser requirement)');
