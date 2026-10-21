@@ -8,6 +8,7 @@ const { getQuote } = require('./market-adapters.cjs');
 const { listIntegrationStatus } = require('./integration-status.cjs');
 const { createRateLimiter } = require('./rate-limit.cjs');
 const { getFearGreed } = require('./fear-greed.cjs');
+const { getSmartMoneyLeaderboard } = require('./smart-money.cjs');
 const { getRhSnapshot, createRhTask, updateRhTaskStatus } = require('./rh-store.cjs');
 const MAX_BODY_BYTES = 64 * 1024;
 const SERVICE = 'adonai-trade';
@@ -69,6 +70,7 @@ function createServer(options = {}) {
   const quoteRateLimit = createRateLimiter({ limit: options.quoteRateLimit || 30, windowMs: 60000, maxKeys: 1000, now });
   const policyRateLimit = createRateLimiter({ limit: options.policyRateLimit || 20, windowMs: 60000, maxKeys: 1000, now });
   const sentimentRateLimit = createRateLimiter({ limit: options.sentimentRateLimit || 20, windowMs: 60000, maxKeys: 1000, now });
+  const smartMoneyRateLimit = createRateLimiter({ limit: options.smartMoneyRateLimit || 12, windowMs: 60000, maxKeys: 1000, now });
   const rhRateLimit = createRateLimiter({ limit: options.rhRateLimit || 30, windowMs: 60000, maxKeys: 1000, now });
   return http.createServer(async (req, res) => {
     const url = new URL(req.url || '/', 'http://127.0.0.1');
@@ -145,13 +147,19 @@ function createServer(options = {}) {
       return send(res, result.status === 'unavailable' ? 503 : 200, { service: SERVICE, version: VERSION, timestamp, mode: 'paper', execution_enabled: false, ...result });
     }
     if (req.method === 'GET' && url.pathname === '/api/v1/smart-money/status') {
-      return send(res, 503, {
-        service: SERVICE, version: VERSION, timestamp, mode: 'paper',
-        status: 'unavailable', provider: 'Open-Fomo-API (terceiro não oficial)',
-        provider_configured: Boolean(String(env.OPEN_FOMO_API_KEY || '').trim()),
-        events: [], rankings: [], execution_enabled: false,
-        reason_codes: ['smart_money_adapter_not_implemented', 'source_data_not_verified']
-      });
+      return send(res, 200, { service: SERVICE, version: VERSION, timestamp, mode: 'paper', status: 'read_only', feed: 'leaderboard only', execution_enabled: false, reason_codes: ['trade_event_stream_not_implemented'] });
+    }
+    if (req.method === 'GET' && url.pathname === '/api/v1/smart-money/leaderboard') {
+      const rate = smartMoneyRateLimit(req.socket && req.socket.remoteAddress || 'unknown');
+      res.setHeader('ratelimit-limit', String(rate.limit));
+      res.setHeader('ratelimit-remaining', String(rate.remaining));
+      if (!rate.allowed) {
+        res.setHeader('retry-after', String(rate.retryAfterSeconds));
+        return send(res, 429, { service: SERVICE, version: VERSION, timestamp, status: 'rate_limited', reason_codes: ['smart_money_rate_limit_exceeded'], rankings: [], execution_enabled: false });
+      }
+      const requestedWindow = url.searchParams.get('window') || '24h';
+      const result = await getSmartMoneyLeaderboard({ fetchImpl, window: requestedWindow, nowMs: now() });
+      return send(res, result.status === 'unavailable' ? 503 : 200, { service: SERVICE, version: VERSION, timestamp, mode: 'paper', ...result });
     }
 
     if (req.method === 'GET' && url.pathname === '/api/v1/sentiment/fear-greed') {
