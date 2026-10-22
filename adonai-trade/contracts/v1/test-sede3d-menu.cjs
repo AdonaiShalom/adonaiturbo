@@ -2,9 +2,9 @@
 const assert = require('node:assert/strict');
 const {getMenu,mount,SYMBOLS,MARKET_SYMBOLS,CHART_SYMBOLS} = require('../../public/sede3d-menu.js');
 const menu = getMenu();
-assert.equal(menu.length,13);
+assert.equal(menu.length,14);
 assert.deepEqual(menu.filter(x=>['CRYPTO','FOREX','B3','INTERNATIONAL'].includes(x.id)).map(x=>x.id),['CRYPTO','FOREX','B3','INTERNATIONAL']);
-for (const id of ['overview','rh','charts','investing','greed','intelligence','levi','eu-sou','audit']) assert.ok(menu.some(x=>x.id===id), 'missing menu item '+id);
+for (const id of ['overview','rh','charts','investing','brapi','greed','intelligence','levi','eu-sou','audit']) assert.ok(menu.some(x=>x.id===id), 'missing menu item '+id);
 assert.deepEqual(SYMBOLS,{CRYPTO:'BTCUSDT',FOREX:'EURUSD',B3:'PETR4',INTERNATIONAL:'AAPL'});
 assert.deepEqual(Object.keys(CHART_SYMBOLS),['CRYPTO','FOREX','B3','INTERNATIONAL']);
 assert.equal(CHART_SYMBOLS.CRYPTO.symbol,'BINANCE:BTCUSDT');
@@ -17,6 +17,9 @@ const menuSource = require('node:fs').readFileSync(require.resolve('../../public
 assert.match(menuSource,/if\(!destroyed && current==='overview'\)render\(current\)/,'runtime polling must not rerender and erase active module controls/results');
 assert.match(menuSource,/q\.price!==null&&q\.price!==undefined&&q\.price!==''&&Number\.isFinite\(Number\(q\.price\)\)&&Number\(q\.price\)>0/,'null, empty, zero, or nonnumeric values must never be rendered as verified prices');
 assert.match(menuSource,/MARKET_SYMBOLS/,'each market must expose an instrument watchlist');
+assert.match(menuSource,/id==='brapi'/,'Brapi must have a dedicated menu panel');
+assert.match(menuSource,/api\/v1\/markets\/quote\?desk=B3&symbol=PETR4/,'Brapi menu must verify B3 read-only quote through runtime');
+assert.match(menuSource,/https:\/\/brapi\.dev\/docs/,'Brapi menu must link to official API documentation');
 assert.match(menuSource,/Selecionar instrumento de /,'market panel must allow instrument selection');
 assert.match(menuSource,/encodeURIComponent\(selectedSymbol\)/,'quote query must use the selected instrument');
 assert.deepEqual(MARKET_SYMBOLS.CRYPTO,['BTCUSDT','ETHUSDT','BNBUSDT','SOLUSDT','XRPUSDT']);
