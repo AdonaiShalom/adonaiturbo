@@ -36,6 +36,20 @@ function validEnvelope(value) {
     if (Object.keys(ctx).some((key) => !Object.hasOwn(schema.properties.scientific_context.properties, key))) return false;
     if (ctx.evidence_refs !== undefined && (!Array.isArray(ctx.evidence_refs) || ctx.evidence_refs.length > 30 || ctx.evidence_refs.some((x) => typeof x !== 'string' || x.length > 512))) return false;
   }
+  if (value.data_context && value.data_context.content_hash !== undefined && !/^[a-fA-F0-9]{64}$/.test(value.data_context.content_hash)) return false;
+  if (value.task_type === 'paper_order_proposal') {
+    const ctx = value.scientific_context;
+    if (!ctx || typeof ctx !== 'object' || Array.isArray(ctx)) return false;
+    const requiredScience = ['method','baseline','event','horizon','probability','calibration_method','calibration_window','calibration_status','uncertainty_interval','model_version','model_hash','dataset_hash','validation_run_id','source_hashes','cost_context','evidence_refs'];
+    if (requiredScience.some((key) => !Object.hasOwn(ctx, key))) return false;
+    if (ctx.calibration_status !== 'verified' && ctx.calibration_status !== 'unverified') return false;
+    if (typeof ctx.probability !== 'number' || ctx.probability < 0 || ctx.probability > 1) return false;
+    if (!ctx.horizon || typeof ctx.horizon.value !== 'number' || ctx.horizon.value <= 0 || !['minute','hour','day','week'].includes(ctx.horizon.unit)) return false;
+    if (!ctx.uncertainty_interval || typeof ctx.uncertainty_interval.lower !== 'number' || typeof ctx.uncertainty_interval.upper !== 'number' || ctx.uncertainty_interval.lower < 0 || ctx.uncertainty_interval.upper > 1 || ctx.uncertainty_interval.lower > ctx.uncertainty_interval.upper || ctx.probability < ctx.uncertainty_interval.lower || ctx.probability > ctx.uncertainty_interval.upper) return false;
+    if (!/^[a-fA-F0-9]{64}$/.test(ctx.model_hash) || !/^[a-fA-F0-9]{64}$/.test(ctx.dataset_hash)) return false;
+    if (!Array.isArray(ctx.source_hashes) || ctx.source_hashes.length === 0 || ctx.source_hashes.some((hash) => !/^[a-fA-F0-9]{64}$/.test(hash))) return false;
+    if (!ctx.cost_context || !['spread_bps','fees_bps','slippage_bps','net_expected_value'].every((key) => typeof ctx.cost_context[key] === 'number') || ['spread_bps','fees_bps','slippage_bps'].some((key) => ctx.cost_context[key] < 0) || typeof ctx.cost_context.currency !== 'string' || !ctx.cost_context.currency.trim()) return false;
+  }
   return true;
 }
 
@@ -71,4 +85,25 @@ for (const phrase of [
   'Segredos não são aceitos'
 ]) assert.ok(contract.includes(phrase), `contract must state: ${phrase}`);
 
-console.log('PASS: Adonai Trade contract smoke tests (8 negative/positive envelope cases + safety clauses)');
+
+const paperProposal = {
+  ...good,
+  task_type: 'paper_order_proposal',
+  data_context: { provider: 'fixture', observed_at: '2026-10-17T10:00:00Z', license_reference: 'test-fixture', data_quality: 'verified', content_hash: 'a'.repeat(64) },
+  scientific_context: {
+    method: 'calibrated baseline', baseline: 'buy-and-hold', event: 'return positive', horizon: { value: 1, unit: 'day' },
+    probability: 0.55, calibration_method: 'isotonic', calibration_window: '2025-01/2026-06', calibration_status: 'verified',
+    uncertainty_interval: { lower: 0.5, upper: 0.6 }, model_version: 'fixture-v1', model_hash: 'b'.repeat(64),
+    dataset_hash: 'c'.repeat(64), validation_run_id: 'fixture-run-1', source_hashes: ['d'.repeat(64)],
+    cost_context: { spread_bps: 2, fees_bps: 1, slippage_bps: 1, net_expected_value: 0.01, currency: 'BRL' }, evidence_refs: ['fixture://source/1']
+  }
+};
+assert.equal(validEnvelope(paperProposal), true, 'paper proposal with complete scientific evidence must pass schema validator');
+const paperWithoutScience = { ...paperProposal };
+delete paperWithoutScience.scientific_context;
+assert.equal(validEnvelope(paperWithoutScience), false, 'paper proposal without scientific evidence must fail');
+assert.equal(validEnvelope({ ...paperProposal, scientific_context: { ...paperProposal.scientific_context, probability: 1.2 } }), false, 'invalid probability must fail schema validator');
+assert.equal(validEnvelope({ ...paperProposal, scientific_context: { ...paperProposal.scientific_context, model_hash: 'invalid' } }), false, 'invalid model hash must fail schema validator');
+assert.equal(validEnvelope({ ...paperProposal, data_context: { ...paperProposal.data_context, content_hash: 'invalid' } }), false, 'invalid data content hash must fail schema validator');
+
+console.log('PASS: Adonai Trade contract smoke tests (base envelopes, scientific paper-proposal schema, hashes and safety clauses)');

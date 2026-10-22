@@ -19,7 +19,27 @@ const envelope = {
     provider: 'fixture',
     observed_at: '2026-10-17T11:59:30.000Z',
     license_reference: 'test-fixture',
-    data_quality: 'verified'
+    data_quality: 'verified',
+    content_hash: 'a'.repeat(64)
+  },
+  scientific_context: {
+    method: 'calibrated baseline model',
+    baseline: 'buy-and-hold',
+    uncertainty: '95% confidence interval',
+    evidence_refs: ['fixture://dataset/001'],
+    event: 'return > 0 over one day',
+    horizon: { value: 1, unit: 'day' },
+    probability: 0.55,
+    calibration_method: 'isotonic',
+    calibration_window: '2025-01/2026-06',
+    calibration_status: 'verified',
+    uncertainty_interval: { lower: 0.5, upper: 0.6 },
+    model_version: 'fixture-model-v1',
+    model_hash: 'b'.repeat(64),
+    dataset_hash: 'c'.repeat(64),
+    validation_run_id: 'fixture-run-001',
+    source_hashes: ['d'.repeat(64)],
+    cost_context: { spread_bps: 2, fees_bps: 1, slippage_bps: 1, net_expected_value: 0.01, currency: 'BRL' }
   }
 };
 const proposal = { mode: 'paper', action: 'paper_order_proposal' };
@@ -93,4 +113,21 @@ const noProvider = evaluatePolicy({ envelope: missingProvider, proposal, risk: a
 assert.equal(noProvider.decision, 'blocked');
 assert.ok(noProvider.reason_codes.includes('data_provenance_not_verified'));
 
-console.log('PASS: deterministic policy gate — approved proposal, live-mode rejection, stale/missing data, risk veto, non-independent risk, expiry/future timestamps, analysis-only and invalid market');
+
+const missingScientific = { ...envelope, scientific_context: undefined };
+delete missingScientific.scientific_context;
+assert.ok(validateEnvelope(missingScientific).includes('scientific_context_required_for_paper_proposal'));
+
+const uncalibratedScience = { ...envelope, scientific_context: { ...envelope.scientific_context, calibration_status: 'unverified' } };
+assert.ok(validateEnvelope(uncalibratedScience).includes('probability_calibration_not_verified'));
+
+const invalidProbability = { ...envelope, scientific_context: { ...envelope.scientific_context, probability: 1.5 } };
+assert.ok(validateEnvelope(invalidProbability).includes('invalid_scientific_probability'));
+
+const missingCosts = { ...envelope, scientific_context: { ...envelope.scientific_context, cost_context: { currency: 'BRL' } } };
+assert.ok(validateEnvelope(missingCosts).includes('invalid_scientific_cost_context'));
+
+const invalidModelHash = { ...envelope, scientific_context: { ...envelope.scientific_context, model_hash: 'not-a-hash' } };
+assert.ok(validateEnvelope(invalidModelHash).includes('invalid_scientific_model_or_dataset_hash'));
+
+console.log('PASS: deterministic policy gate — paper-only, scientific evidence/calibration/provenance/costs, freshness, independent risk, expiry, analysis-only and invalid market');
