@@ -18,7 +18,7 @@ assert.throws(() => plan('<div>not a full document</div>'), /prototype_html_stru
 
 const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'adonai-sede3d-installer-'));
 try {
-  const target = path.join(temp, 'prototype.html');
+  const target = path.join(temp, 'sede3d.html');
   fs.writeFileSync(target, original);
   for (const asset of ['runtime-bridge.js', 'runtime-bridge-client.js', 'sede3d-menu.js']) fs.writeFileSync(path.join(temp, asset), '// fixture');
   const dry = install(target);
@@ -33,7 +33,19 @@ try {
   assert.equal(install(target, { write: true }).reason, 'already_installed');
   fs.copyFileSync(written.backup, target);
   assert.equal(fs.readFileSync(target, 'utf8'), original, 'backup must restore exact original bytes');
+
+  const userPrototype = path.join(temp, 'PROTOTIPO_Sede3D_abrir_no_navegador.html');
+  fs.writeFileSync(userPrototype, original);
+  for (const asset of ['runtime-bridge.js', 'runtime-bridge-client.js', 'sede3d-menu.js']) {
+    fs.writeFileSync(path.join(temp, asset), '// fixture');
+  }
+  assert.equal(install(userPrototype).reason, 'ready_to_install');
+
+  const wrongTarget = path.join(temp, 'trade3d-operacional.html');
+  fs.writeFileSync(wrongTarget, original);
+  assert.throws(() => install(wrongTarget), /official_sede3d_prototype_required/);
+  assert.equal(fs.readFileSync(wrongTarget, 'utf8'), original, 'non-official page must remain untouched');
 } finally {
   fs.rmSync(temp, { recursive: true, force: true });
 }
-process.stdout.write('PASS safe reversible original Sede 3D installer\n');
+process.stdout.write('PASS safe reversible installer; official Sede 3D targets only\n');
