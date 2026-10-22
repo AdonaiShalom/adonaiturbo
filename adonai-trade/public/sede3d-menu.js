@@ -23,6 +23,7 @@
     {id:'investing',label:'Investing.com',group:'Fontes'},
     {id:'greed',label:'Fear & Greed',group:'Fontes'},
     {id:'intelligence',label:'Inteligência e risco',group:'Controle'},
+    {id:'smart-money',label:'Radar Smart Money',group:'Controle'},
     {id:'levi',label:'LEVI',group:'Integrações'},
     {id:'eu-sou',label:'EU SOU',group:'Integrações'},
     {id:'audit',label:'Auditoria e saúde',group:'Controle'}
@@ -138,6 +139,18 @@
       } else if(id==='levi'||id==='eu-sou'){
         const target=id==='levi'?'levi':'eu_sou';const i=state&&state.integrations.find(x=>String(x.id).toLowerCase()===target);
         panel.append(card(id==='levi'?'LEVI':'EU SOU',i?i.status:'Não verificado',id==='levi'?'A integração exige teste ponta a ponta, correlação da tarefa e evento de auditoria.':'O motor científico precisa devolver entrada, método, unidades, resultado e evidência reproduzível.'));
+      } else if(id==='smart-money'){
+        panel.append(
+          card('Radar Smart Money','Fonte de operações não conectada','Este painel ainda não recebe um feed verificado de compras/vendas. Não inventa rankings, carteiras, preços ou PnL.'),
+          card('Escopo verificado','Solana / cripto','Million é uma referência open source para inteligência de tokens e carteiras na Solana; não representa todos os maiores traders do mundo nem os mercados B3, Forex e ações internacionais.'),
+          card('Segurança','Somente observação / paper','Nenhuma carteira será conectada e nenhuma ordem real será enviada por este painel. Antes de ativar dados, revisar fornecedor, API, custos, privacidade, frescor, atribuição da carteira e qualidade do histórico.')
+        );
+        panel.append(
+          external('https://fomo.family/discover','Abrir FOMO Family Discover (referência)'),
+          external('https://github.com/Kelows/million','Revisar repositório Million (MIT)'),
+          external('https://github.com/abstradeapi/Open-Fomo-API','Revisar API comunitária não oficial')
+        );
+        panel.append(node('p','Próxima integração: adaptador de leitura com fonte e timestamp por evento, rankings por janela, compras e vendas observadas, filtros contra manipulação e testes isolados. Até a validação dos dados, o status permanece “não conectado”.'));
       } else if(id==='intelligence'){
         panel.append(card('Risco e inteligência','Fail-closed','Modelos e probabilidades exigem versão, dados, custos, método e validação fora da amostra.'),card('Política','Execução desabilitada','Sem auditoria ou dados verificáveis, bloquear e explicar a decisão.'));
       } else if(id==='audit'){
