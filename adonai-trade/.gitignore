@@ -1,0 +1,29 @@
+# Adonai Trade: local secrets and operational data must never be committed
+.env
+.env.*
+!.env.example
+
+# Operational state, trading records, audit logs, and private signing material
+data/
+logs/
+*.log
+*.pem
+*.key
+*.p12
+*.pfx
+*.sqlite
+*.sqlite3
+*.db
+
+# Private research / proprietary knowledge: allow only after explicit review
+knowledge/
+
+# Dependencies, generated output, local tooling, and backups
+node_modules/
+coverage/
+backups/
+*.bak
+*.backup
+*.old
+.DS_Store
+Thumbs.db
