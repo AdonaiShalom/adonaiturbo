@@ -58,3 +58,14 @@ O RH deverá cobrar a execução desta norma em cada ciclo e reabrir a tarefa qu
 O teste local registrado em 2026-10-21 comprovou o encaminhamento LEVI → EU SOU para `analisar_gestao_risco` no mercado cripto, com resposta `APROVADO` e `ordens_reais=false`. Isso não comprova ainda o fluxo completo com RH e quatro mesas, a execução automática da cobrança, nem a validação operacional dos modelos quânticos/nanoquânticos. Essas etapas permanecem pendentes até evidência.
 
 **Princípio permanente:** EU SOU estuda e melhora; LEVI coordena; RH distribui e cobra; mesas executam com segurança; relatórios retornam; EU SOU aprende. O ciclo continua, sem sacrificar controles ou evidências.
+
+
+## Aditivo V1.1 — evidência por função e melhoria controlada
+
+Aplicar o ciclo a cada departamento, categoria e função: estudar evidências; formular melhoria mensurável; testar em ambiente seguro; comparar com baseline; revisar independentemente; aprovar; distribuir pelo RH; coordenar pelo LEVI; executar dentro das permissões; medir o resultado; devolver ao EU SOU; registrar a lição e reiniciar.
+
+O RH mantém responsável, prazo, critério de aceite, evidência e estado; sem prova, a tarefa permanece pendente. EU SOU distingue hipótese, simulação, teste com mocks e confirmação de provedor. LEVI não contorna risco; traders não executam proposta bloqueada. Limites críticos não podem ser alterados por aprendizagem automática.
+
+Para Binance Futures Demo, saldo e posições devem ser consultados pela API autenticada. Os 5.000 USDT informados permanecem não confirmados até essa consulta. Adonai Trade não possui banca fictícia própria e execução real permanece desabilitada. Dados ausentes/vencidos, auditoria indisponível, estado de conta incerto ou timeout de envio impedem nova tentativa até reconciliação. Nunca registrar credenciais nos relatórios.
+
+**Estado:** aditivo documental; implementação automática no RH, prompt em runtime e validação operacional permanecem pendentes até inspeção do código e testes.
