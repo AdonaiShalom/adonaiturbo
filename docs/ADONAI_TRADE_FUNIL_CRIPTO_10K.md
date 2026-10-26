@@ -25,3 +25,11 @@ Ativos/instrumentos únicos; avaliações válidas/falhas; cobertura das fontes;
 - O conteúdo dos dois arquivos foi relido do GitHub e conferido. O check Vercel disponível no commit do teste está verde, mas isso não prova execução da suíte Node.
 - **Ainda não validado:** acesso de rede real ao endpoint Demo, execução local da suíte, descoberta Perp/CoinGecko, 10.000 avaliações válidas, integração de ponta a ponta EU SOU/LEVI, armazenamento persistente do limite móvel de três entradas, envio/reconciliação de ordem Demo.
 - Segurança: nenhuma ordem foi enviada; execução real continua desabilitada. A correção do adaptador de cotação não é uma implementação do motor de ordens.
+
+
+## Implementação inicial do avaliador — 26/10/2026
+- Criado `adonai-trade/runtime/crypto-opportunity-funnel.cjs`: avaliador read-only, limite de lote 10.000 registros, deduplicação determinística por instrumento/lado/horário/versão, rejeição de dados vencidos, métricas inválidas e contrato Demo não confirmado, score de baseline transparente e seleção de até cinco finalistas com score positivo. Commit do módulo: `839f09704f3bcfb4c78a7ca16d70fbe5809eda8a`.
+- Criado `adonai-trade/contracts/v1/test-crypto-opportunity-funnel.cjs` com verificações de duplicatas, frescor, contrato elegível, limite de lote e execução desabilitada.
+- Incluído o novo teste no comando `npm test`. Commit: `3cca6f2a1c95ff3142ea6f102ca11481142bcf76`.
+- Os arquivos foram relidos e o conteúdo esperado foi confirmado no GitHub. O check Vercel desse commit estava pendente na última consulta; nenhum resultado de execução Node foi confirmado.
+- Limitações: score é heurística experimental, não previsão validada; não há coleta CoinGecko/Perp, persistência da contagem, integração EU SOU/LEVI, nem execução/reconciliação de ordens neste módulo. O módulo não envia ordens.
