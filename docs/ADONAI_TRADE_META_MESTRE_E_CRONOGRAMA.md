@@ -133,3 +133,54 @@ Atualizar este quadro em cada sessão de trabalho:
 5. Não misturar Adonai Trade com PSM Grupo Market, nem alterar PSM, deploy ou serviços externos fora do escopo aprovado.
 6. Não expor segredos, dados pessoais ou chaves; não habilitar ordens reais automaticamente.
 7. Relatar sempre: etapa atual, evidências concluídas, andamento, pendências e próximo passo.
+
+
+## 6. Aditivo V3 — aprendizagem contínua aplicada a todos os departamentos
+
+**Este aditivo complementa o procedimento mestre existente; não substitui suas etapas, gates, regras de segurança nem o foco operacional vigente.**
+
+### 6.1 Ciclo obrigatório de cada tarefa e operação
+
+Aplicar continuamente: **PESQUISAR → COLETAR → VALIDAR → ANALISAR → CALCULAR → DECIDIR → VALIDAR RISCO → EXECUTAR NA DEMO → CONFIRMAR → RECONCILIAR → ESTUDAR RESULTADOS → APRENDER → TESTAR MELHORIA → DOCUMENTAR → REINICIAR.**
+
+Cada etapa deve produzir estado explícito, responsável, timestamp, identificador de correlação, entradas, saídas, evidências e motivo de falha/bloqueio. Não tratar intenção, resposta de modelo, simulação local, proposta aprovada e ordem confirmada pela corretora como estados equivalentes.
+
+### 6.2 Aplicação por departamento
+
+- **LEVI:** orquestra tarefas, controla dependências e timeouts, mantém correlação entre etapas, detecta ciclos interrompidos e coordena a recuperação. Não pode ignorar o bloqueio de risco.
+- **RH AdonaiTrade:** mantém o registro canônico de agentes, funções, especialidades, permissões, qualificações e atividade comprovada; direciona capacitação com base em evidências e não inventa atividade.
+- **EU SOU:** mantém hipóteses, fontes, métodos, versões, resultados, incertezas e limitações; compara previsões com resultados; testa melhorias contra baselines e não afirma vantagem quântica/nanoquântica sem validação reproduzível.
+- **Analistas:** registram procedência, horário, frescor e qualidade dos dados; avaliam mercado, contratos perpétuos, gráficos, fundamentos, notícias e sentimento; explicitam divergências e incertezas.
+- **Traders:** propõem LONG, SHORT ou NO TRADE; justificam entrada, quantidade, alavancagem, stop, alvo, validade e cancelamento; estudam qualidade da decisão, custos e execução sem poder contornar risco.
+- **Gestão de risco independente:** valida estado atual da conta demo, margem, posições, exposição, quantidade, alavancagem, stop, alvo e limites; bloqueia dados inválidos ou propostas inseguras; seus bloqueios são não contornáveis.
+- **Adonai Trade / adaptador de execução:** encaminha apenas propostas aprovadas para Binance Futures Demo, com autorização, idempotência e auditoria; confirma ordem, preenchimentos e estado da posição; retorna o resultado ao LEVI e EU SOU.
+- **Dados e integrações:** Binance Futures Demo é a fonte de verdade para conta/ordens; Perp, CoinGecko, Investing.com e Fear & Greed são usados somente quando a fonte e o acesso estão disponíveis e validados. Identificar origem e horário; não presumir API ou acesso autorizado.
+- **Interface e sala 3D:** exibir estados derivados de eventos reais; sem evidência recente, mostrar desconhecido/offline, nunca atividade fictícia.
+- **Auditoria e memória:** persistir eventos, decisões, versões e resultados com integridade e acesso controlado; nunca registrar chaves, tokens ou segredos.
+
+### 6.3 Aprendizagem contínua e mudança controlada
+
+Ao terminar cada ciclo, registrar: dados usados; versão do modelo; hipótese e previsão; proposta; decisão de risco; estado confirmado pela Binance; resultado, custos e exposição; divergências; causa provável; lição aprendida; melhoria sugerida; testes; decisão de promover, rejeitar, continuar testando ou reverter.
+
+Avaliar melhorias com dados temporalmente separados, baselines, custos, slippage, incerteza e risco. Evitar vazamento de dados futuros, sobreajuste e conclusões baseadas em amostras pequenas. Aprender continuamente não significa emitir ordens continuamente. Mudanças em parâmetros críticos, limites de risco, permissões ou execução exigem testes, revisão e autorização apropriada.
+
+### 6.4 Regras permanentes da conta e execução
+
+- Adonai Trade é uma mesa de análise e operação, não uma corretora nem uma conta com banca fictícia própria.
+- Binance Futures Demo é o ambiente de execução simulada e a fonte de verdade para saldo, margem e posições.
+- O saldo de 5.000 USDT informado pelo usuário é uma referência a confirmar por consulta autenticada; não o substituir por saldo local fictício.
+- Manter execução financeira real desabilitada. Nesta fase, somente Binance Futures Demo.
+- Priorizar CRYPTO/BTCUSDT até validar o ciclo completo.
+- Em timeout ou resultado ambíguo, reconciliar a ordem antes de qualquer tentativa de repetição.
+- A regra padrão é uma ordem por vez; no máximo três posições simultâneas somente se explicitamente suportado pela política vigente, com oportunidades justificadas e risco agregado dentro dos limites. Nunca relaxar controles para atingir uma meta de quantidade.
+- Qualquer falha de fonte, cotação vencida, saldo/posição não confirmado, auditoria indisponível ou bloqueio de risco deve impedir o envio dependente dessa condição.
+
+### 6.5 Critério de ciclo completo
+
+O ciclo CRYPTO/BTCUSDT só é validado quando houver evidência encadeada de: dados atuais; análise EU SOU; coordenação LEVI; proposta de trader; decisão independente de risco; envio autenticado à Binance Futures Demo; confirmação da corretora; reconciliação de ordem/preenchimentos/posição/saldo; auditoria persistida; retorno ao EU SOU; e relatório pós-operação.
+
+Testes com mocks comprovam contratos de software, mas não comprovam uma ordem real de teste na Binance Demo. Relatar separadamente o que foi testado com mocks e o que foi confirmado pelo provedor.
+
+### 6.6 Relatório obrigatório em cada sessão
+
+Atualizar: fase atual; evidências e comandos/testes; mudanças feitas; resultados aprovados/reprovados; componentes realmente ativos; bloqueios; riscos; próximo passo concreto. Seguir **concluir → testar → validar → documentar → publicar → avançar**. Não declarar conclusão sem evidência reproduzível.
