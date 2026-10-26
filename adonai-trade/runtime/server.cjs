@@ -5,6 +5,7 @@ const { evaluatePolicy } = require('./policy-gate.cjs');
 const { createSupabaseAuditLedger } = require('./audit-ledger.cjs');
 const { listMarketDesks } = require('./market-desks.cjs');
 const { getQuote } = require('./market-adapters.cjs');
+const { discoverCrypto } = require('./crypto-discovery.cjs');
 const { listIntegrationStatus } = require('./integration-status.cjs');
 const { createRateLimiter } = require('./rate-limit.cjs');
 const { getFearGreed } = require('./fear-greed.cjs');
@@ -67,6 +68,7 @@ function createServer(options = {}) {
   const auditLedger = options.auditLedger === undefined ? createSupabaseAuditLedger(env) : options.auditLedger;
   const fetchImpl = options.fetchImpl || globalThis.fetch;
   const quoteRateLimit = createRateLimiter({ limit: options.quoteRateLimit || 30, windowMs: 60000, maxKeys: 1000, now });
+  const discoveryRateLimit = createRateLimiter({ limit: options.discoveryRateLimit || 6, windowMs: 60000, maxKeys: 1000, now });
   const policyRateLimit = createRateLimiter({ limit: options.policyRateLimit || 20, windowMs: 60000, maxKeys: 1000, now });
   const sentimentRateLimit = createRateLimiter({ limit: options.sentimentRateLimit || 20, windowMs: 60000, maxKeys: 1000, now });
   const rhRateLimit = createRateLimiter({ limit: options.rhRateLimit || 30, windowMs: 60000, maxKeys: 1000, now });
@@ -155,6 +157,19 @@ function createServer(options = {}) {
       const result = await getFearGreed({ fetchImpl, nowMs: now() });
       return send(res, result.status === 'unavailable' ? 503 : 200, { service: SERVICE, version: VERSION, timestamp, ...result });
     }
+    if (req.method === 'GET' && url.pathname === '/api/v1/crypto/discovery') {
+      const rate = discoveryRateLimit(req.socket && req.socket.remoteAddress || 'unknown');
+      res.setHeader('ratelimit-limit', String(rate.limit));
+      res.setHeader('ratelimit-remaining', String(rate.remaining));
+      if (!rate.allowed) {
+        res.setHeader('retry-after', String(rate.retryAfterSeconds));
+        return send(res, 429, { service: SERVICE, version: VERSION, timestamp, status: 'rate_limited', reason_codes: ['crypto_discovery_rate_limit_exceeded'], retry_after_seconds: rate.retryAfterSeconds, execution_enabled: false });
+      }
+      const raw = Number(url.searchParams.get('per_page') || 250);
+      if (!Number.isInteger(raw) || raw < 1 || raw > 250) return send(res, 400, { service: SERVICE, version: VERSION, timestamp, status: 'blocked', reason_codes: ['per_page_must_be_integer_1_to_250'], execution_enabled: false });
+      const result = await discoverCrypto({ fetchImpl, perPage: raw });
+      return send(res, result.status === 'unavailable' ? 503 : 200, { service: SERVICE, version: VERSION, timestamp, ...result });
+    }
     if (req.method === 'GET' && url.pathname === '/api/v1/markets/quote') {
       const rate = quoteRateLimit(req.socket && req.socket.remoteAddress || 'unknown');
       res.setHeader('ratelimit-limit', String(rate.limit));
@@ -195,7 +210,7 @@ function createServer(options = {}) {
         return send(res, decision.decision === 'blocked' ? 422 : 200, { service: SERVICE, version: VERSION, timestamp, mode: 'paper', audit_persisted: true, audit_event_id: audit.event_id, execution_performed: false, decision });
       } catch { return send(res, 503, { service: SERVICE, version: VERSION, timestamp, mode: 'paper', status: 'blocked', audit_persisted: false, execution_performed: false, reason_codes: ['audit_persistence_failed'], decision }); }
     }
-    if (req.method === 'GET' && url.pathname === '/') return send(res, 200, { service: SERVICE, version: VERSION, mode: 'paper', endpoints: ['/health', '/ready', '/api/v1/integrations', '/api/v1/markets', '/api/v1/markets/quote?desk=CRYPTO&symbol=BTCUSDT', '/api/v1/sentiment/fear-greed', '/api/v1/rh', '/api/v1/rh/tasks (POST; RH_API_TOKEN required)', '/api/v1/rh/tasks/:id/status (PATCH; RH_API_TOKEN required)', '/api/v1/policy/evaluate'], limitations: ['read_only_market_adapters', 'no_order_execution'] });
+    if (req.method === 'GET' && url.pathname === '/') return send(res, 200, { service: SERVICE, version: VERSION, mode: 'paper', endpoints: ['/health', '/ready', '/api/v1/integrations', '/api/v1/markets', '/api/v1/markets/quote?desk=CRYPTO&symbol=BTCUSDT', '/api/v1/crypto/discovery?per_page=250', '/api/v1/sentiment/fear-greed', '/api/v1/rh', '/api/v1/rh/tasks (POST; RH_API_TOKEN required)', '/api/v1/rh/tasks/:id/status (PATCH; RH_API_TOKEN required)', '/api/v1/policy/evaluate'], limitations: ['read_only_market_adapters', 'no_order_execution'] });
     return send(res, 404, { status: 'not_found', reason_codes: ['route_not_found'] });
   });
 }
