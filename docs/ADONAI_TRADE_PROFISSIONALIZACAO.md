@@ -113,3 +113,12 @@ Todos os registros devem conter IDs, timestamps UTC, origem, versão e correlaç
 ## 10. Critério de conclusão
 
 Não declarar mesa ou integração operacional por documentação ou registro de status. Exigir evidências de teste datadas, versão de código, resultado de execução, auditoria e aprovador independente. Nenhuma chave, ordem real ou migração destrutiva deve ser introduzida como parte deste plano documental.
+
+
+## 11. Aditivo operacional — aplicação em todos os departamentos
+
+Este plano deve ser aplicado função por função, sem presumir que a documentação significa implementação. Para cada agente/função, registrar: missão, entradas permitidas, saídas esperadas, permissões, responsável, evidência mínima, métricas, limites, dependências, tratamento de falhas, testes e critérios de requalificação.
+
+O RH mantém o quadro de cobrança; LEVI coordena dependências e correlação; EU SOU estuda evidências e propõe melhorias; analistas entregam dados com fonte e frescor; traders apresentam LONG/SHORT/NO TRADE; risco independente aprova ou bloqueia; execução só encaminha para Binance Futures Demo depois de autorização e validações. Auditoria registra o ciclo e a reconciliação. Nenhuma função pode declarar outra função concluída sem evidência verificável.
+
+Aprendizagem contínua é um processo de avaliação e teste, não permissão para alterar automaticamente limites, código crítico, credenciais ou execução. Melhorias devem ser versionadas, testadas contra baseline e aprovadas antes de promoção. O ciclo inicial prioritário é CRYPTO/BTCUSDT em Demo; as demais mesas seguem após validação do gate anterior.
