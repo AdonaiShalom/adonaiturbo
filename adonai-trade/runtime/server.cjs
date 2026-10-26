@@ -4,7 +4,7 @@ const crypto = require('node:crypto');
 const { evaluatePolicy } = require('./policy-gate.cjs');
 const { createSupabaseAuditLedger } = require('./audit-ledger.cjs');
 const { listMarketDesks } = require('./market-desks.cjs');
-const { getQuote } = require('./market-adapters.cjs');
+const { getQuote, getBinanceFuturesDemoQuote } = require('./market-adapters.cjs');
 const { listIntegrationStatus } = require('./integration-status.cjs');
 const { createRateLimiter } = require('./rate-limit.cjs');
 const { getFearGreed } = require('./fear-greed.cjs');
@@ -155,6 +155,17 @@ function createServer(options = {}) {
       const result = await getFearGreed({ fetchImpl, nowMs: now() });
       return send(res, result.status === 'unavailable' ? 503 : 200, { service: SERVICE, version: VERSION, timestamp, ...result });
     }
+    if (req.method === 'GET' && url.pathname === '/api/v1/markets/crypto-perp-demo-quote') {
+      const rate = quoteRateLimit(req.socket && req.socket.remoteAddress || 'unknown');
+      res.setHeader('ratelimit-limit', String(rate.limit));
+      res.setHeader('ratelimit-remaining', String(rate.remaining));
+      if (!rate.allowed) {
+        res.setHeader('retry-after', String(rate.retryAfterSeconds));
+        return send(res, 429, { service: SERVICE, version: VERSION, timestamp, status: 'rate_limited', reason_codes: ['quote_rate_limit_exceeded'], retry_after_seconds: rate.retryAfterSeconds, execution_enabled: false });
+      }
+      const result = await getBinanceFuturesDemoQuote({ symbol: url.searchParams.get('symbol'), fetchImpl, nowMs: now() });
+      return send(res, result.status === 'unavailable' ? 503 : 200, { service: SERVICE, version: VERSION, timestamp, ...result });
+    }
     if (req.method === 'GET' && url.pathname === '/api/v1/markets/quote') {
       const rate = quoteRateLimit(req.socket && req.socket.remoteAddress || 'unknown');
       res.setHeader('ratelimit-limit', String(rate.limit));
@@ -195,7 +206,7 @@ function createServer(options = {}) {
         return send(res, decision.decision === 'blocked' ? 422 : 200, { service: SERVICE, version: VERSION, timestamp, mode: 'paper', audit_persisted: true, audit_event_id: audit.event_id, execution_performed: false, decision });
       } catch { return send(res, 503, { service: SERVICE, version: VERSION, timestamp, mode: 'paper', status: 'blocked', audit_persisted: false, execution_performed: false, reason_codes: ['audit_persistence_failed'], decision }); }
     }
-    if (req.method === 'GET' && url.pathname === '/') return send(res, 200, { service: SERVICE, version: VERSION, mode: 'paper', endpoints: ['/health', '/ready', '/api/v1/integrations', '/api/v1/markets', '/api/v1/markets/quote?desk=CRYPTO&symbol=BTCUSDT', '/api/v1/sentiment/fear-greed', '/api/v1/rh', '/api/v1/rh/tasks (POST; RH_API_TOKEN required)', '/api/v1/rh/tasks/:id/status (PATCH; RH_API_TOKEN required)', '/api/v1/policy/evaluate'], limitations: ['read_only_market_adapters', 'no_order_execution'] });
+    if (req.method === 'GET' && url.pathname === '/') return send(res, 200, { service: SERVICE, version: VERSION, mode: 'paper', endpoints: ['/health', '/ready', '/api/v1/integrations', '/api/v1/markets', '/api/v1/markets/quote?desk=CRYPTO&symbol=BTCUSDT', '/api/v1/markets/crypto-perp-demo-quote?symbol=BTCUSDT', '/api/v1/sentiment/fear-greed', '/api/v1/rh', '/api/v1/rh/tasks (POST; RH_API_TOKEN required)', '/api/v1/rh/tasks/:id/status (PATCH; RH_API_TOKEN required)', '/api/v1/policy/evaluate'], limitations: ['read_only_market_adapters', 'no_order_execution'] });
     return send(res, 404, { status: 'not_found', reason_codes: ['route_not_found'] });
   });
 }
