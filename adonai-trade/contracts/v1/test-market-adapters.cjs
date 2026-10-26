@@ -8,7 +8,7 @@ async function main() {
   const fetchMock = async (url, options = {}) => {
     assert.equal(options.method, 'GET');
     const u = new URL(url);
-    if (u.hostname === 'api.binance.com') return { ok: true, status: 200, async json() { return { lastPrice: '67123.45', closeTime: nowMs - 1000 }; } };
+    if (u.hostname === 'demo-fapi.binance.com') { assert.equal(u.pathname, '/fapi/v1/ticker/24hr', 'CRYPTO must use USD-M Futures Demo market data, not Spot'); assert.equal(u.searchParams.get('symbol'), 'BTCUSDT'); return { ok: true, status: 200, async json() { return { lastPrice: '67123.45', closeTime: nowMs - 1000 }; } }; }
     if (u.hostname === 'api.frankfurter.dev') return { ok: true, status: 200, async json() { return { date: '2026-10-18', rates: { USD: 1.08 } }; } };
     if (u.hostname === 'brapi.dev') {
       assert.equal(options.headers.Authorization, 'Bearer test-token');
@@ -18,7 +18,7 @@ async function main() {
     throw new Error('unexpected provider');
   };
   const crypto = await getQuote({ desk: 'CRYPTO', symbol: 'BTCUSDT', fetchImpl: fetchMock, nowMs });
-  assert.equal(crypto.status, 'verified'); assert.equal(crypto.price, 67123.45); assert.equal(crypto.execution_enabled, false);
+  assert.equal(crypto.status, 'verified'); assert.equal(crypto.price, 67123.45); assert.equal(crypto.execution_enabled, false); assert.equal(crypto.source, 'binance_usdm_futures_demo_24hr');
   const forex = await getQuote({ desk: 'FOREX', symbol: 'EURUSD', fetchImpl: fetchMock, nowMs });
   assert.equal(forex.status, 'unverified'); assert.equal(forex.reason_code, 'daily_reference_not_intraday', 'daily reference rates must not be mislabeled as live quotes');
   const forexIntraday = await getQuote({ desk: 'FOREX', symbol: 'EURUSD', env: { ALPHAVANTAGE_API_KEY: 'test-key' }, fetchImpl: fetchMock, nowMs });
