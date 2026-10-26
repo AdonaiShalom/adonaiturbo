@@ -89,6 +89,30 @@ function freshQuote({ desk, symbol, price, currency, source, observedAt, nowMs }
   if (!Number.isFinite(n) || n <= 0) return quote('unverified', { desk, symbol, source, observed_at: timestamp, reason_code: 'invalid_provider_price' });
   return quote('verified', { desk, symbol, price: n, currency, source, observed_at: timestamp, age_ms: Math.max(0, ageMs), provider_timestamp_verified: true });
 }
+async function getBinanceFuturesDemoQuote({ symbol, fetchImpl = globalThis.fetch, nowMs = Date.now() }) {
+  const normalizedSymbol = String(symbol || '').trim().toUpperCase();
+  if (!/^[A-Z0-9]{5,15}$/.test(normalizedSymbol)) return quote('unavailable', { desk: 'CRYPTO_PERP_DEMO', symbol: normalizedSymbol, reason_code: 'invalid_crypto_symbol' });
+  if (typeof fetchImpl !== 'function') return quote('unavailable', { desk: 'CRYPTO_PERP_DEMO', symbol: normalizedSymbol, reason_code: 'fetch_unavailable' });
+  try {
+    const data = await getJson(fetchImpl, 'https://demo-fapi.binance.com/fapi/v1/ticker/24hr?symbol=' + encodeURIComponent(normalizedSymbol));
+    if (!data || String(data.symbol || '').toUpperCase() !== normalizedSymbol) {
+      return quote('unverified', { desk: 'CRYPTO_PERP_DEMO', symbol: normalizedSymbol, source: 'binance_futures_demo_24hr', reason_code: 'provider_symbol_mismatch' });
+    }
+    return freshQuote({
+      desk: 'CRYPTO_PERP_DEMO',
+      symbol: normalizedSymbol,
+      price: data.lastPrice,
+      currency: normalizedSymbol.endsWith('USDT') ? 'USDT' : 'quote_currency_in_symbol',
+      source: 'binance_futures_demo_24hr',
+      observedAt: Number.isFinite(Number(data.closeTime)) ? new Date(Number(data.closeTime)).toISOString() : null,
+      nowMs
+    });
+  } catch (error) {
+    const reason = error && error.code === 'PROVIDER_RESPONSE_TOO_LARGE' ? 'provider_response_too_large' : error && error.name === 'AbortError' ? 'provider_timeout' : error && /^provider_http_[0-9]{3}$/.test(error.message) ? error.message : 'provider_request_failed';
+    return quote('unavailable', { desk: 'CRYPTO_PERP_DEMO', symbol: normalizedSymbol, source: 'binance_futures_demo_24hr', reason_code: reason });
+  }
+}
+
 async function getQuote({ desk, symbol, env = process.env, fetchImpl = globalThis.fetch, nowMs = Date.now() }) {
   const id = String(desk || '').toUpperCase();
   const normalizedSymbol = String(symbol || '').trim().toUpperCase();
@@ -161,4 +185,4 @@ async function getQuote({ desk, symbol, env = process.env, fetchImpl = globalThi
     return quote('unavailable', { desk: id, symbol: normalizedSymbol, reason_code: reason });
   }
 }
-module.exports = { getQuote, MAX_AGE_MS, TIMEOUT_MS, MAX_RESPONSE_BYTES };
+module.exports = { getQuote, getBinanceFuturesDemoQuote, MAX_AGE_MS, TIMEOUT_MS, MAX_RESPONSE_BYTES };
