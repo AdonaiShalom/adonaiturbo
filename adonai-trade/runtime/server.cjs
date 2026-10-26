@@ -166,8 +166,10 @@ function createServer(options = {}) {
         return send(res, 429, { service: SERVICE, version: VERSION, timestamp, status: 'rate_limited', reason_codes: ['crypto_discovery_rate_limit_exceeded'], retry_after_seconds: rate.retryAfterSeconds, execution_enabled: false });
       }
       const raw = Number(url.searchParams.get('per_page') || 250);
+      const page = Number(url.searchParams.get('page') || 1);
       if (!Number.isInteger(raw) || raw < 1 || raw > 250) return send(res, 400, { service: SERVICE, version: VERSION, timestamp, status: 'blocked', reason_codes: ['per_page_must_be_integer_1_to_250'], execution_enabled: false });
-      const result = await discoverCrypto({ fetchImpl, perPage: raw });
+      if (!Number.isInteger(page) || page < 1 || page > 40) return send(res, 400, { service: SERVICE, version: VERSION, timestamp, status: 'blocked', reason_codes: ['page_must_be_integer_1_to_40'], execution_enabled: false });
+      const result = await discoverCrypto({ fetchImpl, perPage: raw, page });
       return send(res, result.status === 'unavailable' ? 503 : 200, { service: SERVICE, version: VERSION, timestamp, ...result });
     }
     if (req.method === 'GET' && url.pathname === '/api/v1/markets/quote') {
