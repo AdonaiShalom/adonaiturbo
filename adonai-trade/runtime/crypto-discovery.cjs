@@ -12,7 +12,7 @@ async function discoverCrypto({fetchImpl=globalThis.fetch,perPage=250,page=1}={}
  const pageNumber=Number.isInteger(page)&&page>=1&&page<=40?page:1;
  try{
   const [coins,exchange]=await Promise.all([
-   json(fetchImpl,'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page='+count+'&page=1&sparkline=false'),
+   json(fetchImpl,'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page='+count+'&page='+pageNumber+'&sparkline=false'),
    json(fetchImpl,'https://demo-fapi.binance.com/fapi/v1/exchangeInfo')
   ]);
   if(!Array.isArray(coins)||!exchange||!Array.isArray(exchange.symbols))return {status:'unavailable',reason_code:'provider_schema_invalid',execution_enabled:false};
