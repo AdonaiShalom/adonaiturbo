@@ -18,3 +18,10 @@ Varredura de ativos cripto com Perp e CoinGecko, análise ampla e seleção de a
 Ativos/instrumentos únicos; avaliações válidas/falhas; cobertura das fontes; finalistas; candidatas enviadas ao EU SOU; recomendações; bloqueios; operações na janela de 24h; reconciliação; resultados e lições.
 
 **Estado:** procedimento documental. A meta de 10.000 análises, integrações, cálculos e limite de 24h só podem ser declarados operacionais após testes e evidência de runtime.
+
+## Estado técnico — atualização de 26/10/2026
+- Corrigido `adonai-trade/runtime/market-adapters.cjs` para solicitar a cotação CRYPTO no host `demo-fapi.binance.com`, caminho `/fapi/v1/ticker/24hr`, com fonte `binance_usdm_futures_demo_24hr`. Commit: `01b76d16e4db07b228650dcc93a18ffaab7796fb`.
+- Atualizado `adonai-trade/contracts/v1/test-market-adapters.cjs` para exigir esse host/caminho e identificar a fonte, impedindo que o mock antigo dependa de Binance Spot. Commit: `9603758af7d77e20acfa0e620e8ea6bc809c0209`.
+- O conteúdo dos dois arquivos foi relido do GitHub e conferido. O check Vercel disponível no commit do teste está verde, mas isso não prova execução da suíte Node.
+- **Ainda não validado:** acesso de rede real ao endpoint Demo, execução local da suíte, descoberta Perp/CoinGecko, 10.000 avaliações válidas, integração de ponta a ponta EU SOU/LEVI, armazenamento persistente do limite móvel de três entradas, envio/reconciliação de ordem Demo.
+- Segurança: nenhuma ordem foi enviada; execução real continua desabilitada. A correção do adaptador de cotação não é uma implementação do motor de ordens.
