@@ -98,8 +98,8 @@ async function getQuote({ desk, symbol, env = process.env, fetchImpl = globalThi
   try {
     if (id === 'CRYPTO') {
       if (!/^[A-Z0-9]{5,15}$/.test(normalizedSymbol)) return quote('unavailable', { reason_code: 'invalid_crypto_symbol' });
-      const data = await getJson(fetchImpl, 'https://api.binance.com/api/v3/ticker/24hr?symbol=' + encodeURIComponent(normalizedSymbol));
-      return freshQuote({ desk: id, symbol: normalizedSymbol, price: data.lastPrice, currency: normalizedSymbol.endsWith('USDT') ? 'USDT' : 'quote_currency_in_symbol', source: 'binance_spot_24hr', observedAt: Number.isFinite(Number(data.closeTime)) ? new Date(Number(data.closeTime)).toISOString() : null, nowMs });
+      const data = await getJson(fetchImpl, 'https://demo-fapi.binance.com/fapi/v1/ticker/24hr?symbol=' + encodeURIComponent(normalizedSymbol));
+      return freshQuote({ desk: id, symbol: normalizedSymbol, price: data.lastPrice, currency: normalizedSymbol.endsWith('USDT') ? 'USDT' : 'quote_currency_in_symbol', source: 'binance_usdm_futures_demo_24hr', observedAt: Number.isFinite(Number(data.closeTime)) ? new Date(Number(data.closeTime)).toISOString() : null, nowMs });
     }
     if (id === 'FOREX') {
       const match = normalizedSymbol.match(/^([A-Z]{3})[-_]?([A-Z]{3})$/);
