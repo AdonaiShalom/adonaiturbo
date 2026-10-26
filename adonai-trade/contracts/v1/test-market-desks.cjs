@@ -12,6 +12,7 @@ for (const desk of result.desks) {
   assert.equal(desk.execution_enabled, false);
 }
 assert.equal(result.desks.find((desk) => desk.id === 'CRYPTO').provider_configured, true);
+assert.equal(result.desks.find((desk) => desk.id === 'CRYPTO').provider, 'binance_usdm_futures_demo');
 assert.equal(result.desks.find((desk) => desk.id === 'FOREX').provider_configured, true);
 assert.equal(result.desks.find((desk) => desk.id === 'B3').provider_configured, false);
 assert.equal(result.desks.find((desk) => desk.id === 'INTERNATIONAL').provider_configured, false);
