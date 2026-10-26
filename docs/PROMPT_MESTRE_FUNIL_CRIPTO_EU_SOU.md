@@ -23,3 +23,9 @@ Usar Perp e CoinGecko para descobrir e analisar o universo cripto, realizar pelo
 Fontes/frescor; ativos e instrumentos únicos; avaliações válidas/falhas; cobertura; funil completo; candidatas e motivos; parecer EU SOU; decisão de risco; limite de 24h; ordem e reconciliação se houver; resultado, custos, lições, pendências e próximo passo verificável.
 
 Nunca confunda recomendação, hipótese, simulação, teste com mocks e ordem confirmada pela Binance Futures Demo. Nunca force uma operação para cumprir metas.
+
+## Ciclo completo — funil obrigatório
+
+A análise em lotes integra o ciclo operacional completo; não é um processo separado. Executar até 40 lotes de até 250 registros para buscar 10.000 avaliações válidas, distintas e auditáveis. Cada lote pode reter até 5 candidatos locais. Ao final, deduplicar e reclassificar globalmente para selecionar até 5 finalistas; encaminhar até 4 ao EU SOU, que retorna até 3 recomendações ou `NO TRADE`. Os limites são máximos, não metas a preencher. Descoberta de ativos não conta por si só como avaliação. Se a cobertura não permitir 10.000 avaliações válidas, registrar a quantidade real e a causa.
+
+O fluxo completo é: descoberta e cotação → avaliação em lotes → consolidação global → validação do EU SOU → orquestração LEVI → verificação independente de risco → eventual operação exclusivamente na Binance Futures Demo → confirmação de estado e resultado → retorno ao EU SOU e auditoria. No máximo uma operação por ciclo e até três novas entradas confirmadas em qualquer janela móvel de 24 horas, somando LONG e SHORT. Contador persistente, idempotência e reconciliação são obrigatórios. Na dúvida, dados vencidos, ausência de aprovação ou `NO TRADE`, não operar. Execução real permanece desabilitada. Declarar o ciclo concluído somente com evidências reproduzíveis de testes e runtime; documentação ou deploy isolados não provam funcionamento.
