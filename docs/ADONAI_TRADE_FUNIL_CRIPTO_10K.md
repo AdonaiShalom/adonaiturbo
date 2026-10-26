@@ -33,3 +33,11 @@ Ativos/instrumentos únicos; avaliações válidas/falhas; cobertura das fontes;
 - Incluído o novo teste no comando `npm test`. Commit: `3cca6f2a1c95ff3142ea6f102ca11481142bcf76`.
 - Os arquivos foram relidos e o conteúdo esperado foi confirmado no GitHub. O check Vercel desse commit estava pendente na última consulta; nenhum resultado de execução Node foi confirmado.
 - Limitações: score é heurística experimental, não previsão validada; não há coleta CoinGecko/Perp, persistência da contagem, integração EU SOU/LEVI, nem execução/reconciliação de ordens neste módulo. O módulo não envia ordens.
+
+
+## Descoberta cripto e endpoint read-only — 26/10/2026
+- Criado `adonai-trade/runtime/crypto-discovery.cjs`: consulta CoinGecko Markets (até 250 ativos por chamada) e cruza símbolos com `/fapi/v1/exchangeInfo` da Binance USDⓈ-M Futures Demo; só marca elegibilidade quando há contrato PERPETUAL, quote USDT e status TRADING. Commit: `eaf4bf4bef0778829e006de597add58be3eba335`.
+- Criada rota GET `/api/v1/crypto/discovery?per_page=250`, com limite de 6 chamadas/minuto por endereço e validação de parâmetro; execução desabilitada. Commit: `3b1519783fad42ea856f2a404ad1b03fa3a025ad`.
+- Adicionados testes unitários de descoberta e teste HTTP; incluídos no `npm test`. Commits dos testes/integração: `fada90f3382873eafc055667c86f3043e33f55b6`, `3c068505be7cd140c21242ef396ca1a7aa2e06a3`, `5f10acd1940c25b0fd8010c0cd2a3db350f3944b`, `ef988464805e77ec14982ae4a231f908042b6756`.
+- Os arquivos foram gravados e relidos do GitHub. Isso ainda não prova execução dos testes Node nem resposta real dos provedores; as verificações unitárias usam mocks.
+- A descoberta cobre no máximo 250 moedas por requisição e não é a meta de 10.000 avaliações. Para atingir essa meta são necessárias várias fontes/lotes de dados, métricas reais e registro persistente, com deduplicação global entre ciclos. Ainda não existe integração EU SOU/LEVI nem ordem/reconciliação de Binance Demo nesta rota.
